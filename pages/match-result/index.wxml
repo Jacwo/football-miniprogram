@@ -327,7 +327,7 @@
                     <text class="report-date-label">报告生成时间</text>
                     <text class="report-date">{{modelStats.statsDate}}</text>
                   </view>
-                  <text class="report-note">统计范围：昨日 15:00 - 今日 15:00 的比赛</text>
+                  <text class="report-note">统计范围：昨日 03:00 - 今日 03:00 的比赛</text>
                 </view>
 
                 <!-- 核心指标 -->
