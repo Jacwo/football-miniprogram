@@ -304,23 +304,12 @@
             <block wx:if="{{!modelStats}}">
               <!-- 模型列表 -->
               <view class="model-item" wx:for="{{models}}" wx:key="id" data-model-type="{{item.modelType || item.id}}" bindtap="onModelTap">
-                <view class="model-header">
-                  <text class="model-name">{{item.modelName || item.name || '模型'}}</text>
+                <view class="model-item-header">
+                  <view class="model-item-info">
+                    <text class="model-item-name">{{item.modelName || item.name || '模型'}}</text>
+                    <text class="model-item-desc">{{item.description || '模型描述'}}</text>
+                  </view>
                   <text class="model-arrow">→</text>
-                </view>
-                <view class="model-stats">
-                  <view class="stat">
-                    <text class="stat-label">推荐次数</text>
-                    <text class="stat-value">{{item.recommendCount || item.totalCount || 0}}</text>
-                  </view>
-                  <view class="stat">
-                    <text class="stat-label">命中次数</text>
-                    <text class="stat-value">{{item.hitCount || item.winCount || 0}}</text>
-                  </view>
-                  <view class="stat">
-                    <text class="stat-label">命中率</text>
-                    <text class="stat-value">{{item.hitRate || item.winRate || 0}}%</text>
-                  </view>
                 </view>
               </view>
             </block>
