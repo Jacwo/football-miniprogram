@@ -415,7 +415,7 @@
 }
 
 .bottom-placeholder {
-  height: 20rpx;
+  height: 120rpx;
 }
 
 /* Tab 切换 */
