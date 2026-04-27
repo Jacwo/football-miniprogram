@@ -979,3 +979,132 @@
   color: #333;
   font-weight: 600;
 }
+
+/* 专题页面 */
+.topic-list {
+  flex: 1;
+  padding: 12rpx;
+}
+
+.topic-section {
+  margin-bottom: 20rpx;
+}
+
+.topic-section-title {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 12rpx;
+  padding: 0 12rpx;
+}
+
+.topic-items {
+  gap: 12rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 热门比赛 */
+.topic-item {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.topic-match-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+  padding-bottom: 12rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.topic-league {
+  font-size: 20rpx;
+  color: #667eea;
+  font-weight: 600;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 4rpx 8rpx;
+  border-radius: 4rpx;
+}
+
+.topic-time {
+  font-size: 18rpx;
+  color: #999;
+}
+
+.topic-match-vs {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.topic-team {
+  flex: 1;
+  font-size: 22rpx;
+  color: #333;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.topic-team.home {
+  text-align: right;
+}
+
+.topic-team.away {
+  text-align: left;
+}
+
+.topic-vs {
+  font-size: 18rpx;
+  color: #ccc;
+  font-weight: 500;
+}
+
+.topic-match-desc {
+  font-size: 18rpx;
+  color: #999;
+  line-height: 1.4;
+}
+
+/* 主要赛事 */
+.topic-event-item {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.event-header {
+  margin-bottom: 12rpx;
+  padding-bottom: 12rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.event-title {
+  font-size: 24rpx;
+  color: #333;
+  font-weight: 600;
+  display: block;
+}
+
+.event-desc {
+  font-size: 18rpx;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.event-date {
+  font-size: 16rpx;
+  color: #999;
+  display: block;
+}

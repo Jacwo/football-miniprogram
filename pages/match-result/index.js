@@ -4,9 +4,11 @@ const historyApi = require("../../api/history");
 const leagueColor = require("../../store/leagueColor");
 const userStore = require("../../store/user");
 
+const topicApi = require("../../api/topic");
+
 Page({
   data: {
-    activeTab: "live", // live: 比分直播, result: 赛果, history: 历史记录
+    activeTab: "live", // live: 比分直播, result: 赛果, history: 历史记录, topic: 专题
     results: [],
     liveMatches: [],
     historyList: [],
@@ -31,6 +33,11 @@ Page({
     modelStats: null,
     modelStatsLoading: false,
     modelStatsError: null,
+    // 专题相关
+    topicLoading: false,
+    topicError: null,
+    hotMatches: [],
+    majorEvents: [],
   },
 
   onLoad() {
@@ -49,6 +56,8 @@ Page({
       this.loadResults();
     } else if (this.data.activeTab === "history") {
       this.loadHistory();
+    } else if (this.data.activeTab === "topic") {
+      this.loadTopic();
     }
   },
 
@@ -65,6 +74,8 @@ Page({
       this.loadLiveMatches();
     } else if (tab === "history") {
       this.loadHistory();
+    } else if (tab === "topic") {
+      this.loadTopic();
     }
   },
 
@@ -377,5 +388,25 @@ Page({
   // 返回模型列表
   onModelBackClick() {
     this.setData({ modelStats: null });
+  },
+
+  // ====== 专题相关方法 ======
+  // 加载专题数据
+  async loadTopic() {
+    this.setData({ topicLoading: true, topicError: null });
+    try {
+      const data = await topicApi.getTopicHome();
+      this.setData({
+        hotMatches: data.hotMatches || [],
+        majorEvents: data.majorEvents || [],
+        topicLoading: false,
+      });
+    } catch (error) {
+      console.error("加载专题失败:", error);
+      this.setData({
+        topicLoading: false,
+        topicError: error.message || "加载失败",
+      });
+    }
   },
 });
