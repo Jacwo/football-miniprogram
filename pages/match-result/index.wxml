@@ -60,6 +60,10 @@
 
       <!-- 直播列表 -->
       <view class="content-wrapper" wx:else>
+        <!-- 刷新按钮 -->
+        <view class="refresh-btn" bindtap="onRefresh">
+          <text class="refresh-icon">🔄</text>
+        </view>
         <scroll-view class="results-scroll" scroll-y>
         <view class="live-item" wx:for="{{liveMatches}}" wx:key="matchId">
           <!-- 比赛头部 -->
@@ -324,9 +328,5 @@
       </view>
     </block>
 
-    <!-- 刷新按钮 - 实时直播显示 -->
-    <view class="refresh-btn" wx:if="{{activeTab === 'live'}}" bindtap="onRefresh">
-      <text class="refresh-icon">🔄</text>
-    </view>
   </view>
 </view>

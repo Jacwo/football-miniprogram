@@ -58,13 +58,13 @@
   box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.2);
 }
 
-/* 刷新按钮 - 右下角固定 */
+/* 刷新按钮 - 左上角 */
 .refresh-btn {
-  position: fixed;
-  right: 30rpx;
-  bottom: 130rpx;
-  width: 100rpx;
-  height: 100rpx;
+  position: absolute;
+  left: 30rpx;
+  top: 20rpx;
+  width: 80rpx;
+  height: 80rpx;
   background: #fff;
   border-radius: 50%;
   display: flex;
@@ -134,6 +134,7 @@
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
+  position: relative;
 }
 
 .results-scroll {
