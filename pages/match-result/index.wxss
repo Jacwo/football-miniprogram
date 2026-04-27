@@ -130,7 +130,7 @@
 
 .results-scroll {
   flex: 1;
-  height: 0;
+  overflow-y: auto;
   padding: 16rpx 12rpx 24rpx 12rpx;
 }
 
