@@ -300,26 +300,58 @@
 
           <!-- 模型列表 -->
           <scroll-view class="models-list" scroll-y wx:else>
-            <view class="model-item" wx:for="{{models}}" wx:key="id">
-              <view class="model-header">
-                <text class="model-name">{{item.modelName || item.name || '模型'}}</text>
-                <text class="model-accuracy">准确率: {{item.accuracy || item.winRate || '-'}}%</text>
+            <!-- 显示模型列表或模型详情 -->
+            <block wx:if="{{!modelStats}}">
+              <!-- 模型列表 -->
+              <view class="model-item" wx:for="{{models}}" wx:key="id" data-model-type="{{item.modelType || item.id}}" bindtap="onModelTap">
+                <view class="model-header">
+                  <text class="model-name">{{item.modelName || item.name || '模型'}}</text>
+                  <text class="model-arrow">→</text>
+                </view>
+                <view class="model-stats">
+                  <view class="stat">
+                    <text class="stat-label">推荐次数</text>
+                    <text class="stat-value">{{item.recommendCount || item.totalCount || 0}}</text>
+                  </view>
+                  <view class="stat">
+                    <text class="stat-label">命中次数</text>
+                    <text class="stat-value">{{item.hitCount || item.winCount || 0}}</text>
+                  </view>
+                  <view class="stat">
+                    <text class="stat-label">命中率</text>
+                    <text class="stat-value">{{item.hitRate || item.winRate || 0}}%</text>
+                  </view>
+                </view>
               </view>
-              <view class="model-stats">
-                <view class="stat">
-                  <text class="stat-label">推荐次数</text>
-                  <text class="stat-value">{{item.recommendCount || item.totalCount || 0}}</text>
+            </block>
+
+            <!-- 模型详情 -->
+            <block wx:else>
+              <view class="model-detail-wrapper">
+                <view class="back-btn" bindtap="onModelBackClick">← 返回</view>
+                <view class="model-detail-header">
+                  <text class="model-detail-name">{{modelStats.modelName || modelStats.name || '模型'}}</text>
                 </view>
-                <view class="stat">
-                  <text class="stat-label">命中次数</text>
-                  <text class="stat-value">{{item.hitCount || item.winCount || 0}}</text>
-                </view>
-                <view class="stat">
-                  <text class="stat-label">命中率</text>
-                  <text class="stat-value">{{item.hitRate || item.winRate || 0}}%</text>
+                <view class="model-detail-stats">
+                  <view class="detail-stat">
+                    <text class="detail-stat-label">准确率</text>
+                    <text class="detail-stat-value">{{modelStats.accuracy || modelStats.winRate || '-'}}%</text>
+                  </view>
+                  <view class="detail-stat">
+                    <text class="detail-stat-label">推荐次数</text>
+                    <text class="detail-stat-value">{{modelStats.recommendCount || modelStats.totalCount || 0}}</text>
+                  </view>
+                  <view class="detail-stat">
+                    <text class="detail-stat-label">命中次数</text>
+                    <text class="detail-stat-value">{{modelStats.hitCount || modelStats.winCount || 0}}</text>
+                  </view>
+                  <view class="detail-stat">
+                    <text class="detail-stat-label">命中率</text>
+                    <text class="detail-stat-value">{{modelStats.hitRate || modelStats.winRate || 0}}%</text>
+                  </view>
                 </view>
               </view>
-            </view>
+            </block>
 
             <!-- 底部占位 -->
             <view class="bottom-placeholder"></view>

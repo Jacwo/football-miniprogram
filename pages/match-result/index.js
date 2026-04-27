@@ -23,10 +23,14 @@ Page({
     historyError: null,
     // 历史页面内的Tab
     historySubTab: "list", // list: 历史列表, models: 模型统计
-    // 模型统计相关
+    // 模型列表相关
     models: [],
     modelsLoading: false,
     modelsError: null,
+    // 模型统计详情相关
+    modelStats: null,
+    modelStatsLoading: false,
+    modelStatsError: null,
   },
 
   onLoad() {
@@ -339,16 +343,39 @@ Page({
     }
   },
 
-  // 加载模型统计
+  // 加载模型列表
   async loadModels() {
-    this.setData({ modelsLoading: true, modelsError: null });
+    this.setData({ modelsLoading: true, modelsError: null, modelStats: null });
     try {
-      const data = await historyApi.getModelStats();
+      const data = await historyApi.getModelList();
       const models = data.data || data || [];
       this.setData({ models, modelsLoading: false });
     } catch (error) {
-      console.error("加载模型统计失败:", error);
+      console.error("加载模型列表失败:", error);
       this.setData({ modelsLoading: false, modelsError: error.message || "加载失败" });
     }
+  },
+
+  // 加载模型统计详情
+  async loadModelStats(modelType) {
+    this.setData({ modelStatsLoading: true, modelStatsError: null });
+    try {
+      const data = await historyApi.getModelStats(modelType);
+      this.setData({ modelStats: data, modelStatsLoading: false });
+    } catch (error) {
+      console.error("加载模型统计详情失败:", error);
+      this.setData({ modelStatsLoading: false, modelStatsError: error.message || "加载失败" });
+    }
+  },
+
+  // 点击模型
+  onModelTap(e) {
+    const { modelType } = e.currentTarget.dataset;
+    this.loadModelStats(modelType);
+  },
+
+  // 返回模型列表
+  onModelBackClick() {
+    this.setData({ modelStats: null });
   },
 });
