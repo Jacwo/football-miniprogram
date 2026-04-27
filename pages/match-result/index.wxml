@@ -27,7 +27,7 @@
         data-tab="live"
         bindtap="onTabChange"
       >
-        <text class="tab-text">实时直播</text>
+        <text class="tab-text">实时</text>
       </view>
       <view
         class="tab-item {{activeTab === 'result' ? 'active' : ''}}"
