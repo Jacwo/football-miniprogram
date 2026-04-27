@@ -319,24 +319,44 @@
               <view class="model-detail-wrapper">
                 <view class="back-btn" bindtap="onModelBackClick">← 返回</view>
                 <view class="model-detail-header">
-                  <text class="model-detail-name">{{modelStats.modelName || modelStats.name || '模型'}}</text>
+                  <text class="model-detail-name">{{modelStats.modelName}}</text>
+                  <text class="model-detail-type">{{modelStats.modelType}}</text>
                 </view>
                 <view class="model-detail-stats">
                   <view class="detail-stat">
                     <text class="detail-stat-label">准确率</text>
-                    <text class="detail-stat-value">{{modelStats.accuracy || modelStats.winRate || '-'}}%</text>
+                    <text class="detail-stat-value">{{modelStats.accuracyRate}}%</text>
                   </view>
                   <view class="detail-stat">
-                    <text class="detail-stat-label">推荐次数</text>
-                    <text class="detail-stat-value">{{modelStats.recommendCount || modelStats.totalCount || 0}}</text>
+                    <text class="detail-stat-label">预测次数</text>
+                    <text class="detail-stat-value">{{modelStats.totalPredictions}}</text>
                   </view>
                   <view class="detail-stat">
-                    <text class="detail-stat-label">命中次数</text>
-                    <text class="detail-stat-value">{{modelStats.hitCount || modelStats.winCount || 0}}</text>
+                    <text class="detail-stat-label">正确预测</text>
+                    <text class="detail-stat-value">{{modelStats.correctPredictions}}</text>
                   </view>
                   <view class="detail-stat">
-                    <text class="detail-stat-label">命中率</text>
-                    <text class="detail-stat-value">{{modelStats.hitRate || modelStats.winRate || 0}}%</text>
+                    <text class="detail-stat-label">样本数</text>
+                    <text class="detail-stat-value">{{modelStats.sampleSize}}</text>
+                  </view>
+                </view>
+
+                <!-- 胜平负统计 -->
+                <view class="model-detail-section">
+                  <text class="section-title">胜平负统计</text>
+                  <view class="stat-row">
+                    <view class="stat-item">
+                      <text class="stat-item-label">主队胜</text>
+                      <text class="stat-item-value">{{modelStats.homeWinCorrect}}/{{modelStats.homeWinCount}}</text>
+                    </view>
+                    <view class="stat-item">
+                      <text class="stat-item-label">平</text>
+                      <text class="stat-item-value">{{modelStats.drawCorrect}}/{{modelStats.drawCount}}</text>
+                    </view>
+                    <view class="stat-item">
+                      <text class="stat-item-label">客队胜</text>
+                      <text class="stat-item-value">{{modelStats.awayWinCorrect}}/{{modelStats.awayWinCount}}</text>
+                    </view>
                   </view>
                 </view>
               </view>
