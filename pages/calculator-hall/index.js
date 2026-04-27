@@ -639,6 +639,13 @@ Page({
         otherLeagues,
         leaguesLoading: false,
       });
+
+      // 默认选中第一个热门联赛
+      if (hotLeagues.length > 0) {
+        this.onSelectLeague({
+          currentTarget: { dataset: { league: hotLeagues[0] } },
+        });
+      }
     } catch (e) {
       console.error("加载联赛列表失败:", e);
       this.setData({

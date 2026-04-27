@@ -7,6 +7,8 @@ Page({
     error: null,
     hotMatches: [],
     majorEvents: [],
+    hotTopics: [], // 热门专题（进行中）
+    selectTopics: [], // 精选专题（未开始）
   },
 
   onLoad() {
@@ -25,9 +27,27 @@ Page({
     this.setData({ loading: true, error: null });
     try {
       const data = await topicApi.getTopicHome();
+      const majorEvents = data.majorEvents || [];
+
+      // 按startDate分类：进行中的为热门，未开始的为精选
+      const now = new Date();
+      const hotTopics = [];
+      const selectTopics = [];
+
+      majorEvents.forEach((item) => {
+        const startDate = item.startDate ? new Date(item.startDate) : null;
+        if (startDate && startDate <= now) {
+          hotTopics.push(item);
+        } else {
+          selectTopics.push(item);
+        }
+      });
+
       this.setData({
         hotMatches: data.hotMatches || [],
-        majorEvents: data.majorEvents || [],
+        majorEvents,
+        hotTopics,
+        selectTopics,
         loading: false,
       });
     } catch (error) {
@@ -48,6 +68,21 @@ Page({
   onPullDownRefresh() {
     this.loadTopicData().finally(() => {
       wx.stopPullDownRefresh();
+    });
+  },
+
+  // 点击专题推荐卡片，放大显示图片
+  onEventCardTap(e) {
+    const { url } = e.currentTarget.dataset;
+    const { majorEvents } = this.data;
+
+    // 获取所有图片URL用于预览
+    const urls = majorEvents.map(item => item.imageUrl);
+    const current = url;
+
+    wx.previewImage({
+      current,
+      urls,
     });
   },
 });
