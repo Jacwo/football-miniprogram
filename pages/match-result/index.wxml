@@ -218,6 +218,11 @@
         </view>
 
         <scroll-view class="history-list" scroll-y>
+          <!-- 调试信息 -->
+          <view style="padding: 16rpx; background: #f0f0f0; margin: 10rpx; border-radius: 8rpx;">
+            <text style="font-size: 20rpx; color: #666;">数据条数: {{historyList.length}}</text>
+          </view>
+
           <history-card
             wx:for="{{historyList}}"
             wx:key="id"
