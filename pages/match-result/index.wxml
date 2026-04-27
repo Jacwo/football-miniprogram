@@ -314,48 +314,75 @@
               </view>
             </block>
 
-            <!-- 模型详情 -->
+            <!-- 昨日预测报告 -->
             <block wx:else>
-              <view class="model-detail-wrapper">
+              <view class="report-wrapper">
                 <view class="back-btn" bindtap="onModelBackClick">← 返回</view>
-                <view class="model-detail-header">
-                  <text class="model-detail-name">{{modelStats.modelName}}</text>
-                  <text class="model-detail-type">{{modelStats.modelType}}</text>
+
+                <!-- 报告头部 -->
+                <view class="report-header">
+                  <text class="report-title">📊 昨日预测报告</text>
+                  <text class="report-model">{{modelStats.modelName}}</text>
+                  <text class="report-date">{{modelStats.statsDate}}</text>
                 </view>
-                <view class="model-detail-stats">
-                  <view class="detail-stat">
-                    <text class="detail-stat-label">准确率</text>
-                    <text class="detail-stat-value">{{modelStats.accuracyRate}}%</text>
-                  </view>
-                  <view class="detail-stat">
-                    <text class="detail-stat-label">预测次数</text>
-                    <text class="detail-stat-value">{{modelStats.totalPredictions}}</text>
-                  </view>
-                  <view class="detail-stat">
-                    <text class="detail-stat-label">正确预测</text>
-                    <text class="detail-stat-value">{{modelStats.correctPredictions}}</text>
-                  </view>
-                  <view class="detail-stat">
-                    <text class="detail-stat-label">样本数</text>
-                    <text class="detail-stat-value">{{modelStats.sampleSize}}</text>
+
+                <!-- 核心指标 -->
+                <view class="report-section">
+                  <view class="key-metrics">
+                    <view class="metric-card accuracy">
+                      <text class="metric-value">{{modelStats.accuracyRate}}%</text>
+                      <text class="metric-label">准确率</text>
+                    </view>
+                    <view class="metric-card">
+                      <text class="metric-value">{{modelStats.correctPredictions}}</text>
+                      <text class="metric-label">命中预测</text>
+                    </view>
+                    <view class="metric-card">
+                      <text class="metric-value">{{modelStats.totalPredictions}}</text>
+                      <text class="metric-label">总预测</text>
+                    </view>
                   </view>
                 </view>
 
-                <!-- 胜平负统计 -->
-                <view class="model-detail-section">
-                  <text class="section-title">胜平负统计</text>
-                  <view class="stat-row">
-                    <view class="stat-item">
-                      <text class="stat-item-label">主队胜</text>
-                      <text class="stat-item-value">{{modelStats.homeWinCorrect}}/{{modelStats.homeWinCount}}</text>
+                <!-- 预测分布 -->
+                <view class="report-section">
+                  <text class="section-title">预测分布</text>
+                  <view class="prediction-dist">
+                    <view class="dist-item">
+                      <text class="dist-label">主队胜</text>
+                      <view class="dist-bar">
+                        <view class="dist-fill" style="width: {{modelStats.homeWinCorrect / modelStats.homeWinCount * 100}}%"></view>
+                      </view>
+                      <text class="dist-value">{{modelStats.homeWinCorrect}}/{{modelStats.homeWinCount}}</text>
                     </view>
-                    <view class="stat-item">
-                      <text class="stat-item-label">平</text>
-                      <text class="stat-item-value">{{modelStats.drawCorrect}}/{{modelStats.drawCount}}</text>
+                    <view class="dist-item">
+                      <text class="dist-label">平局</text>
+                      <view class="dist-bar">
+                        <view class="dist-fill" style="width: {{modelStats.drawCorrect / modelStats.drawCount * 100}}%"></view>
+                      </view>
+                      <text class="dist-value">{{modelStats.drawCorrect}}/{{modelStats.drawCount}}</text>
                     </view>
-                    <view class="stat-item">
-                      <text class="stat-item-label">客队胜</text>
-                      <text class="stat-item-value">{{modelStats.awayWinCorrect}}/{{modelStats.awayWinCount}}</text>
+                    <view class="dist-item">
+                      <text class="dist-label">客队胜</text>
+                      <view class="dist-bar">
+                        <view class="dist-fill" style="width: {{modelStats.awayWinCorrect / modelStats.awayWinCount * 100}}%"></view>
+                      </view>
+                      <text class="dist-value">{{modelStats.awayWinCorrect}}/{{modelStats.awayWinCount}}</text>
+                    </view>
+                  </view>
+                </view>
+
+                <!-- 数据统计 -->
+                <view class="report-section">
+                  <text class="section-title">数据统计</text>
+                  <view class="stats-table">
+                    <view class="table-row">
+                      <text class="table-label">样本数</text>
+                      <text class="table-value">{{modelStats.sampleSize}}</text>
+                    </view>
+                    <view class="table-row">
+                      <text class="table-label">模型类型</text>
+                      <text class="table-value">{{modelStats.modelType}}</text>
                     </view>
                   </view>
                 </view>

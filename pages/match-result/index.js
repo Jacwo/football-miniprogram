@@ -361,7 +361,7 @@ Page({
     this.setData({ modelStatsLoading: true, modelStatsError: null });
     try {
       const data = await historyApi.getModelStats(modelType);
-      this.setData({ modelStats: data, modelStatsLoading: false });
+      this.setData({ modelStats: data[0], modelStatsLoading: false });
     } catch (error) {
       console.error("加载模型统计详情失败:", error);
       this.setData({ modelStatsLoading: false, modelStatsError: error.message || "加载失败" });
