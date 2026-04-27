@@ -1,15 +1,26 @@
 // pages/match-result/index.js - 赛果列表
 const matchApi = require("../../api/match");
+const historyApi = require("../../api/history");
 const leagueColor = require("../../store/leagueColor");
+const userStore = require("../../store/user");
 
 Page({
   data: {
-    activeTab: "result", // result: 赛果, live: 比分直播
+    activeTab: "result", // result: 赛果, live: 比分直播, history: 历史记录
     results: [],
     liveMatches: [],
+    historyList: [],
     loading: true,
     error: null,
     expandedId: null,
+    // 历史记录相关
+    historyLoading: false,
+    historyRefreshing: false,
+    historyHasMore: true,
+    historyPageNo: 1,
+    historyPageSize: 20,
+    historyTotal: 0,
+    historyError: null,
   },
 
   onLoad() {
@@ -23,8 +34,10 @@ Page({
     }
     if (this.data.activeTab === "result") {
       this.loadResults();
-    } else {
+    } else if (this.data.activeTab === "live") {
       this.loadLiveMatches();
+    } else if (this.data.activeTab === "history") {
+      this.loadHistory();
     }
   },
 
@@ -37,8 +50,10 @@ Page({
 
     if (tab === "result") {
       this.loadResults();
-    } else {
+    } else if (tab === "live") {
       this.loadLiveMatches();
+    } else if (tab === "history") {
+      this.loadHistory();
     }
   },
 
@@ -180,8 +195,128 @@ Page({
     wx.showToast({ title: "刷新中...", icon: "loading", duration: 500 });
     if (this.data.activeTab === "result") {
       this.loadResults();
-    } else {
+    } else if (this.data.activeTab === "live") {
       this.loadLiveMatches();
+    } else if (this.data.activeTab === "history") {
+      this.refreshHistory();
+    }
+  },
+
+  // ====== 历史记录相关方法 ======
+  // 加载历史记录
+  async loadHistory() {
+    this.setData({ historyLoading: true, historyError: null });
+
+    try {
+      const { historyPageNo, historyPageSize } = this.data;
+      const result = await historyApi.getHistoryList({ pageNo: historyPageNo, pageSize: historyPageSize });
+
+      const { list = [], total = 0 } = result || {};
+
+      // 按照时间倒序排列（最新的在前）
+      if (Array.isArray(list)) {
+        list.sort((a, b) => {
+          const timeA = new Date(a.createTime || a.matchTime || 0).getTime();
+          const timeB = new Date(b.createTime || b.matchTime || 0).getTime();
+          return timeB - timeA;
+        });
+      }
+
+      this.setData({
+        historyList: list,
+        historyTotal: total,
+        historyHasMore: list.length >= historyPageSize,
+        historyLoading: false,
+      });
+    } catch (e) {
+      console.error("加载历史记录失败:", e);
+      this.setData({
+        historyLoading: false,
+        historyError: e.message || "加载失败",
+      });
+    }
+  },
+
+  // 刷新历史记录
+  async refreshHistory() {
+    this.setData({
+      historyPageNo: 1,
+      historyRefreshing: true,
+    });
+
+    await this.loadHistory();
+
+    this.setData({ historyRefreshing: false });
+  },
+
+  // 加载更多历史记录
+  async loadMoreHistory() {
+    if (!this.data.historyHasMore || this.data.historyLoading) return;
+
+    const { historyPageNo, historyPageSize, historyList } = this.data;
+
+    this.setData({ historyLoading: true });
+
+    try {
+      const result = await historyApi.getHistoryList({
+        pageNo: historyPageNo + 1,
+        pageSize: historyPageSize,
+      });
+
+      const { list: newList = [] } = result || {};
+
+      this.setData({
+        historyList: [...historyList, ...newList],
+        historyPageNo: historyPageNo + 1,
+        historyHasMore: newList.length >= historyPageSize,
+        historyLoading: false,
+      });
+    } catch (e) {
+      console.error("加载更多失败:", e);
+      this.setData({ historyLoading: false });
+      wx.showToast({
+        title: "加载失败",
+        icon: "none",
+      });
+    }
+  },
+
+  // 点击历史记录
+  onHistoryItemTap(e) {
+    // 检查登录状态
+    if (!userStore.isLoggedIn()) {
+      wx.showToast({
+        title: "请先登录",
+        icon: "none",
+      });
+      wx.navigateTo({
+        url: "/pages/login/index",
+      });
+      return;
+    }
+
+    const { record } = e.detail;
+    const matchId = record && record.matchId;
+    wx.navigateTo({
+      url: `/pages/history-detail/index?id=` + matchId,
+    });
+  },
+
+  // 处理下拉刷新
+  onPullDownRefresh() {
+    if (this.data.activeTab === "history") {
+      this.refreshHistory().finally(() => {
+        wx.stopPullDownRefresh();
+      });
+    } else {
+      wx.stopPullDownRefresh();
+    }
+  },
+
+  // 处理上拉加载
+  onReachBottom() {
+    if (this.data.activeTab === "history" && this.data.historyHasMore && !this.data.historyLoading) {
+      this.loadMoreHistory();
     }
   },
 });

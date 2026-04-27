@@ -27,13 +27,6 @@ Component({
         selectedIconPath: '/images/tabbar/match-active.png'
       },
       {
-        pagePath: '/pages/history/index',
-        text: '历史',
-        iconPath: '/images/tabbar/match.png',
-        selectedIconPath: '/images/tabbar/match-active.png',
-        key: 'history' // 用于标识历史tab
-      },
-      {
         pagePath: '/pages/profile/index',
         text: '我的',
         iconPath: '/images/tabbar/match.png',
