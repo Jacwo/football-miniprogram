@@ -16,8 +16,12 @@
   <view class="main-content" wx:else>
     <!-- 页面标题 -->
     <view class="page-header">
-      <text class="page-title">⚽ 赛果</text>
-      <text class="page-desc">查看比赛开奖结果</text>
+      <text class="page-title" wx:if="{{activeTab === 'live'}}">📺 实时</text>
+      <text class="page-title" wx:elif="{{activeTab === 'result'}}">⚽ 赛果</text>
+      <text class="page-title" wx:else>📝 历史</text>
+      <text class="page-desc" wx:if="{{activeTab === 'live'}}">查看比赛实时进展</text>
+      <text class="page-desc" wx:elif="{{activeTab === 'result'}}">查看比赛开奖结果</text>
+      <text class="page-desc" wx:else>查看历史分析记录</text>
     </view>
 
     <!-- Tab 切换 -->
