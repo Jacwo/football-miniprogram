@@ -632,9 +632,16 @@
   font-weight: 500;
 }
 
+.history-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .history-list {
   flex: 1;
-  overflow-y: auto;
+  height: 0;
   padding: 16rpx 12rpx 24rpx 12rpx;
 }
 
