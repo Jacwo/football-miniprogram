@@ -6,7 +6,7 @@ const userStore = require("../../store/user");
 
 Page({
   data: {
-    activeTab: "result", // result: 赛果, live: 比分直播, history: 历史记录
+    activeTab: "live", // live: 比分直播, result: 赛果, history: 历史记录
     results: [],
     liveMatches: [],
     historyList: [],
@@ -31,7 +31,7 @@ Page({
 
   onLoad() {
     this.setData({ loading: true });
-    this.loadResults();
+    this.loadLiveMatches();
   },
 
   onShow() {
@@ -39,10 +39,10 @@ Page({
     if (typeof this.getTabBar === "function" && this.getTabBar()) {
       this.getTabBar().setData({ selectedPath: "/pages/match-result/index" });
     }
-    if (this.data.activeTab === "result") {
-      this.loadResults();
-    } else if (this.data.activeTab === "live") {
+    if (this.data.activeTab === "live") {
       this.loadLiveMatches();
+    } else if (this.data.activeTab === "result") {
+      this.loadResults();
     } else if (this.data.activeTab === "history") {
       this.loadHistory();
     }

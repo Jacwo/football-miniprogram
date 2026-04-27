@@ -23,18 +23,18 @@
     <!-- Tab 切换 -->
     <view class="tabs">
       <view
+        class="tab-item {{activeTab === 'live' ? 'active' : ''}}"
+        data-tab="live"
+        bindtap="onTabChange"
+      >
+        <text class="tab-text">实时直播</text>
+      </view>
+      <view
         class="tab-item {{activeTab === 'result' ? 'active' : ''}}"
         data-tab="result"
         bindtap="onTabChange"
       >
         <text class="tab-text">赛果</text>
-      </view>
-      <view
-        class="tab-item {{activeTab === 'live' ? 'active' : ''}}"
-        data-tab="live"
-        bindtap="onTabChange"
-      >
-        <text class="tab-text">比分直播</text>
       </view>
       <view
         class="tab-item {{activeTab === 'history' ? 'active' : ''}}"
@@ -44,6 +44,70 @@
         <text class="tab-text">历史</text>
       </view>
     </view>
+
+    <!-- 比分直播列表 -->
+    <block wx:if="{{activeTab === 'live'}}">
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{liveMatches.length === 0}}">
+        <text class="empty-icon">📺</text>
+        <text class="empty-text">暂无直播</text>
+        <text class="empty-tip">当前没有比赛直播</text>
+      </view>
+
+      <!-- 直播列表 -->
+      <scroll-view class="results-scroll" scroll-y wx:else>
+        <view class="live-item" wx:for="{{liveMatches}}" wx:key="matchId">
+          <!-- 比赛头部 -->
+          <view class="live-header">
+            <view class="live-league">
+              <text class="league-tag" style="background-color: #{{item.displayColor}}">{{item.leagueAbbName}}</text>
+              <text class="live-status">{{item.matchPhaseTcName || item.matchStatusName}}</text>
+            </view>
+            <view class="live-time">
+              <text class="live-date">{{item.displayDate}}</text>
+              <text class="live-clock">{{item.displayTime}}</text>
+            </view>
+          </view>
+
+          <!-- 比分区域 -->
+          <view class="live-score-section">
+            <view class="live-team home">
+              <text class="live-team-name">{{item.homeTeamAbbName}}</text>
+            </view>
+            <view class="live-score-box">
+              <text class="live-score">{{item.sectionsNo999 || '-'}}</text>
+              <text class="live-half-score" wx:if="{{item.sectionsNo1}}">半场 {{item.sectionsNo1}}</text>
+              <text class="live-minute" wx:if="{{item.matchMinute}}">{{item.matchMinute}}'</text>
+            </view>
+            <view class="live-team away">
+              <text class="live-team-name">{{item.awayTeamAbbName}}</text>
+            </view>
+          </view>
+
+          <!-- 事件时间线 -->
+          <view class="live-events" wx:if="{{item.events.length > 0}}">
+            <view class="events-title">比赛事件</view>
+            <view class="event-item {{event.isHome ? 'home' : 'away'}}" wx:for="{{item.events}}" wx:for-item="event" wx:key="index">
+              <view class="event-time">{{event.matchMinute}}'</view>
+              <view class="event-icon">
+                <text wx:if="{{event.eventCode === 'G' || event.eventCode === 'PG'}}">⚽</text>
+                <text wx:elif="{{event.eventCode === 'OG'}}">🔴</text>
+                <text wx:elif="{{event.eventCode === 'Y'}}">🟨</text>
+                <text wx:elif="{{event.eventCode === 'R'}}">🟥</text>
+                <text wx:else>📌</text>
+              </view>
+              <view class="event-info">
+                <text class="event-player">{{event.personEnName}}</text>
+                <text class="event-type">{{event.eventName}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 底部占位 -->
+        <view class="bottom-placeholder"></view>
+      </scroll-view>
+    </block>
 
     <!-- 赛果列表 -->
     <block wx:if="{{activeTab === 'result'}}">
@@ -112,70 +176,6 @@
               <text class="odds-label">比分</text>
               <text class="odds-result">{{item.crsCombinationDesc}}</text>
               <text class="odds-odds">{{item.crsOdds}}</text>
-            </view>
-          </view>
-        </view>
-
-        <!-- 底部占位 -->
-        <view class="bottom-placeholder"></view>
-      </scroll-view>
-    </block>
-
-    <!-- 比分直播列表 -->
-    <block wx:if="{{activeTab === 'live'}}">
-      <!-- 空状态 -->
-      <view class="empty-state" wx:if="{{liveMatches.length === 0}}">
-        <text class="empty-icon">📺</text>
-        <text class="empty-text">暂无直播</text>
-        <text class="empty-tip">当前没有比赛直播</text>
-      </view>
-
-      <!-- 直播列表 -->
-      <scroll-view class="results-scroll" scroll-y wx:else>
-        <view class="live-item" wx:for="{{liveMatches}}" wx:key="matchId">
-          <!-- 比赛头部 -->
-          <view class="live-header">
-            <view class="live-league">
-              <text class="league-tag" style="background-color: #{{item.displayColor}}">{{item.leagueAbbName}}</text>
-              <text class="live-status">{{item.matchPhaseTcName || item.matchStatusName}}</text>
-            </view>
-            <view class="live-time">
-              <text class="live-date">{{item.displayDate}}</text>
-              <text class="live-clock">{{item.displayTime}}</text>
-            </view>
-          </view>
-
-          <!-- 比分区域 -->
-          <view class="live-score-section">
-            <view class="live-team home">
-              <text class="live-team-name">{{item.homeTeamAbbName}}</text>
-            </view>
-            <view class="live-score-box">
-              <text class="live-score">{{item.sectionsNo999 || '-'}}</text>
-              <text class="live-half-score" wx:if="{{item.sectionsNo1}}">半场 {{item.sectionsNo1}}</text>
-              <text class="live-minute" wx:if="{{item.matchMinute}}">{{item.matchMinute}}'</text>
-            </view>
-            <view class="live-team away">
-              <text class="live-team-name">{{item.awayTeamAbbName}}</text>
-            </view>
-          </view>
-
-          <!-- 事件时间线 -->
-          <view class="live-events" wx:if="{{item.events.length > 0}}">
-            <view class="events-title">比赛事件</view>
-            <view class="event-item {{event.isHome ? 'home' : 'away'}}" wx:for="{{item.events}}" wx:for-item="event" wx:key="index">
-              <view class="event-time">{{event.matchMinute}}'</view>
-              <view class="event-icon">
-                <text wx:if="{{event.eventCode === 'G' || event.eventCode === 'PG'}}">⚽</text>
-                <text wx:elif="{{event.eventCode === 'OG'}}">🔴</text>
-                <text wx:elif="{{event.eventCode === 'Y'}}">🟨</text>
-                <text wx:elif="{{event.eventCode === 'R'}}">🟥</text>
-                <text wx:else>📌</text>
-              </view>
-              <view class="event-info">
-                <text class="event-player">{{event.personEnName}}</text>
-                <text class="event-type">{{event.eventName}}</text>
-              </view>
             </view>
           </view>
         </view>
@@ -316,7 +316,7 @@
       </view>
     </block>
 
-    <!-- 刷新按钮 - 仅比分直播显示 -->
+    <!-- 刷新按钮 - 实时直播显示 -->
     <view class="refresh-btn" wx:if="{{activeTab === 'live'}}" bindtap="onRefresh">
       <text class="refresh-icon">🔄</text>
     </view>
