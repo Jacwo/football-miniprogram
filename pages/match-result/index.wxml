@@ -380,10 +380,6 @@
                       <text class="table-label">样本数</text>
                       <text class="table-value">{{modelStats.sampleSize}}</text>
                     </view>
-                    <view class="table-row">
-                      <text class="table-label">模型类型</text>
-                      <text class="table-value">{{modelStats.modelType}}</text>
-                    </view>
                   </view>
                 </view>
               </view>
