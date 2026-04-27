@@ -10,7 +10,7 @@ Page({
     results: [],
     liveMatches: [],
     historyList: [],
-    loading: true,
+    loading: false,
     error: null,
     expandedId: null,
     // 历史记录相关
@@ -24,6 +24,7 @@ Page({
   },
 
   onLoad() {
+    this.setData({ loading: true });
     this.loadResults();
   },
 
