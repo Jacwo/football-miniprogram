@@ -27,16 +27,71 @@
         <text class="section-title">🔥 今日热门比赛</text>
         <view class="items-container">
           <view class="match-item" wx:for="{{hotMatches}}" wx:key="matchId">
-            <view class="match-header">
-              <text class="match-league">{{item.leagueAbbName}}</text>
+            <!-- 比赛头部 -->
+            <view class="match-top">
+              <view class="league-badge" style="background-color: #{{item.backColor}}">
+                <text class="league-text">{{item.leagueAbbName}}</text>
+              </view>
               <text class="match-time">{{item.matchTime}}</text>
+              <text class="match-status">{{item.matchStatusName}}</text>
             </view>
-            <view class="match-vs">
-              <text class="team home">{{item.homeName}}</text>
-              <text class="vs-text">VS</text>
-              <text class="team away">{{item.awayName}}</text>
+
+            <!-- 对阵信息 -->
+            <view class="match-vs-section">
+              <view class="team-info home">
+                <text class="team-name">{{item.homeTeamAbbName}}</text>
+                <view class="team-rank">排名 {{item.homeTeamRank}}</view>
+                <view class="trend {{item.homeFormTrend === '上升' ? 'up' : 'down'}}">
+                  <text class="trend-icon">{{item.homeFormTrend === '上升' ? '📈' : '📉'}}</text>
+                  <text>{{item.homeFormTrend}}</text>
+                </view>
+              </view>
+
+              <view class="vs-middle">
+                <text class="vs">VS</text>
+              </view>
+
+              <view class="team-info away">
+                <text class="team-name">{{item.awayTeamAbbName}}</text>
+                <view class="team-rank">排名 {{item.awayTeamRank}}</view>
+                <view class="trend {{item.awayFormTrend === '上升' ? 'up' : 'down'}}">
+                  <text class="trend-icon">{{item.awayFormTrend === '上升' ? '📈' : '📉'}}</text>
+                  <text>{{item.awayFormTrend}}</text>
+                </view>
+              </view>
             </view>
-            <text class="match-desc">{{item.description || '待分析'}}</text>
+
+            <!-- 赔率信息 -->
+            <view class="odds-section">
+              <view class="odds-item">
+                <text class="odds-label">{{item.homeTeamAbbName}}胜</text>
+                <text class="odds-value">{{item.homeWin}}</text>
+              </view>
+              <view class="odds-item">
+                <text class="odds-label">平</text>
+                <text class="odds-value">{{item.draw}}</text>
+              </view>
+              <view class="odds-item">
+                <text class="odds-label">{{item.awayTeamAbbName}}胜</text>
+                <text class="odds-value">{{item.awayWin}}</text>
+              </view>
+            </view>
+
+            <!-- 队伍标签 -->
+            <view class="tags-section" wx:if="{{item.homeTags || item.awayTags}}">
+              <view class="team-tags" wx:if="{{item.homeTags}}">
+                <text class="tags-label">主队:</text>
+                <view class="tags">
+                  <text class="tag" wx:for="{{item.homeTags.split(',')}}" wx:key="*this">{{item}}</text>
+                </view>
+              </view>
+              <view class="team-tags" wx:if="{{item.awayTags}}">
+                <text class="tags-label">客队:</text>
+                <view class="tags">
+                  <text class="tag" wx:for="{{item.awayTags.split(',')}}" wx:key="*this">{{item}}</text>
+                </view>
+              </view>
+            </view>
           </view>
         </view>
       </view>
@@ -46,11 +101,11 @@
         <text class="section-title">⭐ 主要赛事</text>
         <view class="items-container">
           <view class="event-item" wx:for="{{majorEvents}}" wx:key="id">
-            <view class="event-header">
-              <text class="event-title">{{item.title}}</text>
+            <image class="event-image" src="{{item.imageUrl}}" mode="aspectFill" />
+            <view class="event-overlay">
+              <text class="event-title">{{item.topicName}}</text>
+              <text class="event-desc">{{item.topicDesc}}</text>
             </view>
-            <text class="event-desc">{{item.description}}</text>
-            <text class="event-date" wx:if="{{item.date}}">📅 {{item.date}}</text>
           </view>
         </view>
       </view>
