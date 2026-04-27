@@ -21,6 +21,12 @@ Page({
     historyPageSize: 20,
     historyTotal: 0,
     historyError: null,
+    // 历史页面内的Tab
+    historySubTab: "list", // list: 历史列表, models: 模型统计
+    // 模型统计相关
+    models: [],
+    modelsLoading: false,
+    modelsError: null,
   },
 
   onLoad() {
@@ -316,8 +322,33 @@ Page({
 
   // 处理上拉加载
   onReachBottom() {
-    if (this.data.activeTab === "history" && this.data.historyHasMore && !this.data.historyLoading) {
+    if (this.data.activeTab === "history" && this.data.historySubTab === "list" && this.data.historyHasMore && !this.data.historyLoading) {
       this.loadMoreHistory();
+    }
+  },
+
+  // ====== 历史页面内的Tab切换 ======
+  onHistorySubTabChange(e) {
+    const tab = e.currentTarget.dataset.tab;
+    if (tab === this.data.historySubTab) return;
+
+    this.setData({ historySubTab: tab });
+
+    if (tab === "models") {
+      this.loadModels();
+    }
+  },
+
+  // 加载模型统计
+  async loadModels() {
+    this.setData({ modelsLoading: true, modelsError: null });
+    try {
+      const data = await historyApi.getModelList();
+      const models = data.data || data || [];
+      this.setData({ models, modelsLoading: false });
+    } catch (error) {
+      console.error("加载模型列表失败:", error);
+      this.setData({ modelsLoading: false, modelsError: error.message || "加载失败" });
     }
   },
 });
