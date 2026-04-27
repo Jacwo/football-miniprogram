@@ -217,18 +217,11 @@
           <text class="stats-text">共 {{historyTotal}} 条记录</text>
         </view>
 
-        <scroll-view class="history-list" scroll-y>
-          <!-- 调试信息 -->
-          <view style="padding: 16rpx; background: #f0f0f0; margin: 10rpx; border-radius: 8rpx;">
-            <text style="font-size: 20rpx; color: #666;">数据条数: {{historyList.length}}</text>
+        <!-- 测试：直接显示列表项 -->
+        <view class="history-list">
+          <view wx:for="{{historyList}}" wx:key="id" style="padding: 16rpx; background: #fff; margin: 8rpx 12rpx; border-radius: 8rpx; border: 1rpx solid #f0f0f0;">
+            <text style="font-size: 24rpx; color: #333;">{{item.match || item.title || 'Item ' + index}}</text>
           </view>
-
-          <history-card
-            wx:for="{{historyList}}"
-            wx:key="id"
-            record="{{item}}"
-            bind:tap="onHistoryItemTap"
-          />
 
           <!-- 加载更多 -->
           <view class="load-more" wx:if="{{historyHasMore}}">
@@ -243,7 +236,7 @@
 
           <!-- 底部占位 -->
           <view class="bottom-placeholder"></view>
-        </scroll-view>
+        </view>
       </view>
     </block>
 
