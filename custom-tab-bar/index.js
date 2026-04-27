@@ -21,6 +21,12 @@ Component({
         selectedIconPath: '/images/tabbar/match-active.png'
       },
       {
+        pagePath: '/pages/topic/index',
+        text: '专题',
+        iconPath: '/images/tabbar/match.png',
+        selectedIconPath: '/images/tabbar/match-active.png'
+      },
+      {
         pagePath: '/pages/match-result/index',
         text: '赛果',
         iconPath: '/images/tabbar/match.png',
