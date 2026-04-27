@@ -343,11 +343,11 @@ Page({
   async loadModels() {
     this.setData({ modelsLoading: true, modelsError: null });
     try {
-      const data = await historyApi.getModelList();
+      const data = await historyApi.getModelStats();
       const models = data.data || data || [];
       this.setData({ models, modelsLoading: false });
     } catch (error) {
-      console.error("加载模型列表失败:", error);
+      console.error("加载模型统计失败:", error);
       this.setData({ modelsLoading: false, modelsError: error.message || "加载失败" });
     }
   },
