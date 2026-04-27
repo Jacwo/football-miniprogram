@@ -47,13 +47,6 @@
       >
         <text class="tab-text">历史</text>
       </view>
-      <view
-        class="tab-item {{activeTab === 'topic' ? 'active' : ''}}"
-        data-tab="topic"
-        bindtap="onTabChange"
-      >
-        <text class="tab-text">专题</text>
-      </view>
     </view>
 
     <!-- 比分直播列表 -->
@@ -403,62 +396,6 @@
       </view>
     </block>
 
-    <!-- 专题 -->
-    <block wx:if="{{activeTab === 'topic'}}">
-      <!-- 加载状态 -->
-      <view class="loading-wrapper" wx:if="{{topicLoading}}">
-        <view class="loading-spinner"></view>
-        <text class="loading-text">加载中...</text>
-      </view>
-
-      <!-- 错误状态 -->
-      <view class="empty-state" wx:elif="{{topicError}}">
-        <text class="empty-icon">⚠️</text>
-        <text class="empty-text">加载失败</text>
-        <text class="empty-tip">{{topicError}}</text>
-      </view>
-
-      <!-- 专题内容 -->
-      <view class="content-wrapper" wx:else>
-        <scroll-view class="topic-list" scroll-y>
-          <!-- 今日热门比赛 -->
-          <view class="topic-section" wx:if="{{hotMatches.length > 0}}">
-            <text class="topic-section-title">🔥 今日热门比赛</text>
-            <view class="topic-items">
-              <view class="topic-item" wx:for="{{hotMatches}}" wx:key="matchId">
-                <view class="topic-match-header">
-                  <text class="topic-league">{{item.leagueAbbName}}</text>
-                  <text class="topic-time">{{item.matchTime}}</text>
-                </view>
-                <view class="topic-match-vs">
-                  <text class="topic-team home">{{item.homeName}}</text>
-                  <text class="topic-vs">VS</text>
-                  <text class="topic-team away">{{item.awayName}}</text>
-                </view>
-                <text class="topic-match-desc">{{item.description || '待分析'}}</text>
-              </view>
-            </view>
-          </view>
-
-          <!-- 主要赛事 -->
-          <view class="topic-section" wx:if="{{majorEvents.length > 0}}">
-            <text class="topic-section-title">⭐ 主要赛事</text>
-            <view class="topic-items">
-              <view class="topic-event-item" wx:for="{{majorEvents}}" wx:key="id">
-                <view class="event-header">
-                  <text class="event-title">{{item.title}}</text>
-                </view>
-                <text class="event-desc">{{item.description}}</text>
-                <text class="event-date" wx:if="{{item.date}}">{{item.date}}</text>
-              </view>
-            </view>
-          </view>
-
-          <!-- 底部占位 -->
-          <view class="bottom-placeholder"></view>
-        </scroll-view>
-      </view>
-    </block>
 
   </view>
 </view>

@@ -1,0 +1,69 @@
+<!-- pages/topic/index.wxml -->
+<view class="topic-page">
+  <!-- 加载状态 -->
+  <view class="loading-wrapper" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 错误状态 -->
+  <view class="error-wrapper" wx:elif="{{error}}">
+    <text class="error-text">{{error}}</text>
+    <view class="retry-btn" bindtap="onRetry">重试</view>
+  </view>
+
+  <!-- 主内容 -->
+  <view class="main-content" wx:else>
+    <!-- 页面标题 -->
+    <view class="page-header">
+      <text class="page-title">📌 专题</text>
+      <text class="page-desc">了解足球热门话题</text>
+    </view>
+
+    <!-- 内容区域 -->
+    <scroll-view class="topic-content" scroll-y enable-back-to-top="true">
+      <!-- 今日热门比赛 -->
+      <view class="topic-section" wx:if="{{hotMatches.length > 0}}">
+        <text class="section-title">🔥 今日热门比赛</text>
+        <view class="items-container">
+          <view class="match-item" wx:for="{{hotMatches}}" wx:key="matchId">
+            <view class="match-header">
+              <text class="match-league">{{item.leagueAbbName}}</text>
+              <text class="match-time">{{item.matchTime}}</text>
+            </view>
+            <view class="match-vs">
+              <text class="team home">{{item.homeName}}</text>
+              <text class="vs-text">VS</text>
+              <text class="team away">{{item.awayName}}</text>
+            </view>
+            <text class="match-desc">{{item.description || '待分析'}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 主要赛事 -->
+      <view class="topic-section" wx:if="{{majorEvents.length > 0}}">
+        <text class="section-title">⭐ 主要赛事</text>
+        <view class="items-container">
+          <view class="event-item" wx:for="{{majorEvents}}" wx:key="id">
+            <view class="event-header">
+              <text class="event-title">{{item.title}}</text>
+            </view>
+            <text class="event-desc">{{item.description}}</text>
+            <text class="event-date" wx:if="{{item.date}}">📅 {{item.date}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{hotMatches.length === 0 && majorEvents.length === 0}}">
+        <text class="empty-icon">📋</text>
+        <text class="empty-text">暂无专题内容</text>
+        <text class="empty-tip">敬请期待</text>
+      </view>
+
+      <!-- 底部占位 -->
+      <view class="bottom-placeholder"></view>
+    </scroll-view>
+  </view>
+</view>
