@@ -55,7 +55,6 @@ Page({
       this.loadLiveMatches();
     } else if (tab === "history") {
       this.loadHistory();
-      console.log("切换到历史tab，开始加载历史记录");
     }
   },
 
@@ -207,17 +206,13 @@ Page({
   // ====== 历史记录相关方法 ======
   // 加载历史记录
   async loadHistory() {
-    console.log("开始加载历史记录");
     this.setData({ historyLoading: true, historyError: null });
 
     try {
       const { historyPageNo, historyPageSize } = this.data;
-      console.log("请求参数:", { pageNo: historyPageNo, pageSize: historyPageSize });
       const result = await historyApi.getHistoryList({ pageNo: historyPageNo, pageSize: historyPageSize });
-      console.log("历史记录API返回结果:", result);
 
       const { list = [], total = 0 } = result || {};
-      console.log("提取的列表:", list, "总数:", total);
 
       // 按照时间倒序排列（最新的在前）
       if (Array.isArray(list)) {
@@ -228,14 +223,12 @@ Page({
         });
       }
 
-      console.log("排序后的列表:", list);
       this.setData({
         historyList: list,
         historyTotal: total,
         historyHasMore: list.length >= historyPageSize,
         historyLoading: false,
       });
-      console.log("设置完成，当前状态:", this.data);
     } catch (e) {
       console.error("加载历史记录失败:", e);
       this.setData({
