@@ -59,7 +59,8 @@
       </view>
 
       <!-- 直播列表 -->
-      <scroll-view class="results-scroll" scroll-y wx:else>
+      <view class="content-wrapper" wx:else>
+        <scroll-view class="results-scroll" scroll-y>
         <view class="live-item" wx:for="{{liveMatches}}" wx:key="matchId">
           <!-- 比赛头部 -->
           <view class="live-header">
@@ -110,7 +111,8 @@
 
         <!-- 底部占位 -->
         <view class="bottom-placeholder"></view>
-      </scroll-view>
+        </scroll-view>
+      </view>
     </block>
 
     <!-- 赛果列表 -->
@@ -123,7 +125,8 @@
       </view>
 
       <!-- 赛果列表 -->
-      <scroll-view class="results-scroll" scroll-y wx:else>
+      <view class="content-wrapper" wx:else>
+        <scroll-view class="results-scroll" scroll-y>
         <view class="result-item {{item.statusClass}}" wx:for="{{results}}" wx:key="matchId">
           <!-- 状态指示条 -->
           <view class="result-status-bar"></view>
@@ -186,7 +189,8 @@
 
         <!-- 底部占位 -->
         <view class="bottom-placeholder"></view>
-      </scroll-view>
+        </scroll-view>
+      </view>
     </block>
 
     <!-- 历史记录列表 -->

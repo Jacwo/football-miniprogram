@@ -128,6 +128,14 @@
   text-align: center;
 }
 
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
 .results-scroll {
   flex: 1;
   overflow-y: auto;
