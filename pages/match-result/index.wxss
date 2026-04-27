@@ -62,7 +62,7 @@
 .refresh-btn {
   position: fixed;
   right: 30rpx;
-  bottom: 100rpx;
+  bottom: 130rpx;
   width: 100rpx;
   height: 100rpx;
   background: #fff;
