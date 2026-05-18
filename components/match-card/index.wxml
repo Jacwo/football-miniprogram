@@ -58,6 +58,22 @@
       <view class="detail-tags" wx:if="{{match.homeTags && match.homeTags.length}}">
         <text class="tag-item" wx:for="{{match.homeTags}}" wx:key="index">{{item}}</text>
       </view>
+      <!-- 球队建议 (VIP专属) -->
+      <view class="advice-section" wx:if="{{match.homeAdvice}}">
+        <view class="advice-header">
+          <text class="advice-label">球队建议</text>
+          <view class="vip-required" wx:if="{{!isVip}}">
+            <view class="vip-lock-icon">🔒</view>
+            <text class="vip-hint">VIP可见</text>
+          </view>
+        </view>
+        <view class="advice-content {{isVip ? '' : 'blurred'}}" wx:if="{{isVip}}">
+          <text class="advice-text">{{match.homeAdvice}}</text>
+        </view>
+        <view class="advice-content blurred" wx:else>
+          <text class="advice-text">开通VIP查看专业建议</text>
+        </view>
+      </view>
     </view>
     <!-- 客队信息 -->
     <view class="team-detail-item">
@@ -70,6 +86,22 @@
       </view>
       <view class="detail-tags" wx:if="{{match.awayTags && match.awayTags.length}}">
         <text class="tag-item" wx:for="{{match.awayTags}}" wx:key="index">{{item}}</text>
+      </view>
+      <!-- 球队建议 (VIP专属) -->
+      <view class="advice-section" wx:if="{{match.awayAdvice}}">
+        <view class="advice-header">
+          <text class="advice-label">球队建议</text>
+          <view class="vip-required" wx:if="{{!isVip}}">
+            <view class="vip-lock-icon">🔒</view>
+            <text class="vip-hint">VIP可见</text>
+          </view>
+        </view>
+        <view class="advice-content {{isVip ? '' : 'blurred'}}" wx:if="{{isVip}}">
+          <text class="advice-text">{{match.awayAdvice}}</text>
+        </view>
+        <view class="advice-content blurred" wx:else>
+          <text class="advice-text">开通VIP查看专业建议</text>
+        </view>
       </view>
     </view>
   </view>

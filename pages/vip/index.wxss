@@ -838,3 +838,332 @@
 .safe-area-bottom {
   height: calc(40rpx + env(safe-area-inset-bottom));
 }
+
+/* ========== 加载状态 ========== */
+.loading-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #f0f0f0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  margin-top: 20rpx;
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* ========== 购买按钮 ========== */
+.purchase-btn-wrapper {
+  padding: 32rpx 0;
+}
+
+.purchase-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50rpx;
+  padding: 28rpx 32rpx;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+}
+
+.purchase-btn::after {
+  border: none;
+}
+
+.purchase-btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.purchase-btn .btn-icon {
+  font-size: 36rpx;
+}
+
+.purchase-btn .btn-text {
+  font-size: 32rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* ========== 空状态 ========== */
+.empty-packages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 0;
+}
+
+.empty-emoji {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.empty-sub {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* ========== 支付弹窗 ========== */
+.pay-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.pay-modal.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+.pay-modal-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.pay-modal-content {
+  position: relative;
+  width: 600rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 40rpx 32rpx;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.2);
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.pay-modal.show .pay-modal-content {
+  transform: scale(1);
+}
+
+.pay-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32rpx;
+}
+
+.pay-modal-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.pay-modal-close {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  color: #999;
+  background: #f5f5f5;
+  border-radius: 50%;
+}
+
+.pay-modal-close:active {
+  background: #e5e5e5;
+}
+
+.pay-amount {
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+
+.pay-amount-label {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+
+.pay-amount-value {
+  display: block;
+  font-size: 56rpx;
+  font-weight: bold;
+  color: #ff6b6b;
+}
+
+.pay-qrcode-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx;
+  background: #f8f9fc;
+  border-radius: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.pay-qrcode {
+  width: 320rpx;
+  height: 320rpx;
+}
+
+.qrcode-placeholder {
+  width: 320rpx;
+  height: 320rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 16rpx;
+}
+
+.qrcode-placeholder text {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.loading-spinner-small {
+  width: 48rpx;
+  height: 48rpx;
+  border: 3rpx solid #f0f0f0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.pay-tips {
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.pay-tip {
+  display: block;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.pay-tip-sub {
+  display: block;
+  font-size: 22rpx;
+  color: #999;
+}
+
+.pay-order-info {
+  text-align: center;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.order-no {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* 支付操作按钮 */
+.pay-actions {
+  display: flex;
+  gap: 24rpx;
+  margin-top: 32rpx;
+}
+
+.pay-action-btn {
+  flex: 1;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  border: none;
+}
+
+.pay-action-btn::after {
+  border: none;
+}
+
+.pay-action-btn.cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.pay-action-btn.confirm {
+  background: linear-gradient(135deg, #07c160 0%, #04be02 100%);
+  color: #fff;
+}
+
+/* 支付链接模式 */
+.qrcode-link-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx;
+}
+
+.qrcode-link-box {
+  width: 100%;
+  padding: 20rpx;
+  background: #f5f5f5;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  word-break: break-all;
+}
+
+.qrcode-link-text {
+  font-size: 22rpx;
+  color: #666;
+  line-height: 1.5;
+}
+
+.copy-btn {
+  background: linear-gradient(135deg, #07c160 0%, #04be02 100%);
+  color: #fff;
+  font-size: 28rpx;
+  padding: 20rpx 60rpx;
+  border-radius: 50rpx;
+  border: none;
+  margin-bottom: 16rpx;
+}
+
+.copy-btn::after {
+  border: none;
+}
+
+.qrcode-tip-manual {
+  font-size: 22rpx;
+  color: #999;
+}

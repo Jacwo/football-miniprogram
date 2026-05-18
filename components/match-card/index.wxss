@@ -222,7 +222,7 @@
 }
 
 .team-detail-panel.show {
-  max-height: 400rpx;
+  max-height: 800rpx;
 }
 
 .team-detail-item {
@@ -295,6 +295,66 @@
 .trend-text {
   font-size: 22rpx;
   font-weight: 500;
+}
+
+/* 球队建议样式 */
+.advice-section {
+  margin-top: 12rpx;
+  padding-top: 12rpx;
+  border-top: 1rpx solid #e8ecf4;
+}
+
+.advice-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+
+.advice-label {
+  font-size: 22rpx;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.vip-required {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+  padding: 3rpx 10rpx;
+  border-radius: 10rpx;
+}
+
+.vip-lock-icon {
+  font-size: 18rpx;
+}
+
+.vip-hint {
+  font-size: 18rpx;
+  color: #fff;
+  font-weight: 500;
+}
+
+.advice-content {
+  background: #fff;
+  padding: 12rpx 16rpx;
+  border-radius: 8rpx;
+  border: 1rpx solid #e5e5e5;
+}
+
+.advice-content.blurred {
+  position: relative;
+  filter: blur(4rpx);
+  opacity: 0.6;
+  user-select: none;
+  pointer-events: none;
+}
+
+.advice-text {
+  font-size: 24rpx;
+  color: #333;
+  line-height: 1.6;
 }
 
 /* AI分析隐藏时的占位 */

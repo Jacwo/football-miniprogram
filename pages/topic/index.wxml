@@ -13,105 +13,104 @@
   </view>
 
   <!-- 主内容 -->
-  <view class="main-content" wx:else>
-    <!-- 页面标题 -->
-    <view class="page-header">
-      <text class="page-title">📌 专题</text>
+  <scroll-view class="topic-scroll" scroll-y enable-back-to-top="true" wx:else>
+    <!-- 轮播图 -->
+    <view class="swiper-section" wx:if="{{majorEvents.length > 0}}">
+      <swiper class="event-swiper" indicator-dots autoplay circular indicator-color="rgba(255,255,255,0.4)" indicator-active-color="#ffffff">
+        <swiper-item wx:for="{{majorEvents}}" wx:key="id">
+          <view class="swiper-item" bindtap="onEventCardTap" data-url="{{item.imageUrl}}">
+            <image class="swiper-image" src="{{item.carouselImageUrl || item.imageUrl}}" mode="aspectFill" />
+            <view class="swiper-overlay"></view>
+            <view class="swiper-info" wx:if="{{item.topicName}}">
+              <text class="swiper-title">{{item.topicName}}</text>
+              <text class="swiper-desc" wx:if="{{item.topicDesc}}">{{item.topicDesc}}</text>
+            </view>
+          </view>
+        </swiper-item>
+      </swiper>
     </view>
 
-    <!-- 内容区域 -->
-    <scroll-view class="topic-content" scroll-y enable-back-to-top="true">
-      <!-- 热门赛事轮播 -->
-      <view class="swiper-section" wx:if="{{majorEvents.length > 0}}">
-        <swiper class="event-swiper" indicator-dots autoplay circular>
-          <swiper-item wx:for="{{majorEvents}}" wx:key="id">
-            <view class="swiper-item-wrapper">
-              <image class="swiper-image" src="{{item.carouselImageUrl}}" mode="scaleToFill" />
-            </view>
-          </swiper-item>
-        </swiper>
+    <!-- 热门比赛 -->
+    <view class="section" wx:if="{{hotMatches.length > 0}}">
+      <view class="section-bar">
+        <view class="section-bar-dot"></view>
+        <text class="section-bar-title">热门比赛</text>
+        <text class="section-bar-extra">{{hotMatches.length}}场</text>
       </view>
-
-      <!-- 今日热门比赛 -->
-      <view class="topic-section" wx:if="{{hotMatches.length > 0}}">
-        <view class="section-header">
-          <text class="section-title">🔥 今日热门比赛</text>
-          <text class="section-count">共 {{hotMatches.length}} 场</text>
-        </view>
-        <view class="items-container">
-          <view class="match-item" wx:for="{{hotMatches}}" wx:key="matchId">
-            <!-- 比赛头部 -->
-            <view class="match-top">
-              <view class="league-badge" style="background-color: #{{item.backColor}}">
-                <text class="league-text">{{item.leagueAbbName}}</text>
-              </view>
-              <text class="match-time">{{item.matchTime}}</text>
-              <text class="match-status">{{item.matchStatusName}}</text>
+      <view class="match-list">
+        <view class="match-card" wx:for="{{hotMatches}}" wx:key="matchId">
+          <view class="match-league">
+            <view class="league-tag" style="background-color: #{{item.backColor}}">
+              {{item.leagueAbbName}}
             </view>
-
-            <!-- 对阵信息 -->
-            <view class="match-vs-section">
-              <view class="team-info home">
-                <text class="team-name">{{item.homeTeamAbbName}}</text>
-                <view class="team-rank">排名 {{item.homeTeamRank}}</view>
-              </view>
-              <view class="vs-middle">
-                <text class="vs">VS</text>
-              </view>
-              <view class="team-info away">
-                <text class="team-name">{{item.awayTeamAbbName}}</text>
-                <view class="team-rank">排名 {{item.awayTeamRank}}</view>
-              </view>
+            <text class="match-time">{{item.matchTime}}</text>
+            <text class="match-status" wx:if="{{item.matchStatusName}}">{{item.matchStatusName}}</text>
+          </view>
+          <view class="match-teams">
+            <view class="team-col">
+              <text class="team-name">{{item.homeTeamAbbName}}</text>
+              <text class="team-rank" wx:if="{{item.homeTeamRank}}">排名{{item.homeTeamRank}}</text>
+            </view>
+            <text class="vs-text">VS</text>
+            <view class="team-col">
+              <text class="team-name">{{item.awayTeamAbbName}}</text>
+              <text class="team-rank" wx:if="{{item.awayTeamRank}}">排名{{item.awayTeamRank}}</text>
             </view>
           </view>
         </view>
       </view>
+    </view>
 
-      <!-- 热门专题 -->
-      <view class="topic-section" wx:if="{{hotTopics.length > 0}}">
-        <text class="section-title">🔥 热门专题</text>
-        <view class="events-grid">
-          <view class="event-card" wx:for="{{hotTopics}}" wx:key="id" bindtap="onEventCardTap" data-url="{{item.imageUrl}}">
-            <view class="event-card-image">
-              <image src="{{item.imageUrl}}" mode="aspectFill" />
-              <view class="event-card-badge hot-badge">进行中</view>
-            </view>
-            <view class="event-card-info">
-              <text class="event-card-title">{{item.topicName}}</text>
-              <text class="event-card-desc">{{item.topicDesc}}</text>
-              <text class="event-card-date" wx:if="{{item.startDate && item.endDate}}">{{item.startDate}} - {{item.endDate}}</text>
-            </view>
+    <!-- 进行中的专题 -->
+    <view class="section" wx:if="{{hotTopics.length > 0}}">
+      <view class="section-bar">
+        <view class="section-bar-dot hot"></view>
+        <text class="section-bar-title">进行中</text>
+        <view class="section-bar-badge hot">HOT</view>
+      </view>
+      <view class="topic-grid">
+        <view class="topic-card" wx:for="{{hotTopics}}" wx:key="id" bindtap="onEventCardTap" data-url="{{item.imageUrl}}">
+          <view class="topic-cover">
+            <image class="topic-cover-img" src="{{item.imageUrl}}" mode="aspectFill" />
+            <view class="topic-cover-tag hot">进行中</view>
+          </view>
+          <view class="topic-body">
+            <text class="topic-name">{{item.topicName}}</text>
+            <text class="topic-desc" wx:if="{{item.topicDesc}}">{{item.topicDesc}}</text>
+            <text class="topic-date" wx:if="{{item.startDate && item.endDate}}">{{item.startDate}} - {{item.endDate}}</text>
           </view>
         </view>
       </view>
+    </view>
 
-      <!-- 精选专题 -->
-      <view class="topic-section" wx:if="{{selectTopics.length > 0}}">
-        <text class="section-title">⭐ 精选专题</text>
-        <view class="events-grid">
-          <view class="event-card" wx:for="{{selectTopics}}" wx:key="id" bindtap="onEventCardTap" data-url="{{item.imageUrl}}">
-            <view class="event-card-image">
-              <image src="{{item.imageUrl}}" mode="aspectFill" />
-              <view class="event-card-badge">敬请期待</view>
-            </view>
-            <view class="event-card-info">
-              <text class="event-card-title">{{item.topicName}}</text>
-              <text class="event-card-desc">{{item.topicDesc}}</text>
-              <text class="event-card-date" wx:if="{{item.startDate && item.endDate}}">{{item.startDate}} - {{item.endDate}}</text>
-            </view>
+    <!-- 即将开始的专题 -->
+    <view class="section" wx:if="{{selectTopics.length > 0}}">
+      <view class="section-bar">
+        <view class="section-bar-dot upcoming"></view>
+        <text class="section-bar-title">即将开始</text>
+      </view>
+      <view class="topic-grid">
+        <view class="topic-card" wx:for="{{selectTopics}}" wx:key="id" bindtap="onEventCardTap" data-url="{{item.imageUrl}}">
+          <view class="topic-cover">
+            <image class="topic-cover-img" src="{{item.imageUrl}}" mode="aspectFill" />
+            <view class="topic-cover-tag">敬请期待</view>
+          </view>
+          <view class="topic-body">
+            <text class="topic-name">{{item.topicName}}</text>
+            <text class="topic-desc" wx:if="{{item.topicDesc}}">{{item.topicDesc}}</text>
+            <text class="topic-date" wx:if="{{item.startDate && item.endDate}}">{{item.startDate}} - {{item.endDate}}</text>
           </view>
         </view>
       </view>
+    </view>
 
-      <!-- 空状态 -->
-      <view class="empty-state" wx:if="{{hotMatches.length === 0 && hotTopics.length === 0 && selectTopics.length === 0}}">
-        <text class="empty-icon">📋</text>
-        <text class="empty-text">暂无专题内容</text>
-        <text class="empty-tip">敬请期待</text>
-      </view>
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{hotMatches.length === 0 && hotTopics.length === 0 && selectTopics.length === 0 && !loading}}">
+      <text class="empty-emoji">📋</text>
+      <text class="empty-title">暂无专题内容</text>
+      <text class="empty-sub">精彩内容正在筹备中</text>
+    </view>
 
-      <!-- 底部占位 -->
-      <view class="bottom-placeholder"></view>
-    </scroll-view>
-  </view>
+    <view class="bottom-space"></view>
+  </scroll-view>
 </view>
