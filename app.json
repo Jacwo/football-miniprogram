@@ -20,7 +20,8 @@
     "pages/agreement/index",
     "pages/credits/index",
     "pages/vip/index",
-    "pages/topic/index"
+    "pages/topic/index",
+    "pages/topic-detail/index"
   ],
   "window": {
     "navigationBarTextStyle": "black",

@@ -1,5 +1,13 @@
 <!-- pages/topic/index.wxml -->
 <view class="topic-page">
+  <!-- 模拟选号入口 - 可拖动 -->
+  <movable-area class="calculator-area" wx:if="{{showCalculator}}">
+    <movable-view class="calculator-btn" direction="all" x="{{calculatorX}}" y="{{calculatorY}}" bindchange="onCalculatorMove" bindtap="onCalculator">
+      <text class="calculator-icon">🎮</text>
+      <text class="calculator-text">模拟选号</text>
+    </movable-view>
+  </movable-area>
+
   <!-- 加载状态 -->
   <view class="loading-wrapper" wx:if="{{loading}}">
     <view class="loading-spinner"></view>
@@ -38,23 +46,58 @@
         <text class="section-bar-extra">{{hotMatches.length}}场</text>
       </view>
       <view class="match-list">
-        <view class="match-card" wx:for="{{hotMatches}}" wx:key="matchId">
-          <view class="match-league">
-            <view class="league-tag" style="background-color: #{{item.backColor}}">
-              {{item.leagueAbbName}}
+        <view class="match-card-item" wx:for="{{hotMatches}}" wx:key="matchId">
+          <view class="match-card" bindtap="onHotMatchTap" data-matchid="{{item.matchId}}">
+            <view class="card-header">
+              <view class="header-left">
+                <text class="match-num">{{item.matchNumStr}}</text>
+                <text class="league-tag" style="background-color: #667eea">{{item.leagueAbbName}}</text>
+              </view>
+              <view class="header-right">
+                <text class="match-time">{{item.matchTime}}</text>
+              </view>
             </view>
-            <text class="match-time">{{item.matchTime}}</text>
-            <text class="match-status" wx:if="{{item.matchStatusName}}">{{item.matchStatusName}}</text>
-          </view>
-          <view class="match-teams">
-            <view class="team-col">
-              <text class="team-name">{{item.homeTeamAbbName}}</text>
-              <text class="team-rank" wx:if="{{item.homeTeamRank}}">排名{{item.homeTeamRank}}</text>
+            <view class="teams-row">
+              <view class="team-info home">
+                <text class="team-name">{{item.homeTeamAbbName}}</text>
+                <text class="team-rank" wx:if="{{item.homeTeamRank}}">[{{item.homeTeamRank}}]</text>
+              </view>
+              <text class="vs">VS</text>
+              <view class="team-info away">
+                <text class="team-name">{{item.awayTeamAbbName}}</text>
+                <text class="team-rank" wx:if="{{item.awayTeamRank}}">[{{item.awayTeamRank}}]</text>
+              </view>
             </view>
-            <text class="vs-text">VS</text>
-            <view class="team-col">
-              <text class="team-name">{{item.awayTeamAbbName}}</text>
-              <text class="team-rank" wx:if="{{item.awayTeamRank}}">排名{{item.awayTeamRank}}</text>
+            <!-- 赔率行 -->
+            <view class="odds-row" wx:if="{{item.homeWin || item.draw || item.awayWin}}">
+              <view class="odds-cell action-cell data-btn" catchtap="onDataAnalyze" data-matchid="{{item.matchId}}">
+                <view class="action-content">
+                  <text class="action-tag">📊</text>
+                  <text class="action-text">分析</text>
+                </view>
+              </view>
+              <view class="action-gap"></view>
+              <view class="odds-cell action-cell ai-btn" catchtap="onAiAnalyze" data-matchid="{{item.matchId}}" wx:if="{{showAiAnalysis}}">
+                <view class="action-content">
+                  <view class="ai-btn-wrapper">
+                    <text class="lock-icon">🔒</text>
+                    <text class="action-tag">AI</text>
+                  </view>
+                  <text class="action-text">智能</text>
+                </view>
+              </view>
+              <view class="odds-cell">
+                <text class="odds-label">主胜</text>
+                <text class="odds-num">{{item.homeWin || '-'}}</text>
+              </view>
+              <view class="odds-cell">
+                <text class="odds-label">平局</text>
+                <text class="odds-num">{{item.draw || '-'}}</text>
+              </view>
+              <view class="odds-cell">
+                <text class="odds-label">客胜</text>
+                <text class="odds-num">{{item.awayWin || '-'}}</text>
+              </view>
             </view>
           </view>
         </view>
@@ -69,7 +112,7 @@
         <view class="section-bar-badge hot">HOT</view>
       </view>
       <view class="topic-grid">
-        <view class="topic-card" wx:for="{{hotTopics}}" wx:key="id" bindtap="onEventCardTap" data-url="{{item.imageUrl}}">
+        <view class="topic-card" wx:for="{{hotTopics}}" wx:key="id" bindtap="onTopicTap" data-id="{{item.id}}" data-name="{{item.topicName}}" data-url="{{item.imageUrl}}">
           <view class="topic-cover">
             <image class="topic-cover-img" src="{{item.imageUrl}}" mode="aspectFill" />
             <view class="topic-cover-tag hot">进行中</view>
@@ -83,17 +126,55 @@
       </view>
     </view>
 
-    <!-- 即将开始的专题 -->
-    <view class="section" wx:if="{{selectTopics.length > 0}}">
+    <!-- 热门专区 - 水平展示 -->
+    <view class="section" wx:if="{{championsLeague.topicName || worldCup.topicName}}">
+      <view class="hot-zones-row">
+        <!-- 欧冠专区 -->
+        <view class="hot-zone-card" bindtap="onTopicTap" data-id="{{championsLeague.id}}" data-name="{{championsLeague.topicName}}" data-url="{{championsLeague.imageUrl}}" wx:if="{{championsLeague.topicName}}">
+          <view class="hot-zone-header">
+            <text class="hot-zone-icon">⚽</text>
+            <text class="hot-zone-title">{{championsLeague.topicName}}</text>
+            <view class="hot-zone-badge live">进行中</view>
+          </view>
+          <view class="hot-zone-matches" wx:if="{{championsLeagueMatches.length > 0}}">
+            <view class="zone-match-item" wx:for="{{championsLeagueMatches}}" wx:key="matchId">
+              <text class="zone-match-time">{{item.matchTime}}</text>
+              <text class="zone-match-teams">{{item.homeTeamAbbName}} VS {{item.awayTeamAbbName}}</text>
+              <text class="zone-match-score" wx:if="{{item.homeScore !== null}}">{{item.homeScore}}-{{item.awayScore}}</text>
+            </view>
+          </view>
+          <view class="hot-zone-matches empty" wx:else>
+            <text class="zone-empty-text">暂无进行中的比赛</text>
+          </view>
+        </view>
+
+        <!-- 世界杯专区 -->
+        <view class="hot-zone-card upcoming" bindtap="onTopicTap" data-id="{{worldCup.id}}" data-name="{{worldCup.topicName}}" data-url="{{worldCup.imageUrl}}" wx:if="{{worldCup.topicName}}">
+          <view class="hot-zone-header">
+            <text class="hot-zone-icon">🏆</text>
+            <text class="hot-zone-title">{{worldCup.topicName}}</text>
+            <view class="hot-zone-badge">预告</view>
+          </view>
+          <view class="hot-zone-info">
+            <text class="zone-desc" wx:if="{{worldCup.topicDesc}}">{{worldCup.topicDesc}}</text>
+            <text class="zone-date" wx:if="{{worldCup.startDate && worldCup.endDate}}">{{worldCup.startDate}} - {{worldCup.endDate}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 进行中的专题 -->
+    <view class="section" wx:if="{{hotTopics.length > 0}}">
       <view class="section-bar">
-        <view class="section-bar-dot upcoming"></view>
-        <text class="section-bar-title">即将开始</text>
+        <view class="section-bar-dot hot"></view>
+        <text class="section-bar-title">进行中</text>
+        <view class="section-bar-badge hot">HOT</view>
       </view>
       <view class="topic-grid">
-        <view class="topic-card" wx:for="{{selectTopics}}" wx:key="id" bindtap="onEventCardTap" data-url="{{item.imageUrl}}">
+        <view class="topic-card" wx:for="{{hotTopics}}" wx:key="id" bindtap="onTopicTap" data-id="{{item.id}}" data-name="{{item.topicName}}" data-url="{{item.imageUrl}}">
           <view class="topic-cover">
             <image class="topic-cover-img" src="{{item.imageUrl}}" mode="aspectFill" />
-            <view class="topic-cover-tag">敬请期待</view>
+            <view class="topic-cover-tag hot">进行中</view>
           </view>
           <view class="topic-body">
             <text class="topic-name">{{item.topicName}}</text>

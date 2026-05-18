@@ -8,6 +8,15 @@ function getTopicHome() {
   return post('/api/topic/home', {})
 }
 
+/**
+ * 获取专题详情
+ * @param {string} topicId - 专题ID
+ */
+function getTopicDetail(topicId) {
+  return post('/api/topic/detail', { topicId })
+}
+
 module.exports = {
-  getTopicHome
+  getTopicHome,
+  getTopicDetail
 }

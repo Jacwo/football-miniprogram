@@ -42,10 +42,30 @@ Page({
     touchStartY: 0,
     currentSwipeIndex: -1,
     // 待切换的tab（用于登录后自动切换）
-    pendingTab: null
+    pendingTab: null,
+    // 来源标识（用于区分首页和专题页）
+    source: '',
+    // 页面标题
+    pageTitle: '模拟选号'
   },
 
-  onLoad() {
+  onLoad(options) {
+    // 检查是否有传递的比赛数据（来自专题页面）
+    if (options.matches) {
+      try {
+        const hotMatches = JSON.parse(decodeURIComponent(options.matches));
+        this.setData({
+          matches: hotMatches,
+          loading: false,
+          source: options.source || '',
+          pageTitle: '热门比赛模拟'
+        });
+        return;
+      } catch (e) {
+        console.error('解析比赛数据失败:', e);
+      }
+    }
+    // 否则加载全部比赛数据
     this.loadMatches()
   },
 

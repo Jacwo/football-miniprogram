@@ -14,10 +14,16 @@
 
   <!-- 主内容 -->
   <view class="main-content" wx:else>
+    <!-- 页面标题（专题页来源时显示） -->
+    <view class="page-title-bar" wx:if="{{source === 'topic'}}">
+      <text class="page-title">{{pageTitle}}</text>
+      <text class="page-subtitle">{{matches.length}}场比赛</text>
+    </view>
+
     <!-- 顶部Tab切换 -->
     <view class="tab-header">
       <view class="tab-item {{currentTab === 'play' ? 'active' : ''}}" bindtap="onSwitchTab" data-tab="play">
-        <text class="tab-text">模拟选号</text>
+        <text class="tab-text">{{pageTitle}}</text>
       </view>
       <view class="tab-item {{currentTab === 'records' ? 'active' : ''}}" bindtap="onSwitchTab" data-tab="records">
         <text class="tab-text">我的记录</text>

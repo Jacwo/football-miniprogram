@@ -1,0 +1,468 @@
+/* pages/topic-detail/index.wxss - 专题详情页样式 */
+
+.topic-detail-page {
+  height: 100vh;
+  background: linear-gradient(180deg, #f0f4f8 0%, #e8eef3 100%);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* ---- 滚动区域 ---- */
+.detail-scroll {
+  flex: 1;
+  height: 0;
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+/* ---- 加载 / 错误 ---- */
+.loading-wrapper,
+.error-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner {
+  width: 56rpx;
+  height: 56rpx;
+  border: 4rpx solid #f0f0f0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: #8c8c8c;
+}
+
+.error-text {
+  font-size: 24rpx;
+  color: #ff4d4f;
+  text-align: center;
+  padding: 0 40rpx;
+  margin-bottom: 24rpx;
+}
+
+.retry-btn {
+  padding: 14rpx 48rpx;
+  background: #667eea;
+  color: #fff;
+  border-radius: 16rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.retry-btn:active {
+  opacity: 0.85;
+}
+
+/* ---- 专题头部 ---- */
+.topic-header {
+  width: 100%;
+  margin-bottom: 32rpx;
+}
+
+.topic-cover {
+  width: 100%;
+  display: block;
+}
+
+.topic-info-overlay {
+  padding: 24rpx 0;
+}
+
+.topic-title {
+  font-size: 36rpx;
+  color: #333;
+  font-weight: 700;
+  line-height: 1.3;
+  display: block;
+}
+
+.topic-desc {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 12rpx;
+  line-height: 1.4;
+  display: block;
+}
+
+/* ---- 分组Tab ---- */
+.group-tabs-wrapper {
+  background: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.group-tabs-scroll {
+  white-space: nowrap;
+  padding: 16rpx 8rpx;
+}
+
+.group-tabs {
+  display: inline-flex;
+  gap: 12rpx;
+}
+
+.group-tab {
+  display: inline-block;
+  padding: 12rpx 24rpx;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  color: #666;
+  background: #f5f5f5;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.group-tab.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-weight: 600;
+}
+
+.group-tab:active {
+  transform: scale(0.95);
+}
+
+/* ---- 日期分组标题 ---- */
+.date-group-title {
+  padding: 20rpx 0 16rpx 0;
+  margin-bottom: 8rpx;
+}
+
+.date-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  padding-left: 16rpx;
+  border-left: 6rpx solid #667eea;
+}
+
+/* ---- 世界杯分组样式 ---- */
+.group-section-title {
+  padding: 24rpx 0 16rpx 0;
+}
+
+.group-title-text {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #667eea;
+  padding-left: 16rpx;
+  border-left: 6rpx solid #667eea;
+}
+
+.date-row {
+  padding: 12rpx 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.date-label {
+  font-size: 26rpx;
+  color: #764ba2;
+  font-weight: 600;
+  background: linear-gradient(135deg, #f0e6ff, #e8d5ff);
+  padding: 6rpx 24rpx;
+  border-radius: 20rpx;
+}
+
+.day-matches-box {
+  background: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.match-card.compact {
+  padding: 20rpx 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.match-card.compact:last-child {
+  border-bottom: none;
+}
+
+.compact-time {
+  font-size: 26rpx;
+  color: #1890ff;
+  font-weight: 600;
+  width: 60rpx;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.compact-teams {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32rpx;
+}
+
+.compact-team {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.compact-vs {
+  font-size: 22rpx;
+  color: #999;
+  font-weight: 600;
+}
+
+/* ---- 区块 ---- */
+.section {
+  margin-bottom: 32rpx;
+}
+
+.section-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+  padding: 0 4rpx;
+}
+
+.section-bar-dot {
+  width: 8rpx;
+  height: 28rpx;
+  border-radius: 4rpx;
+  background: linear-gradient(180deg, #667eea, #764ba2);
+  margin-right: 12rpx;
+}
+
+.section-bar-dot.hot {
+  background: linear-gradient(180deg, #ff4d4f, #faad14);
+}
+
+.section-bar-dot.upcoming {
+  background: linear-gradient(180deg, #1890ff, #36cfc9);
+}
+
+.section-bar-title {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 700;
+}
+
+.section-bar-extra {
+  font-size: 22rpx;
+  color: #999;
+  margin-left: auto;
+}
+
+/* ---- 比赛卡片 ---- */
+.match-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.match-card-item {
+  background: #fff;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+.match-card {
+  padding: 28rpx;
+}
+
+.match-card:active {
+  opacity: 0.9;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.match-num {
+  font-size: 22rpx;
+  color: #999;
+  font-weight: 500;
+}
+
+.group-tag {
+  padding: 4rpx 14rpx;
+  border-radius: 8rpx;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+
+.league-tag {
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: 600;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.match-time {
+  font-size: 22rpx;
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.match-status {
+  font-size: 22rpx;
+  font-weight: 600;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+.match-status.finished {
+  color: #999;
+  background: #f5f5f5;
+}
+
+/* 队伍行 */
+.teams-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 24rpx;
+}
+
+.team-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.team-name {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 700;
+  text-align: center;
+}
+
+.team-rank {
+  font-size: 20rpx;
+  color: #999;
+  background: #f5f5f5;
+  padding: 2rpx 10rpx;
+  border-radius: 9999rpx;
+}
+
+.vs {
+  font-size: 24rpx;
+  color: #ccc;
+  font-weight: 700;
+  padding: 0 24rpx;
+}
+
+/* 比分框 */
+.score-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 0 24rpx;
+}
+
+.home-score,
+.away-score {
+  font-size: 42rpx;
+  font-weight: 700;
+  color: #333;
+}
+
+.score-divider {
+  font-size: 36rpx;
+  color: #ccc;
+  font-weight: 700;
+}
+
+/* ---- 空状态 ---- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 40rpx 0;
+}
+
+.empty-emoji {
+  font-size: 100rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.6;
+}
+
+.empty-title {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.empty-sub {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* ---- 加载更多 ---- */
+.load-more-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24rpx;
+  margin-top: 8rpx;
+}
+
+.load-more-text {
+  font-size: 26rpx;
+  color: #667eea;
+  font-weight: 500;
+  padding: 12rpx 40rpx;
+  background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
+  border-radius: 30rpx;
+}
+
+.load-more-text:active {
+  opacity: 0.7;
+}
+
+/* ---- 底部安全区 ---- */
+.bottom-space {
+  height: 120rpx;
+}
