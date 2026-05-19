@@ -41,9 +41,10 @@
         <text class="tab-text">赛果</text>
       </view>
       <view
-        class="tab-item {{activeTab === 'history' ? 'active' : ''}}"
+        class="tab-item {{activeTab === 'history' ? 'active' : ''}} {{!showHistory ? 'hidden' : ''}}"
         data-tab="history"
         bindtap="onTabChange"
+        wx:if="{{showHistory}}"
       >
         <text class="tab-text">历史</text>
       </view>
@@ -60,7 +61,6 @@
 
       <!-- 直播列表 -->
       <view class="content-wrapper" wx:else>
-        <!-- 刷新按钮 -->
         <view class="refresh-btn" bindtap="onRefresh">
           <text class="refresh-icon">🔄</text>
         </view>
@@ -130,7 +130,7 @@
 
       <!-- 赛果列表 -->
       <view class="content-wrapper" wx:else>
-        <scroll-view class="results-scroll" scroll-y>
+        <scroll-view class="results-scroll" scroll-y bindscrolltolower="onResultScrollToLower" lower-threshold="100">
         <view class="result-item {{item.statusClass}}" wx:for="{{results}}" wx:key="matchId">
           <!-- 状态指示条 -->
           <view class="result-status-bar"></view>
@@ -250,7 +250,7 @@
           </view>
 
           <!-- 历史列表滚动区 -->
-          <scroll-view class="history-list" scroll-y enable-back-to-top="true">
+          <scroll-view class="history-list" scroll-y enable-back-to-top="true" bindscrolltolower="onHistoryScrollToLower" lower-threshold="100">
             <history-card
               wx:for="{{historyList}}"
               wx:key="id"

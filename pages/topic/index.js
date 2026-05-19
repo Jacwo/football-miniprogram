@@ -55,6 +55,7 @@ Page({
       homeScore: item.homeScore,
       awayScore: item.awayScore,
       isFinished: item.homeScore !== undefined && item.awayScore !== undefined,
+      isSingleMatch: item.isSingleMatch || item.singleMatch || false,
       matchTime: item.matchTime || '',
       fullMatchTime: item.matchDate ? `${item.matchDate} ${item.matchTime || ''}` : (item.fullMatchTime || ''),
       // Tips 相关字段
@@ -341,17 +342,23 @@ Page({
     });
   },
 
-  // 点击专题推荐卡片，放大显示图片
+  // 点击专题推荐卡片，跳转到专题详情页
   onEventCardTap(e) {
-    const { url } = e.currentTarget.dataset;
+    const { id, name, url } = e.currentTarget.dataset;
+    
+    // 如果有专题ID，跳转到专题详情页
+    if (id) {
+      wx.navigateTo({
+        url: `/pages/topic-detail/index?topicId=${id}&topicName=${encodeURIComponent(name || '')}&imageUrl=${encodeURIComponent(url || '')}`,
+      });
+      return;
+    }
+
+    // 否则预览图片
     const { majorEvents } = this.data;
-
-    // 获取所有图片URL用于预览
     const urls = majorEvents.map(item => item.imageUrl);
-    const current = url;
-
     wx.previewImage({
-      current,
+      current: url,
       urls,
     });
   },

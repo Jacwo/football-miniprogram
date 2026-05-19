@@ -374,6 +374,8 @@ page {
   position: relative;
   overflow: hidden;
   margin-bottom: 24rpx;
+  display: flex;
+  align-items: stretch;
 }
 
 .scheme-item:active {
@@ -409,7 +411,10 @@ page {
   align-items: flex-start;
   gap: 16rpx;
   padding: 24rpx;
+  padding-right: 64rpx;
   position: relative;
+  flex: 1;
+  min-width: 0;
 }
 
 .user-avatar-wrapper {
@@ -440,6 +445,7 @@ page {
 
 .user-meta {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 8rpx;

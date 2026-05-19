@@ -13,6 +13,7 @@ Page({
     loading: false,
     error: null,
     expandedId: null,
+    showHistory: false, // 是否显示历史tab，由后端配置控制
     // 历史记录相关
     historyLoading: false,
     historyRefreshing: false,
@@ -35,7 +36,26 @@ Page({
 
   onLoad() {
     this.setData({ loading: true });
+    this.checkFeatures(); // 获取配置，控制历史tab显示
     this.loadLiveMatches();
+  },
+
+  // 检查功能开关，控制历史tab显示
+  async checkFeatures() {
+    try {
+      const result = await matchApi.checkFeatures();
+      const showHistory = result === true;
+      this.setData({ showHistory });
+      
+      // 如果当前在历史tab但配置关闭，自动切换到赛果tab
+      if (!showHistory && this.data.activeTab === 'history') {
+        this.setData({ activeTab: 'result' });
+        this.loadResults();
+      }
+    } catch (error) {
+      console.error("检查功能开关失败:", error);
+      this.setData({ showHistory: false });
+    }
   },
 
   onShow() {
@@ -327,6 +347,24 @@ Page({
   // 处理上拉加载
   onReachBottom() {
     if (this.data.activeTab === "history" && this.data.historySubTab === "list" && this.data.historyHasMore && !this.data.historyLoading) {
+      this.loadMoreHistory();
+    }
+  },
+
+  // 赛果列表上拉加载
+  onResultScrollToLower() {
+    wx.showToast({ title: "没有更多赛果了", icon: "none", duration: 1500 });
+  },
+
+  // 实时列表上拉加载
+  onLiveScrollToLower() {
+    wx.showToast({ title: "实时数据自动刷新中", icon: "none", duration: 1500 });
+    this.loadLiveMatches();
+  },
+
+  // 历史记录上拉加载
+  onHistoryScrollToLower() {
+    if (this.data.historyHasMore && !this.data.historyLoading) {
       this.loadMoreHistory();
     }
   },

@@ -18,7 +18,7 @@
     <view class="swiper-section" wx:if="{{majorEvents.length > 0}}">
       <swiper class="event-swiper" indicator-dots autoplay circular indicator-color="rgba(255,255,255,0.4)" indicator-active-color="#ffffff">
         <swiper-item wx:for="{{majorEvents}}" wx:key="id">
-          <view class="swiper-item" bindtap="onEventCardTap" data-url="{{item.imageUrl}}">
+          <view class="swiper-item" bindtap="onEventCardTap" data-id="{{item.id}}" data-name="{{item.topicName}}" data-url="{{item.imageUrl}}">
             <image class="swiper-image" src="{{item.carouselImageUrl || item.imageUrl}}" mode="aspectFill" />
             <view class="swiper-overlay"></view>
             <view class="swiper-info" wx:if="{{item.topicName}}">

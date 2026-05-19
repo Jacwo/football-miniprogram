@@ -17,6 +17,7 @@ Page({
     countdownDays: 0,
     countdownHours: 0,
     countdownMins: 0,
+    countdownSecs: 0,
     // 是否是世界杯专题
     isWorldCup: false,
   },
@@ -63,17 +64,19 @@ Page({
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
         this.setData({
           countdownDays: days,
           countdownHours: hours,
           countdownMins: mins,
+          countdownSecs: secs,
         });
       }
     };
 
     updateCountdown();
-    this.countdownTimer = setInterval(updateCountdown, 60000); // 每分钟更新
+    this.countdownTimer = setInterval(updateCountdown, 1000); // 每秒更新
   },
 
   onUnload() {
@@ -225,5 +228,11 @@ Page({
   onGroupSwiperChange(e) {
     const current = e.detail.current;
     this.setData({ selectedGroupIndex: current });
+  },
+
+  // 点击Tab切换分组
+  onTabTap(e) {
+    const index = e.currentTarget.dataset.index;
+    this.setData({ selectedGroupIndex: index });
   },
 });

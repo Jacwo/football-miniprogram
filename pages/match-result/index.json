@@ -4,7 +4,7 @@
   "navigationBarBackgroundColor": "#ffffff",
   "backgroundColor": "#f5f7fa",
   "backgroundTextStyle": "dark",
-  "enablePullDownRefresh": true,
+  "enablePullDownRefresh": false,
   "usingComponents": {
     "history-card": "/components/history-card/index"
   }
