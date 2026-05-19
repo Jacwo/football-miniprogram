@@ -1,12 +1,119 @@
 /* pages/calculator-hall/index.wxss - 推荐方案大厅 */
+page {
+  background: #f0f2f5;
+}
+
 .hall-page {
   height: 100vh;
-  background: linear-gradient(180deg, #f8f9fb 0%, #f5f7fa 100%);
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
+/* 页面头部 */
+.page-header {
+  position: relative;
+  padding: 60rpx 32rpx 24rpx;
+  display: flex;
+  align-items: center;
+}
+
+.page-title {
+  font-size: 40rpx;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 2rpx;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+}
+
+.header-share-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0 24rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  color: #667eea;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+}
+
+.header-share-btn::after {
+  border: none;
+}
+
+/* Tab 切换 */
+.tab-header {
+  position: relative;
+  display: flex;
+  margin: 0 32rpx 24rpx;
+  padding: 6rpx;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50rpx;
+  backdrop-filter: blur(10px);
+}
+
+.tab-bg {
+  position: absolute;
+  top: 6rpx;
+  left: 6rpx;
+  width: calc(50% - 6rpx);
+  height: calc(100% - 12rpx);
+  background: #fff;
+  border-radius: 50rpx;
+  transition: transform 0.3s ease;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+}
+
+.tab-item {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 20rpx 0;
+  z-index: 1;
+}
+
+.tab-icon {
+  font-size: 32rpx;
+  transition: all 0.3s;
+}
+
+.tab-text {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.tab-item.active .tab-text {
+  color: #667eea;
+  font-weight: 700;
+}
+
+.tab-item.active .tab-icon {
+  transform: scale(1.1);
+}
+
+.tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #f0f2f5;
+  border-radius: 40rpx 40rpx 0 0;
+  padding-top: 24rpx;
+}
+
+/* 加载状态 */
 .loading-wrapper,
 .error-wrapper {
   display: flex;
@@ -17,34 +124,33 @@
 }
 
 .loading-spinner {
-  width: 60rpx;
-  height: 60rpx;
-  border: 4rpx solid #f0f0f0;
+  width: 64rpx;
+  height: 64rpx;
+  border: 4rpx solid rgba(102, 126, 234, 0.2);
   border-top-color: #667eea;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
-.loading-text,
-.error-text {
+.loading-text, .error-text {
   margin-top: 20rpx;
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: #666;
 }
 
 .retry-btn {
   margin-top: 24rpx;
   padding: 16rpx 48rpx;
-  background: #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
-  border-radius: 32rpx;
-  font-size: 26rpx;
+  border-radius: 50rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.3);
 }
 
 .main-content {
@@ -54,102 +160,44 @@
   overflow: hidden;
 }
 
-/* 顶部区域 */
-.top-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding-bottom: 20rpx;
-}
-
-/* 页面头部 */
-.page-header {
-  display: flex;
-  flex-direction: column;
-  padding: 24rpx 24rpx 16rpx;
-  color: #fff;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16rpx;
-}
-
-.title-section {
-  display: flex;
-  flex-direction: column;
-  gap: 8rpx;
-  flex: 1;
-}
-
-.header-share-btn {
-  flex-shrink: 0;
-  width: 48rpx;
-  height: 48rpx;
-  padding: 0;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  border-radius: 12rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-}
-
-.header-share-btn::after {
-  border: none;
-}
-
-.header-share-btn .share-icon {
-  font-size: 28rpx;
-  line-height: 1;
-}
-
-.page-title {
-  font-size: 34rpx;
-  color: #fff;
-  font-weight: 700;
-  letter-spacing: 1rpx;
-}
-
 /* 排行榜 */
 .rank-section {
   background: #fff;
-  margin: 12rpx 12rpx;
-  border-radius: 12rpx;
+  margin: 0 24rpx 24rpx;
+  border-radius: 24rpx;
   overflow: hidden;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
 }
 
 .rank-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 10rpx 16rpx;
+  padding: 20rpx 24rpx;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-/* 排行榜类型切换按钮 */
 .rank-type-switcher {
   display: flex;
-  gap: 8rpx;
+  gap: 12rpx;
 }
 
 .rank-type-btn {
-  padding: 6rpx 16rpx;
-  border-radius: 20rpx;
+  padding: 10rpx 20rpx;
+  border-radius: 50rpx;
   background: rgba(255, 255, 255, 0.2);
   transition: all 0.3s;
 }
 
 .rank-type-btn text {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
 }
 
 .rank-type-btn.active {
   background: #fff;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
 }
 
 .rank-type-btn.active text {
@@ -158,27 +206,27 @@
 }
 
 .rank-toggle {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: rgba(255, 255, 255, 0.9);
-  padding: 6rpx 12rpx;
+  padding: 8rpx 16rpx;
 }
 
 .rank-list {
-  padding: 8rpx 12rpx;
+  padding: 16rpx;
   max-height: 500rpx;
   overflow: hidden;
-  transition: max-height 0.3s ease, padding 0.3s ease;
+  transition: max-height 0.3s ease;
 }
 
 .rank-list.collapsed {
   max-height: 0;
-  padding: 0 12rpx;
+  padding: 0 16rpx;
 }
 
 .rank-item {
   display: flex;
   align-items: center;
-  padding: 10rpx 6rpx;
+  padding: 16rpx 8rpx;
   border-bottom: 1rpx solid #f5f5f5;
 }
 
@@ -187,34 +235,34 @@
 }
 
 .rank-medal {
-  width: 40rpx;
-  font-size: 28rpx;
+  width: 48rpx;
+  font-size: 32rpx;
   text-align: center;
 }
 
 .rank-avatar {
-  width: 44rpx;
-  height: 44rpx;
-  margin-right: 10rpx;
+  width: 56rpx;
+  height: 56rpx;
+  margin-right: 16rpx;
 }
 
 .avatar-img {
-  width: 44rpx;
-  height: 44rpx;
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 50%;
   background: #f0f0f0;
 }
 
 .avatar-fallback {
-  width: 44rpx;
-  height: 44rpx;
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: 700;
 }
 
@@ -228,66 +276,27 @@
 .rank-name-row {
   display: flex;
   align-items: center;
-  gap: 6rpx;
+  gap: 8rpx;
 }
 
 .rank-name {
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: #333;
   font-weight: 600;
 }
 
-/* 排行榜勋章 */
-.rank-medals {
-  display: flex;
-  gap: 4rpx;
-}
-
 .rank-medal-icon {
-  width: 28rpx;
-  height: 28rpx;
+  width: 32rpx;
+  height: 32rpx;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16rpx;
-  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.12);
-}
-
-.rank-medal-icon.medal-green {
-  background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
-}
-
-.rank-medal-icon.medal-blue {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.rank-medal-icon.medal-purple {
-  background: linear-gradient(135deg, #9d50bb 0%, #6e48aa 100%);
-}
-
-.rank-medal-icon.medal-pink {
-  background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%);
-}
-
-.rank-medal-icon.medal-orange {
-  background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
-}
-
-.rank-medal-icon.medal-gold {
-  background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
-}
-
-.rank-medal-icon.medal-rainbow {
-  background: linear-gradient(135deg, #eb3349 0%, #f45c43 50%, #ffd700 100%);
-}
-
-.rank-medal-icon.medal-default {
-  background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+  font-size: 18rpx;
 }
 
 .rank-stats {
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: #999;
 }
 
@@ -297,11 +306,10 @@
 }
 
 .rate-num {
-  font-size: 26rpx;
+  font-size: 28rpx;
   font-weight: 700;
   color: #ff6b6b;
 }
-
 
 .rank-bonus {
   min-width: 100rpx;
@@ -309,17 +317,16 @@
 }
 
 .bonus-num {
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: 700;
   color: #ff6b6b;
 }
 
-/* 排行榜空状态 */
 .rank-empty {
-  padding: 30rpx;
+  padding: 40rpx;
   text-align: center;
   color: #999;
-  font-size: 24rpx;
+  font-size: 26rpx;
 }
 
 /* 空状态 */
@@ -329,25 +336,24 @@
   align-items: center;
   justify-content: center;
   flex: 1;
-  padding: 100rpx 40rpx;
-  color: #999;
+  padding: 120rpx 40rpx;
 }
 
 .empty-icon {
-  font-size: 120rpx;
-  margin-bottom: 24rpx;
+  font-size: 140rpx;
+  margin-bottom: 32rpx;
   opacity: 0.6;
 }
 
 .empty-text {
-  font-size: 32rpx;
+  font-size: 36rpx;
   color: #666;
   font-weight: 600;
-  margin-bottom: 12rpx;
+  margin-bottom: 16rpx;
 }
 
 .empty-tip {
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: #999;
   text-align: center;
 }
@@ -355,88 +361,54 @@
 .recommendations-scroll {
   flex: 1;
   height: 0;
-  padding: 12rpx 12rpx 20rpx 12rpx;
+  padding: 0 24rpx 24rpx;
 }
 
 /* 方案卡片 */
 .scheme-item {
-  font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  background: var(--bg-primary);
-  color: var(--card-text-primary);
-  font-size: 14px;
-  background: #ffffff;
-  border-radius: 18rpx;
-  padding: 18rpx;
-  box-shadow: 0 2rpx 12rpx rgba(20, 30, 50, 0.06);
-  border: 1rpx solid #edf0f5;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 0;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  cursor: pointer;
-  margin-bottom: 12rpx;
+  margin-bottom: 24rpx;
 }
 
 .scheme-item:active {
-  box-shadow: 0 8rpx 28rpx rgba(20, 30, 50, 0.1);
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
   transform: translateY(-2rpx);
 }
 
-.scheme-item:hover {
-  box-shadow: var(--shadow-lg);
-  border-color: #d8dde6;
-  transform: translateY(-1rpx);
-}
-
-/* 左侧状态条（待开奖、已中奖等） */
+/* 左侧状态条 */
 .scheme-item::after {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
-  width: 4rpx;
+  width: 6rpx;
   height: 100%;
-  border-radius: 4rpx 0 0 4rpx;
-  transition: var(--transition-slow);
 }
 
 .scheme-item.status-pending::after {
-  background: var(--pedding-text-color);
+  background: linear-gradient(180deg, #52c41a 0%, #73d13d 100%);
 }
 
 .scheme-item.status-won::after {
-  /* background: var(--success-color); */
-  background: var(--won-text-color);
+  background: linear-gradient(180deg, #ff4d4f 0%, #ff7875 100%);
 }
 
 .scheme-item.status-lost::after {
-  background: var(--lost-text-color);
-}
-
-/* 未中 */
-/* 顶部状态条 */
-.scheme-status-bar {
-  height: 4rpx;
-  width: 100%;
-}
-
-.scheme-status-bar.win {
-  background: linear-gradient(90deg, #ff6b6b 0%, #ff8c8c 100%);
-}
-
-.scheme-status-bar.pending {
-  background: linear-gradient(90deg, #52c41a 0%, #85ce61 100%);
-}
-
-.scheme-status-bar.lose {
-  background: linear-gradient(90deg, #d9d9d9 0%, #e8e8e8 100%);
+  background: linear-gradient(180deg, #999 0%, #bfbfbf 100%);
 }
 
 /* 用户信息区 */
 .scheme-user-section {
   display: flex;
   align-items: flex-start;
-  gap: 10rpx;
-  padding: 12rpx 16rpx;
+  gap: 16rpx;
+  padding: 24rpx;
   position: relative;
 }
 
@@ -445,199 +417,187 @@
 }
 
 .user-avatar {
-  width: 40rpx;
-  height: 40rpx;
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 50%;
   background: #f0f0f0;
-  border: 2rpx solid #e8e8e8;
+  border: 3rpx solid #e8e8e8;
 }
 
 .user-avatar-fallback {
-  width: 40rpx;
-  height: 40rpx;
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18rpx;
+  font-size: 24rpx;
   font-weight: 700;
-  border: 2rpx solid rgba(102, 126, 234, 0.3);
+  border: 3rpx solid rgba(102, 126, 234, 0.3);
 }
 
 .user-meta {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6rpx;
+  gap: 8rpx;
 }
 
 .user-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8rpx;
+  gap: 12rpx;
 }
 
-/* 用户名+勋章容器 */
 .user-name-medals {
   display: flex;
   align-items: center;
-  gap: 6rpx;
+  gap: 8rpx;
+}
+
+.user-name {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 700;
 }
 
 .user-medal-item {
-  width: 40rpx;
-  height: 40rpx;
+  width: 36rpx;
+  height: 36rpx;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.15);
 }
 
 .user-medal-item .medal-icon {
-  font-size: 30rpx;
+  font-size: 24rpx;
 }
 
-/* 勋章颜色 */
-.user-medal-item.medal-green {
-  /* background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); */
-}
-
-.user-medal-item.medal-blue {
-  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
-}
-
-.user-medal-item.medal-purple {
-  /* background: linear-gradient(135deg, #9d50bb 0%, #6e48aa 100%); */
-}
-
-.user-medal-item.medal-pink {
-  /* background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%); */
-}
-
-.user-medal-item.medal-orange {
-  /* background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); */
-}
-
-.user-medal-item.medal-gold {
-  /* background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%); */
-}
-
-.user-medal-item.medal-rainbow {
-  /* background: linear-gradient(135deg, #eb3349 0%, #f45c43 50%, #ffd700 100%); */
-}
-
-.user-medal-item.medal-default {
-  /* background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%); */
-}
-
-.user-name {
-  font-size: 30rpx;
-  color: #333;
-  font-weight: 700;
-  flex: 1;
-}
-
+/* 状态标签 */
 .badge {
   display: flex;
   align-items: center;
-  gap: 3rpx;
-  padding: 5rpx 12rpx;
-  border-radius: 10rpx;
-  font-size: 24rpx;
+  gap: 4rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 50rpx;
+  font-size: 22rpx;
   font-weight: 600;
   flex-shrink: 0;
-  letter-spacing: 0.3rpx;
 }
 
 .tag-pending {
-  background: var(--pedding-color);
-  color: var(--pedding-text-color);
+  background: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
 }
 
 .tag-won {
-  background: var(--won-color);
-  color: var(--won-text-color);
+  background: rgba(255, 77, 79, 0.1);
+  color: #ff4d4f;
 }
 
 .tag-lost {
-  background: var(--lost-color);
-  color: var(--lost-text-color);
-
-}
-
-.badge-icon,
-.badge-text {
-  vertical-align: middle;
+  background: rgba(153, 153, 153, 0.1);
+  color: #999;
 }
 
 .badge-icon {
-  font-size: 16rpx;
-  display: inline-block;
+  font-size: 18rpx;
+  margin-right: 2rpx;
 }
 
 .badge-text {
-  font-size: 20rpx;
+  font-size: 22rpx;
 }
 
-.user-stats-row {
-  margin-top: 14rpx;
-  display: flex;
-  gap: 6rpx;
+/* 用户统计网格 */
+.user-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+  margin-top: 8rpx;
 }
 
-.stat-box {
-  flex: 1;
+.stat-item {
+  background: #f8f9fb;
+  border-radius: 16rpx;
+  padding: 20rpx 12rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 6rpx 8rpx;
-  background: #f8f9fb;
-  border-radius: 6rpx;
-  gap: 3rpx;
-  min-height: 42rpx;
   justify-content: center;
+  gap: 6rpx;
 }
 
-.stat-box.highlight {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.08) 100%);
-  border: 1rpx solid rgba(102, 126, 234, 0.15);
+.stat-value {
+  font-weight: 700;
+  font-size: 36rpx;
+  color: #333;
+  line-height: 1;
 }
 
-
-/* 分割线 */
-.divider {
-  height: 1rpx;
-  background: linear-gradient(90deg, #f0f0f0 0%, #f0f0f0 100%);
-  margin: 0 16rpx;
+.stat-label {
+  font-size: 22rpx;
+  color: #999;
+  line-height: 1;
 }
 
-/* 方案详情区 */
-.scheme-detail-section {
-  padding: 10rpx 16rpx 12rpx 16rpx;
+.stat-label-win-rate {
+  background: linear-gradient(135deg, #fff9e6 0%, #fff1cc 100%);
+}
+
+.stat-label-win-rate .stat-value {
+  color: #fa8c16;
+}
+
+.stat-label-win-rate .stat-label {
+  color: #8b6914;
+}
+
+/* 玩法标签 */
+.plan-tags-row {
   display: flex;
-  flex-direction: column;
-  gap: 10rpx;
+  align-items: center;
+  gap: 16rpx;
+  margin-top: 12rpx;
 }
 
+.plan-play-tag {
+  background: linear-gradient(135deg, #eef2ff 0%, #e6eaff 100%);
+  color: #667eea;
+  padding: 10rpx 20rpx;
+  border-radius: 50rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+}
 
-/* 查看箭头 */
+.plan-note {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.open-record {
+  font-size: 26rpx;
+  color: #667eea;
+  font-weight: 600;
+  margin-left: auto;
+}
+
 .scheme-arrow {
   position: absolute;
-  right: 20rpx;
+  right: 24rpx;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 32rpx;
-  color: #e8e8e8;
+  font-size: 36rpx;
+  color: #d9d9d9;
   font-weight: 300;
-  opacity: 0.6;
 }
 
 .bottom-placeholder {
-  height: 20rpx;
+  height: 40rpx;
 }
 
 /* 单关计划浮动按钮 */
@@ -651,11 +611,6 @@
   align-items: center;
   justify-content: center;
   z-index: 99;
-  cursor: grab;
-}
-
-.dragon-floating-btn:active {
-  cursor: grabbing;
 }
 
 .dragon-btn-inner {
@@ -667,17 +622,17 @@
   justify-content: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 50%;
-  box-shadow: 0 6rpx 20rpx rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.4);
   transition: all 0.3s ease;
 }
 
-.dragon-floating-btn:active .dragon-btn-inner {
+.dragon-btn-inner:active {
   transform: scale(0.95);
-  box-shadow: 0 3rpx 12rpx rgba(102, 126, 234, 0.35);
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.35);
 }
 
 .dragon-icon {
-  font-size: 36rpx;
+  font-size: 40rpx;
   line-height: 1;
   margin-bottom: 4rpx;
 }
@@ -686,126 +641,63 @@
   font-size: 18rpx;
   color: #fff;
   font-weight: 700;
-  letter-spacing: 0.5rpx;
-}
-
-/* ========== Tab 切换 ========== */
-.tab-header {
-  position: relative;
-  display: flex;
-  background: rgba(255, 255, 255, 0.2);
-  margin: 0 24rpx;
-  padding: 6rpx;
-  border-radius: 12rpx;
-}
-
-.tab-bg {
-  position: absolute;
-  top: 6rpx;
-  left: 6rpx;
-  width: calc(50% - 6rpx);
-  height: calc(100% - 12rpx);
-  background: #fff;
-  border-radius: 8rpx;
-  transition: transform 0.3s ease;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
-}
-
-.tab-item {
-  position: relative;
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8rpx;
-  padding: 20rpx 0;
-  z-index: 1;
-  transition: all 0.3s;
-}
-
-.tab-icon {
-  font-size: 28rpx;
-  transition: all 0.3s;
-}
-
-.tab-text {
-  font-size: 26rpx;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
-  transition: all 0.3s;
-}
-
-.tab-item.active .tab-text {
-  color: #667eea;
-  font-weight: 600;
-}
-
-.tab-item.active .tab-icon {
-  transform: scale(1.1);
-}
-
-.tab-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  margin-bottom: 60rpx;
 }
 
 /* ========== 数据发现 Tab ========== */
 .discovery-tab {
-  background: linear-gradient(180deg, #f8f9fb 0%, #f5f7fa 100%);
+  background: #f0f2f5;
+  border-radius: 40rpx 40rpx 0 0;
+  padding-top: 24rpx;
 }
 
 .discovery-scroll {
   flex: 1;
   height: 0;
-  padding: 16rpx;
+  padding: 0 24rpx 24rpx;
 }
 
 /* 联赛选择区 */
 .league-section {
   display: flex;
   flex-direction: column;
-  gap: 20rpx;
+  gap: 24rpx;
 }
 
-/* 联赛分类 */
 .league-category {
   background: #fff;
-  border-radius: 16rpx;
-  padding: 20rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+  border-radius: 24rpx;
+  padding: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
 }
 
 .category-header {
   display: flex;
   align-items: center;
-  gap: 8rpx;
-  margin-bottom: 16rpx;
-  padding-bottom: 12rpx;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+  padding-bottom: 16rpx;
   border-bottom: 1rpx solid #f0f0f0;
 }
 
 .category-icon {
-  font-size: 28rpx;
+  font-size: 32rpx;
 }
 
 .category-title {
-  font-size: 26rpx;
-  font-weight: 600;
+  font-size: 28rpx;
+  font-weight: 700;
   color: #333;
 }
 
 .category-count {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: #999;
   margin-left: auto;
 }
 
 .category-toggle {
-  width: 32rpx;
-  height: 32rpx;
+  width: 36rpx;
+  height: 36rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -814,7 +706,7 @@
 }
 
 .category-toggle text {
-  font-size: 28rpx;
+  font-size: 32rpx;
   color: #999;
   font-weight: 500;
 }
@@ -827,10 +719,9 @@
 .league-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 12rpx;
-  max-height: calc(4 * (80rpx + 12rpx));
+  gap: 16rpx;
+  max-height: calc(4 * (100rpx + 16rpx));
   overflow-y: auto;
-  padding-right: 4rpx;
 }
 
 .league-grid.collapsed {
@@ -842,39 +733,39 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 12rpx 4rpx;
+  padding: 16rpx 8rpx;
   background: #f8f9fb;
-  border-radius: 10rpx;
-  border: 2rpx solid transparent;
+  border-radius: 16rpx;
+  border: 3rpx solid transparent;
   transition: all 0.2s;
-  min-height: 80rpx;
-}
-
-.league-card.active {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%);
-  border-color: #667eea;
-  box-shadow: 0 2rpx 8rpx rgba(102, 126, 234, 0.2);
+  min-height: 100rpx;
 }
 
 .league-card:active {
   transform: scale(0.96);
 }
 
+.league-card.active {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.08) 100%);
+  border-color: #667eea;
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.2);
+}
+
 .league-logo {
-  width: 40rpx;
-  height: 40rpx;
-  margin-bottom: 6rpx;
-  border-radius: 6rpx;
+  width: 48rpx;
+  height: 48rpx;
+  margin-bottom: 8rpx;
+  border-radius: 10rpx;
 }
 
 .league-logo-placeholder {
-  width: 40rpx;
-  height: 40rpx;
-  margin-bottom: 6rpx;
-  border-radius: 6rpx;
+  width: 48rpx;
+  height: 48rpx;
+  margin-bottom: 8rpx;
+  border-radius: 10rpx;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -899,35 +790,34 @@
 
 /* 区块标题 */
 .section-title {
-  font-size: 26rpx;
-  font-weight: 600;
+  font-size: 28rpx;
+  font-weight: 700;
   color: #333;
   margin-bottom: 16rpx;
-  padding-left: 8rpx;
 }
 
 /* 赛季选择区 */
 .season-section {
   background: #fff;
-  border-radius: 16rpx;
-  padding: 20rpx;
-  margin-top: 16rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+  border-radius: 24rpx;
+  padding: 24rpx;
+  margin-top: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
 }
 
 .season-loading {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10rpx;
-  padding: 20rpx;
-  font-size: 22rpx;
+  gap: 12rpx;
+  padding: 24rpx;
+  font-size: 24rpx;
   color: #999;
 }
 
 .mini-spinner {
-  width: 28rpx;
-  height: 28rpx;
+  width: 32rpx;
+  height: 32rpx;
   border: 3rpx solid #f0f0f0;
   border-top-color: #667eea;
   border-radius: 50%;
@@ -940,16 +830,16 @@
 
 .season-list {
   display: inline-flex;
-  gap: 10rpx;
+  gap: 12rpx;
   padding: 4rpx 0;
 }
 
 .season-item {
   display: inline-flex;
   align-items: center;
-  padding: 12rpx 20rpx;
+  padding: 14rpx 24rpx;
   background: #f5f7fa;
-  border-radius: 20rpx;
+  border-radius: 50rpx;
   border: 2rpx solid transparent;
   transition: all 0.3s;
 }
@@ -961,10 +851,11 @@
 
 .season-item.active .season-name {
   color: #fff;
+  font-weight: 600;
 }
 
 .season-name {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: #666;
   white-space: nowrap;
 }
@@ -972,25 +863,25 @@
 /* 排名区域 */
 .standing-section {
   background: #fff;
-  border-radius: 16rpx;
-  padding: 20rpx;
-  margin-top: 16rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+  border-radius: 24rpx;
+  padding: 24rpx;
+  margin-top: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
 }
 
 .standing-type-tabs {
   display: flex;
-  gap: 10rpx;
-  margin-bottom: 16rpx;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
 }
 
 .type-tab {
   flex: 1;
   text-align: center;
-  padding: 14rpx 0;
+  padding: 16rpx 0;
   background: #f5f7fa;
-  border-radius: 10rpx;
-  font-size: 24rpx;
+  border-radius: 12rpx;
+  font-size: 26rpx;
   color: #666;
   transition: all 0.3s;
 }
@@ -998,16 +889,17 @@
 .type-tab.active {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
-  font-weight: 500;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.3);
 }
 
 .standing-loading {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10rpx;
-  padding: 40rpx;
-  font-size: 22rpx;
+  gap: 12rpx;
+  padding: 60rpx;
+  font-size: 24rpx;
   color: #999;
 }
 
@@ -1019,14 +911,14 @@
 .table-header {
   display: flex;
   align-items: center;
-  padding: 12rpx 6rpx;
+  padding: 16rpx 8rpx;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 6rpx;
-  margin-bottom: 6rpx;
+  border-radius: 12rpx;
+  margin-bottom: 8rpx;
 }
 
 .table-header text {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #fff;
   font-weight: 500;
   text-align: center;
@@ -1035,23 +927,12 @@
 .table-body {
   display: flex;
   flex-direction: column;
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0.6;
-  }
-
-  to {
-    opacity: 1;
-  }
 }
 
 .table-row {
   display: flex;
   align-items: center;
-  padding: 12rpx 6rpx;
+  padding: 16rpx 8rpx;
   border-bottom: 1rpx solid #f5f5f5;
 }
 
@@ -1064,16 +945,15 @@
 }
 
 .table-row.bottom-zone {
-  background: rgba(255, 77, 79, 0.05);
+  background: rgba(255, 77, 79, 0.03);
 }
 
 .table-row text {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: #333;
   text-align: center;
 }
 
-/* 列宽度分配 */
 .col-rank {
   flex: 0.8;
   font-weight: 600;
@@ -1081,33 +961,27 @@
 
 .col-rank.rank-top {
   color: #667eea;
+  font-weight: 700;
 }
 
 .col-team {
   flex: 1.5;
   text-align: left !important;
-  padding-left: 6rpx;
+  padding-left: 8rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.col-played,
-.col-win,
-.col-draw,
-.col-loss,
-.col-gf,
-.col-ga,
-.col-gd {
+.col-played, .col-win, .col-draw, .col-loss, .col-gf, .col-ga, .col-gd {
   flex: 1;
 }
 
 .col-pts {
   flex: 1.1;
-  font-weight: 600;
+  font-weight: 700;
   color: #667eea !important;
 }
-
 
 .col-gd.positive {
   color: #52c41a !important;
@@ -1121,8 +995,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40rpx;
-  font-size: 24rpx;
+  padding: 60rpx;
+  font-size: 26rpx;
   color: #999;
 }
 
@@ -1132,206 +1006,34 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 100rpx 40rpx;
+  padding: 120rpx 40rpx;
 }
 
 .tip-icon {
-  font-size: 72rpx;
-  margin-bottom: 20rpx;
+  font-size: 80rpx;
+  margin-bottom: 24rpx;
 }
 
 .tip-text {
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: #999;
 }
 
 .safe-bottom {
-  height: calc(env(safe-area-inset-bottom) + 120rpx);
+  height: calc(env(safe-area-inset-bottom) + 100rpx);
 }
 
+/* 勋章颜色 */
+.medal-green { background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); }
+.medal-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.medal-purple { background: linear-gradient(135deg, #9d50bb 0%, #6e48aa 100%); }
+.medal-pink { background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%); }
+.medal-orange { background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); }
+.medal-gold { background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%); }
+.medal-rainbow { background: linear-gradient(135deg, #eb3349 0%, #f45c43 50%, #ffd700 100%); }
+.medal-default { background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%); }
 
-/* 用户统计网格（中奖/未中/胜率） */
-.user-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 30rpx;
-  margin-bottom: 10rpx;
-  margin-top: 10px;
-}
-
-.stat-item {
-  background: #f8fafc;
-  border-radius: 20rpx;
-  padding: 18rpx 12rpx;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
-  height: 140rpx;
-  box-sizing: border-box;
-  border: 1px solid #f0f3f7;
-}
-
-.stat-label {
-  font-size: 22rpx;
-  line-height: 1;
-  color: var(--text-tertiary);
-  margin-top: 4rpx;
-}
-
-.stat-value {
-  font-weight: 700;
-  font-size: 40rpx;
-  line-height: 1;
-  color: var(--text-primary);
-}
-
-.stat-label-win-rate {
-  background: linear-gradient(135deg, #fffef9 0%, #fef9ea 100%);
-}
-
-.stat-label-win-rate .stat-value {
-  color: #c88830;
-}
-
-.stat-label-win-rate .stat-label {
-  color: #8b90a0;
-}
-
-.stat-value.win-color {
-  color: #ff6b6b;
-}
-
-.stat-value.lose-color {
-  color: #d9d9d9;
-}
-
-.stat-value.rate-color {
-  color: #667eea;
-}
-
-.plan-detail-item {
-  background: #f8fafc;
-  border-radius: 20rpx;
-  padding: 16rpx 12rpx;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 120rpx;
-  box-sizing: border-box;
-}
-
-.plan-detail-value {
-  font-weight: 700;
-  font-size: 40rpx;
-  line-height: 1;
-  color: var(--text-primary);
-}
-
-.plan-detail-label {
-  font-size: 22rpx;
-  line-height: 1;
-  color: var(--text-tertiary);
-  margin-top: 4rpx;
-}
-
-
-/* 投注详情网格 */
-.plan-details-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 30rpx;
-  margin-bottom: 24rpx;
-}
-
-.plan-detail-item {
-  background: #f8fafc;
-  border-radius: 20rpx;
-  padding: 20rpx 16rpx;
-  text-align: center;
-}
-
-.plan-detail-value {
-  font-weight: 700;
-  font-size: 36rpx;
-  color: var(--text-primary);
-}
-
-.amount-highlight {
-  color: var(--amount-orange);
-}
-
-/* 玩法标签 */
-.plan-tags-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 20rpx;
-  margin-bottom: 14rpx;
-}
-
-.plan-play-tag {
-  background: #eef2fa;
-  color: #2c3e6b;
-  padding: 15rpx 20rpx;
-  border-radius: 12rpx;
-  font-size: 28rpx;
-  line-height: 1;
-  font-weight: 500;
-  letter-spacing: 3rpx;
-}
-
-.plan-note {
-  font-size: 28rpx;
-  color: var(--text-tertiary);
-}
-
-.open-record {
-
-  font-size: 12px;
-  margin-left: auto;
-  font-weight: 400;
-  color: #d4832a;
-}
-
-/* 底部胜率总结 */
-.plan-summary-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.plan-winrate-display {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  background: #f8fafc;
-  padding: 12rpx 24rpx;
-  border-radius: 40rpx;
-  border: 2rpx solid #e8ecf2;
-}
-
-.plan-winrate-num {
-  font-weight: 800;
-  font-size: 32rpx;
-}
-
-.plan-winrate-label {
-  font-size: 22rpx;
-  color: var(--text-tertiary);
-}
-
-.plan-total-amount {
-  font-weight: 800;
-  font-size: 44rpx;
-}
-
-/* 底部导航 */
-.bottom-nav {
-  display: flex;
-  justify-content: space-around;
-  background: #fff;
-  padding: 16rpx 0 40rpx;
-  border-top: 2rpx solid var(--border-light);
-}
+.stat-value.win-color { color: #ff6b6b; }
+.stat-value.lose-color { color: #999; }
+.stat-value.rate-color { color: #667eea; }
+.amount-highlight { color: #fa8c16; font-weight: 800; }

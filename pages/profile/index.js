@@ -54,10 +54,6 @@ Page({
     topMedal: null, // 最高等级勋章
     medalsLoading: false,
     showMedalPopup: false,
-    // 积分充值悬浮按钮
-    showCreditsButton: false,
-    creditsX: 500,
-    creditsY: 120,
     // VIP到期时间格式化
     vipExpireTimeStr: "",
     // 会员入口显示
@@ -85,13 +81,11 @@ Page({
       const result = await matchApi.checkFeatures();
       const showFeatures = result === true;
       this.setData({
-        showCreditsButton: showFeatures,
         showVipButton: showFeatures,
       });
     } catch (error) {
       console.error("检查功能开关失败:", error);
       this.setData({
-        showCreditsButton: false,
         showVipButton: false,
       });
     }
@@ -759,25 +753,6 @@ Page({
     }
   },
 
-  // 积分充值按钮拖动
-  onCreditsMove(e) {
-    // 记录最新位置，防止tap事件被误触
-    this._lastMoveTime = Date.now();
-  },
-
-  // 点击积分充值按钮
-  onCredits() {
-    // 如果刚拖动过，忽略点击
-    if (this._lastMoveTime && Date.now() - this._lastMoveTime < 300) {
-      return;
-    }
-
-    // 跳转到积分充值页面
-    wx.navigateTo({
-      url: "/pages/credits/index",
-    });
-  },
-
   // 点击VIP图标
   onVipBadgeTap() {
     const { userInfo } = this.data;
@@ -803,6 +778,13 @@ Page({
     }
     wx.navigateTo({
       url: "/pages/vip/index",
+    });
+  },
+
+  // 点击积分充值
+  onCredits() {
+    wx.navigateTo({
+      url: "/pages/credits/index",
     });
   },
 

@@ -14,6 +14,7 @@ Page({
     match: null,
     loading: true,
     error: null,
+
     // 标签页
     tabs: [
       { key: 'recent', name: '战绩' },

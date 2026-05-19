@@ -8,9 +8,7 @@
         <view class="title-section">
           <text class="page-title">🏆 大厅</text>
         </view>
-        <button class="header-share-btn" open-type="share">
-          <text class="share-icon">📤</text>
-        </button>
+        <button class="header-share-btn" open-type="share">分享</button>
       </view>
     </view>
     <!-- Tab 切换 -->

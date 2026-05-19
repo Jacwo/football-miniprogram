@@ -22,6 +22,10 @@ Component({
       type: Boolean,
       value: true,
     },
+    forceVipStyle: {
+      type: Boolean,
+      value: false,
+    },
   },
 
   data: {
@@ -30,28 +34,43 @@ Component({
     isUnlocked: false, // 是否已解锁
     isVip: false, // 是否是VIP用户
     showTip: false, // 是否展开Tips
+    isFinished: false, // 是否已完成
   },
 
   lifetimes: {
     attached() {
-      // 检查用户VIP状态
+      // 检查用户VIP状态并更新显示
       this.checkVipStatus();
+      // 强制VIP样式模式下立即更新状态
+      if (this.properties.forceVipStyle) {
+        this.updateVipDisplay(true);
+      }
     },
   },
 
   observers: {
-    match: function (match) {
+    'match, forceVipStyle': function (match, forceVipStyle) {
       if (match && match.fullMatchTime) {
         const userInfo = userStore.getUserInfo();
         const isVip = userInfo && userInfo.isVip === true;
+        // 强制VIP样式模式下，始终显示VIP样式
+        const showAsVip = forceVipStyle || isVip;
+        // 判断是否为已完成比赛（有比分）
+        const isFinished = match.isFinished || (match.homeScore !== undefined && match.awayScore !== undefined);
 
         this.setData({
-          formattedTime: dateUtils.formatShortDateTime(match.fullMatchTime),
+          formattedTime: isFinished ? '已结束' : dateUtils.formatShortDateTime(match.fullMatchTime),
           statusInfo: matchUtils.getMatchStatus(match.status),
-          // VIP用户默认解锁，否则从match对象中获取解锁状态
-          isUnlocked: isVip || match.isUnlocked || false,
-          isVip: isVip,
+          isUnlocked: showAsVip || match.isUnlocked || false,
+          isVip: showAsVip,
+          isFinished: isFinished,
         });
+      }
+    },
+    'forceVipStyle': function (forceVipStyle) {
+      // 单独监听 forceVipStyle 变化
+      if (forceVipStyle && this.properties.match) {
+        this.updateVipDisplay(true);
       }
     },
   },
@@ -78,7 +97,22 @@ Component({
     checkVipStatus() {
       const userInfo = userStore.getUserInfo();
       const isVip = userInfo && userInfo.isVip === true;
-      this.setData({ isVip });
+      const forceVipStyle = this.properties.forceVipStyle;
+      // 强制VIP样式模式下，直接设为VIP
+      this.setData({ isVip: forceVipStyle || isVip });
+    },
+
+    // 更新VIP显示状态
+    updateVipDisplay(forceVip) {
+      const match = this.properties.match;
+      if (!match) return;
+
+      const isFinished = match.isFinished || (match.homeScore !== undefined && match.awayScore !== undefined);
+      this.setData({
+        isUnlocked: true,
+        isVip: true,
+        isFinished: isFinished,
+      });
     },
 
     async onAnalyze() {

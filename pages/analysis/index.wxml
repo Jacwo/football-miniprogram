@@ -55,6 +55,7 @@
           <text class="odds-value">{{match.odds.away || '-'}}</text>
         </view>
       </view>
+
     </view>
 
     <!-- 标签页导航 -->

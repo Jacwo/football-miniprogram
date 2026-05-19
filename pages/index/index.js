@@ -5,6 +5,7 @@ const matchUtils = require("../../utils/match");
 const userStore = require("../../store/user");
 const userApi = require("../../api/user");
 const leagueColor = require("../../store/leagueColor");
+const systemApi = require("../../api/system");
 
 Page({
   data: {
@@ -26,11 +27,14 @@ Page({
     calculatorY: 120,
     // 功能开关
     showCalculator: false, // 是否显示模拟选号按钮
+    // 公告
+    announcements: [],
   },
 
   onLoad() {
     this.checkFeatures();
     this.loadMatches();
+    this.loadAnnouncements();
   },
 
   onShow() {
@@ -178,9 +182,40 @@ Page({
 
   onPullDownRefresh() {
     this.checkFeatures();
-    this.loadMatches().finally(() => {
+    this.loadMatches();
+    this.loadAnnouncements().finally(() => {
       wx.stopPullDownRefresh();
     });
+  },
+
+  // 加载公告
+  async loadAnnouncements() {
+    try {
+      const res = await systemApi.getAnnouncements();
+      // 兼容字符串和数组格式
+      if (typeof res === 'string') {
+        // 字符串直接转成数组
+        const announcements = res.split('\n').filter(s => s.trim());
+        const list = announcements.map((text, index) => ({ id: index, content: text }));
+        // 单条公告复制一份用于无缝滚动
+        if (list.length === 1) {
+          list.push({ id: 1, content: list[0].content });
+        }
+        this.setData({ announcements: list });
+      } else if (Array.isArray(res)) {
+        const list = res.map((text, index) => ({ id: index, content: String(text) }));
+        // 单条公告复制一份用于无缝滚动
+        if (list.length === 1) {
+          list.push({ id: 1, content: list[0].content });
+        }
+        this.setData({ announcements: list });
+      } else {
+        this.setData({ announcements: [] });
+      }
+    } catch (error) {
+      console.error("加载公告失败:", error);
+      this.setData({ announcements: [] });
+    }
   },
 
   // 检查功能开关

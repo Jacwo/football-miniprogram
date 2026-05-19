@@ -1,13 +1,5 @@
 <!-- pages/topic/index.wxml -->
 <view class="topic-page">
-  <!-- 模拟选号入口 - 可拖动 -->
-  <movable-area class="calculator-area" wx:if="{{showCalculator}}">
-    <movable-view class="calculator-btn" direction="all" x="{{calculatorX}}" y="{{calculatorY}}" bindchange="onCalculatorMove" bindtap="onCalculator">
-      <text class="calculator-icon">🎮</text>
-      <text class="calculator-text">模拟选号</text>
-    </movable-view>
-  </movable-area>
-
   <!-- 加载状态 -->
   <view class="loading-wrapper" wx:if="{{loading}}">
     <view class="loading-spinner"></view>
@@ -41,66 +33,27 @@
     <!-- 热门比赛 -->
     <view class="section" wx:if="{{hotMatches.length > 0}}">
       <view class="section-bar">
-        <view class="section-bar-dot"></view>
-        <text class="section-bar-title">热门比赛</text>
-        <text class="section-bar-extra">{{hotMatches.length}}场</text>
-      </view>
-      <view class="match-list">
-        <view class="match-card-item" wx:for="{{hotMatches}}" wx:key="matchId">
-          <view class="match-card" bindtap="onHotMatchTap" data-matchid="{{item.matchId}}">
-            <view class="card-header">
-              <view class="header-left">
-                <text class="match-num">{{item.matchNumStr}}</text>
-                <text class="league-tag" style="background-color: #667eea">{{item.leagueAbbName}}</text>
-              </view>
-              <view class="header-right">
-                <text class="match-time">{{item.matchTime}}</text>
-              </view>
-            </view>
-            <view class="teams-row">
-              <view class="team-info home">
-                <text class="team-name">{{item.homeTeamAbbName}}</text>
-                <text class="team-rank" wx:if="{{item.homeTeamRank}}">[{{item.homeTeamRank}}]</text>
-              </view>
-              <text class="vs">VS</text>
-              <view class="team-info away">
-                <text class="team-name">{{item.awayTeamAbbName}}</text>
-                <text class="team-rank" wx:if="{{item.awayTeamRank}}">[{{item.awayTeamRank}}]</text>
-              </view>
-            </view>
-            <!-- 赔率行 -->
-            <view class="odds-row" wx:if="{{item.homeWin || item.draw || item.awayWin}}">
-              <view class="odds-cell action-cell data-btn" catchtap="onDataAnalyze" data-matchid="{{item.matchId}}">
-                <view class="action-content">
-                  <text class="action-tag">📊</text>
-                  <text class="action-text">分析</text>
-                </view>
-              </view>
-              <view class="action-gap"></view>
-              <view class="odds-cell action-cell ai-btn" catchtap="onAiAnalyze" data-matchid="{{item.matchId}}" wx:if="{{showAiAnalysis}}">
-                <view class="action-content">
-                  <view class="ai-btn-wrapper">
-                    <text class="lock-icon">🔒</text>
-                    <text class="action-tag">AI</text>
-                  </view>
-                  <text class="action-text">智能</text>
-                </view>
-              </view>
-              <view class="odds-cell">
-                <text class="odds-label">主胜</text>
-                <text class="odds-num">{{item.homeWin || '-'}}</text>
-              </view>
-              <view class="odds-cell">
-                <text class="odds-label">平局</text>
-                <text class="odds-num">{{item.draw || '-'}}</text>
-              </view>
-              <view class="odds-cell">
-                <text class="odds-label">客胜</text>
-                <text class="odds-num">{{item.awayWin || '-'}}</text>
-              </view>
-            </view>
-          </view>
+        <view class="section-bar-left">
+          <view class="section-bar-dot"></view>
+          <text class="section-bar-title">热门比赛</text>
+          <text class="section-bar-extra">{{hotMatches.length}}场</text>
         </view>
+        <view class="vip-banner-inline" bindtap="goToVip">
+          <text class="vip-banner-inline-icon">🎁</text>
+          <text class="vip-banner-inline-text">开通会员畅享VIP特权</text>
+        </view>
+      </view>
+      <view class="match-list vip-style">
+        <match-card
+          wx:for="{{hotMatches}}"
+          wx:key="id"
+          match="{{item}}"
+          showAiAnalysis="{{showAiAnalysis}}"
+          clickable="{{true}}"
+          forceVipStyle="{{false}}"
+          bind:matchtap="onHotMatchTap"
+          bind:analyze="onAiAnalyze"
+        />
       </view>
     </view>
 
@@ -153,11 +106,14 @@
           <view class="hot-zone-header">
             <text class="hot-zone-icon">🏆</text>
             <text class="hot-zone-title">{{worldCup.topicName}}</text>
-            <view class="hot-zone-badge">预告</view>
+            <view class="hot-zone-badge">即将开赛</view>
+          </view>
+          <view class="hot-zone-cover" wx:if="{{worldCup.imageUrl}}">
+            <image class="hot-zone-img" src="{{worldCup.imageUrl}}" mode="aspectFill" />
           </view>
           <view class="hot-zone-info">
             <text class="zone-desc" wx:if="{{worldCup.topicDesc}}">{{worldCup.topicDesc}}</text>
-            <text class="zone-date" wx:if="{{worldCup.startDate && worldCup.endDate}}">{{worldCup.startDate}} - {{worldCup.endDate}}</text>
+            <text class="zone-date" wx:if="{{worldCup.startDate && worldCup.endDate}}">{{worldCup.formattedDate}}</text>
           </view>
         </view>
       </view>

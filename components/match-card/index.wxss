@@ -176,6 +176,29 @@
   padding: 0 20rpx;
 }
 
+/* 比分框 */
+.score-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 0 24rpx;
+}
+
+.home-score,
+.away-score {
+  font-size: 42rpx;
+  font-weight: 700;
+  color: #333;
+  font-family: -apple-system, 'Helvetica Neue', sans-serif;
+}
+
+.score-divider {
+  font-size: 36rpx;
+  color: #ccc;
+  font-weight: 700;
+}
+
 /* Tips提示条 */
 .team-tip-bar {
   display: flex;
@@ -302,6 +325,10 @@
   margin-top: 12rpx;
   padding-top: 12rpx;
   border-top: 1rpx solid #e8ecf4;
+}
+
+.advice-section.locked {
+  opacity: 0.8;
 }
 
 .advice-header {

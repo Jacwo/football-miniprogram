@@ -1,12 +1,5 @@
 <!-- pages/profile/index.wxml -->
 <view class="profile-page">
-  <!-- 积分充值按钮 - 可拖动 -->
-  <movable-area class="credits-area" wx:if="{{showCreditsButton}}">
-    <movable-view class="credits-btn" direction="all" x="{{creditsX}}" y="{{creditsY}}" bindchange="onCreditsMove" bindtap="onCredits">
-      <text class="credits-icon">💳</text>
-      <text class="credits-text">积分充值</text>
-    </movable-view>
-  </movable-area>
   <!-- 用户信息区域 -->
   <view class="user-section">
     <!-- 已登录 -->
@@ -121,11 +114,24 @@
             <view class="vip-entry-diamond"></view>
           </view>
           <view class="vip-entry-info">
-            <text class="vip-entry-title">{{userInfo.isVip ? '会员管理' : '升级为会员'}}</text>
+            <text class="vip-entry-title">{{userInfo.isVip ? '会员中心' : '升级为会员'}}</text>
             <text class="vip-entry-desc">{{userInfo.isVip ? '管理会员权益' : '解锁全部最新AI分析'}}</text>
           </view>
         </view>
         <view class="vip-entry-arrow">›</view>
+      </view>
+      <!-- 积分充值入口 -->
+      <view class="credits-entry-card" bindtap="onCredits">
+        <view class="credits-entry-left">
+          <view class="credits-icon-box">
+            <text class="credits-icon">💎</text>
+          </view>
+          <view class="credits-info">
+            <text class="credits-title">积分充值</text>
+            <text class="credits-desc">解锁AI分析</text>
+          </view>
+        </view>
+        <view class="credits-entry-arrow">›</view>
       </view>
     </view>
 

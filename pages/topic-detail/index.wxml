@@ -14,105 +14,72 @@
 
   <!-- 主内容 -->
   <scroll-view class="detail-scroll" scroll-y enable-back-to-top="true" wx:else>
-    <!-- 专题封面图 -->
-    <view class="topic-header" wx:if="{{topicInfo.imageUrl}}">
-      <image class="topic-cover" src="{{topicInfo.imageUrl}}" mode="widthFix" />
-      <view class="topic-info-overlay">
+    <!-- 世界杯专题标题 -->
+    <view class="worldcup-header" wx:if="{{isWorldCup}}">
+      <view class="topic-title-row">
         <text class="topic-title">{{topicInfo.topicName}}</text>
-        <text class="topic-desc" wx:if="{{topicInfo.topicDesc}}">{{topicInfo.topicDesc}}</text>
+        <text class="worldcup-badge">FIFA World Cup 2026™</text>
+      </view>
+      <text class="worldcup-date-range">11 June - 19 July 2026</text>
+      <!-- 倒计时 -->
+      <view class="countdown-section">
+        <text class="countdown-number">{{countdownDays}}</text>
+        <text class="countdown-label">Days</text>
+        <text class="countdown-number">{{countdownHours}}</text>
+        <text class="countdown-label">Hours</text>
+        <text class="countdown-number">{{countdownMins}}</text>
+        <text class="countdown-label">mins</text>
       </view>
     </view>
 
-    <!-- 已完成比赛 - 滚动加载 -->
-    <view class="section" wx:if="{{finishedMatches.length > 0}}">
-      <view class="section-bar">
-        <view class="section-bar-dot hot"></view>
-        <text class="section-bar-title">已完成比赛</text>
-        <text class="section-bar-extra">{{finishedDisplayMatches.length}}/{{finishedMatches.length}}场</text>
-      </view>
-      <view class="match-list">
-        <view class="match-card-item" wx:for="{{finishedDisplayMatches}}" wx:key="matchId">
-          <view class="match-card" bindtap="onMatchTap" data-matchid="{{item.matchId}}">
-            <view class="card-header">
-              <view class="header-left">
-                <text class="match-num">{{item.matchNumStr}}</text>
-                <text class="league-tag">{{item.leagueAbbName}}</text>
-              </view>
-              <view class="header-right">
-                <text class="match-status finished">已结束</text>
-              </view>
-            </view>
-            <view class="teams-row">
-              <view class="team-info home">
-                <text class="team-name">{{item.homeTeamAbbName}}</text>
-                <text class="team-rank" wx:if="{{item.homeTeamRank}}">[{{item.homeTeamRank}}]</text>
-              </view>
-              <view class="score-box">
-                <text class="home-score">{{item.homeScore}}</text>
-                <text class="score-divider">:</text>
-                <text class="away-score">{{item.awayScore}}</text>
-              </view>
-              <view class="team-info away">
-                <text class="team-name">{{item.awayTeamAbbName}}</text>
-                <text class="team-rank" wx:if="{{item.awayTeamRank}}">[{{item.awayTeamRank}}]</text>
-              </view>
-            </view>
-          </view>
-        </view>
-        
-        <!-- 加载更多按钮 -->
-        <view class="load-more-btn" wx:if="{{finishedHasMore}}" bindtap="onLoadMoreFinished">
-          <text class="load-more-text">加载更多</text>
-        </view>
-      </view>
+    <!-- 普通专题标题 -->
+    <view class="topic-title-section" wx:else>
+      <text class="topic-title">{{topicInfo.topicName}}</text>
+      <text class="topic-desc" wx:if="{{topicInfo.topicDesc}}">{{topicInfo.topicDesc}}</text>
     </view>
 
-    <!-- 待开始比赛 - Tab切换显示 -->
-    <view class="section" wx:if="{{upcomingByGroup.length > 0}}">
+    <!-- 时间轴比赛列表 -->
+    <view class="timeline-section" wx:if="{{timelineMatches.length > 0}}">
       <view class="section-bar">
-        <view class="section-bar-dot upcoming"></view>
-        <text class="section-bar-title">待开始比赛</text>
+        <view class="section-bar-left">
+          <view class="section-bar-dot upcoming"></view>
+          <text class="section-bar-title">赛程</text>
+          <text class="section-bar-extra">{{timelineMatches.length}}场比赛</text>
+        </view>
       </view>
-      
-      <!-- 分组Tab横向导航 -->
-      <view class="group-tabs-wrapper">
-        <scroll-view class="group-tabs-scroll" scroll-x enable-flex="true">
-          <view class="group-tabs">
-            <view 
-              wx:for="{{groupTabs}}" 
-              wx:key="index"
-              class="group-tab {{activeGroupTab === index ? 'active' : ''}}"
-              data-index="{{index}}"
-              bindtap="onGroupTabChange"
-            >{{item}}</view>
+
+      <view class="timeline">
+        <view class="timeline-item" wx:for="{{timelineMatches}}" wx:key="id">
+          <!-- 时间线节点 -->
+          <view class="timeline-marker">
+            <view class="timeline-dot"></view>
+            <view class="timeline-line"></view>
           </view>
-        </scroll-view>
-      </view>
-      
-      <!-- 选中分组的比赛列表 -->
-      <view class="match-list">
-        <!-- 按日期循环 -->
-        <view wx:for="{{selectedGroupMatches}}" wx:for-item="dateItem" wx:key="date">
-          <!-- 日期标题 -->
-          <view class="date-row">
-            <text class="date-label">{{dateItem.date}}</text>
+
+          <!-- 日期标签 -->
+          <view class="timeline-date" wx:if="{{item.showDateLabel}}">
+            <text class="date-badge">{{item.matchDate}}</text>
+            <view class="view-groups-btn-inline" bindtap="onViewGroups">
+              <text>分组</text>
+            </view>
           </view>
-          
-          <!-- 一天内的所有比赛 -->
-          <view class="day-matches-box">
-            <view 
-              class="match-card compact" 
-              wx:for="{{dateItem.matches}}" 
-              wx:for-item="matchItem" 
-              wx:key="matchId"
-              bindtap="onMatchTap" 
-              data-matchid="{{matchItem.matchId}}"
-            >
-              <view class="compact-time">{{matchItem.timeOnly}}</view>
-              <view class="compact-teams">
-                <text class="compact-team">{{matchItem.homeTeamAbbName}}</text>
-                <text class="compact-vs">VS</text>
-                <text class="compact-team">{{matchItem.awayTeamAbbName}}</text>
+
+          <!-- 比赛卡片 -->
+          <view class="timeline-card" data-id="{{item.id}}" bindtap="onMatchTap">
+            <view class="card-time-row">
+              <text class="card-weekday">{{item.weekDay}}</text>
+              <text class="card-time">{{item.matchTime}}</text>
+              <text class="card-group" wx:if="{{item.groupName}}">{{item.groupName}}</text>
+            </view>
+            <view class="card-teams">
+              <view class="team home">
+                <text class="team-name">{{item.homeTeam}}</text>
+              </view>
+              <view class="vs-badge">
+                <text class="vs-text">VS</text>
+              </view>
+              <view class="team away">
+                <text class="team-name">{{item.awayTeam}}</text>
               </view>
             </view>
           </view>
@@ -121,7 +88,7 @@
     </view>
 
     <!-- 空状态 -->
-    <view class="empty-state" wx:if="{{finishedMatches.length === 0 && upcomingByGroup.length === 0 && !loading}}">
+    <view class="empty-state" wx:if="{{timelineMatches.length === 0 && !loading}}">
       <text class="empty-emoji">📋</text>
       <text class="empty-title">暂无比赛数据</text>
       <text class="empty-sub">精彩比赛即将开始</text>
@@ -129,4 +96,81 @@
 
     <view class="bottom-space"></view>
   </scroll-view>
+
+  <!-- 分组弹窗 -->
+  <view class="groups-modal" wx:if="{{showGroupsModal}}" catchtouchmove="preventTouchMove">
+    <view class="groups-mask" bindtap="onCloseGroupsModal"></view>
+    <view class="groups-content">
+      <view class="groups-header">
+        <text class="groups-title">分组积分</text>
+        <view class="groups-close" bindtap="onCloseGroupsModal">✕</view>
+      </view>
+
+      <!-- 加载状态 -->
+      <view class="groups-loading" wx:if="{{groupsLoading}}">
+        <view class="loading-spinner"></view>
+        <text>加载中...</text>
+      </view>
+
+      <block wx:elif="{{groupNames.length > 0}}">
+        <!-- 分组Tab指示器 -->
+        <scroll-view class="group-tabs-indicator" scroll-x scroll-with-animation scroll-into-view="tab{{selectedGroupIndex}}">
+          <view class="group-tabs-wrapper">
+            <view class="group-tab-btn {{selectedGroupIndex === index ? 'active' : ''}}" wx:for="{{groupNames}}" wx:key="index" id="tab{{index}}">
+              {{item}}
+            </view>
+          </view>
+        </scroll-view>
+
+        <!-- 分组滑动视图 -->
+        <swiper 
+          class="groups-swiper" 
+          current="{{selectedGroupIndex}}" 
+          bindchange="onGroupSwiperChange"
+        >
+          <swiper-item wx:for="{{groupNames}}" wx:key="item">
+            <scroll-view class="group-scroll" scroll-y>
+              <view class="groups-table">
+                <view class="table-header">
+                  <text class="col-rank">排名</text>
+                  <text class="col-team">球队</text>
+                  <text class="col-played">赛</text>
+                  <text class="col-win">胜</text>
+                  <text class="col-draw">平</text>
+                  <text class="col-loss">负</text>
+                  <text class="col-goals">进</text>
+                  <text class="col-ga">失</text>
+                  <text class="col-gd">净</text>
+                  <text class="col-points">积分</text>
+                </view>
+                <view class="table-body">
+                  <view class="table-row" wx:for="{{groupList[item]}}" wx:key="id">
+                    <text class="col-rank {{item.teamRank <= 2 ? 'top' : ''}}">{{item.teamRank}}</text>
+                    <text class="col-team">{{item.teamName}}</text>
+                    <text class="col-played">{{item.played}}</text>
+                    <text class="col-win">{{item.won}}</text>
+                    <text class="col-draw">{{item.drawn}}</text>
+                    <text class="col-loss">{{item.lost}}</text>
+                    <text class="col-goals">{{item.goalsFor}}</text>
+                    <text class="col-ga">{{item.goalsAgainst}}</text>
+                    <text class="col-gd {{item.goalDiff > 0 ? 'positive' : item.goalDiff < 0 ? 'negative' : ''}}">{{item.goalDiff > 0 ? '+' : ''}}{{item.goalDiff}}</text>
+                    <text class="col-points {{item.teamRank <= 2 ? 'top' : ''}}">{{item.points}}</text>
+                  </view>
+                </view>
+              </view>
+            </scroll-view>
+          </swiper-item>
+        </swiper>
+
+        <!-- 底部指示器 -->
+        <view class="group-indicator" wx:if="{{groupNames.length > 1}}">
+          <view 
+            class="indicator-dot {{selectedGroupIndex === index ? 'active' : ''}}" 
+            wx:for="{{groupNames}}" 
+            wx:key="index"
+          ></view>
+        </view>
+      </block>
+    </view>
+  </view>
 </view>

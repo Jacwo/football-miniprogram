@@ -1,17 +1,16 @@
 /* pages/topic-detail/index.wxss - 专题详情页样式 */
+.page-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f0f4f8 0%, #e8eef3 100%);
+}
 
 .topic-detail-page {
-  height: 100vh;
+  min-height: 100vh;
   background: linear-gradient(180deg, #f0f4f8 0%, #e8eef3 100%);
-  display: flex;
-  flex-direction: column;
-  position: relative;
 }
 
 /* ---- 滚动区域 ---- */
 .detail-scroll {
-  flex: 1;
-  height: 0;
   padding: 24rpx;
   box-sizing: border-box;
 }
@@ -19,11 +18,11 @@
 /* ---- 加载 / 错误 ---- */
 .loading-wrapper,
 .error-wrapper {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 200rpx 0;
 }
 
 .loading-spinner {
@@ -66,23 +65,79 @@
   opacity: 0.85;
 }
 
-/* ---- 专题头部 ---- */
-.topic-header {
-  width: 100%;
-  margin-bottom: 32rpx;
+/* ---- 世界杯标题区域 ---- */
+.worldcup-header {
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 24rpx;
 }
 
-.topic-cover {
-  width: 100%;
+.topic-title-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex-wrap: wrap;
+  margin-bottom: 12rpx;
+}
+
+.worldcup-header .topic-title {
+  color: #fff;
+  font-size: 36rpx;
+}
+
+.worldcup-badge {
+  display: inline-block;
+  padding: 6rpx 16rpx;
+  background: linear-gradient(135deg, #ffd700, #ffb700);
+  color: #1a1a2e;
+  font-size: 20rpx;
+  font-weight: 700;
+  border-radius: 8rpx;
+}
+
+.worldcup-date-range {
   display: block;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 20rpx;
 }
 
-.topic-info-overlay {
-  padding: 24rpx 0;
+/* 倒计时 */
+.countdown-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+}
+
+.countdown-number {
+  display: inline-block;
+  min-width: 64rpx;
+  padding: 12rpx 8rpx;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 700;
+  border-radius: 12rpx;
+  text-align: center;
+}
+
+.countdown-label {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+}
+
+/* ---- 专题标题区域 ---- */
+.topic-title-section {
+  padding: 32rpx 0;
+  margin-bottom: 24rpx;
+  border-bottom: 1rpx solid #eee;
 }
 
 .topic-title {
-  font-size: 36rpx;
+  font-size: 40rpx;
   color: #333;
   font-weight: 700;
   line-height: 1.3;
@@ -90,156 +145,25 @@
 }
 
 .topic-desc {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #666;
   margin-top: 12rpx;
-  line-height: 1.4;
+  line-height: 1.5;
   display: block;
 }
 
-/* ---- 分组Tab ---- */
-.group-tabs-wrapper {
-  background: #fff;
-  border-radius: 16rpx;
-  margin-bottom: 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-}
-
-.group-tabs-scroll {
-  white-space: nowrap;
-  padding: 16rpx 8rpx;
-}
-
-.group-tabs {
-  display: inline-flex;
-  gap: 12rpx;
-}
-
-.group-tab {
-  display: inline-block;
-  padding: 12rpx 24rpx;
-  border-radius: 40rpx;
-  font-size: 26rpx;
-  color: #666;
-  background: #f5f5f5;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.group-tab.active {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: #fff;
-  font-weight: 600;
-}
-
-.group-tab:active {
-  transform: scale(0.95);
-}
-
-/* ---- 日期分组标题 ---- */
-.date-group-title {
-  padding: 20rpx 0 16rpx 0;
-  margin-bottom: 8rpx;
-}
-
-.date-text {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #333;
-  padding-left: 16rpx;
-  border-left: 6rpx solid #667eea;
-}
-
-/* ---- 世界杯分组样式 ---- */
-.group-section-title {
-  padding: 24rpx 0 16rpx 0;
-}
-
-.group-title-text {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #667eea;
-  padding-left: 16rpx;
-  border-left: 6rpx solid #667eea;
-}
-
-.date-row {
-  padding: 12rpx 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.date-label {
-  font-size: 26rpx;
-  color: #764ba2;
-  font-weight: 600;
-  background: linear-gradient(135deg, #f0e6ff, #e8d5ff);
-  padding: 6rpx 24rpx;
-  border-radius: 20rpx;
-}
-
-.day-matches-box {
-  background: #fff;
-  border-radius: 16rpx;
-  margin-bottom: 16rpx;
-  overflow: hidden;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
-}
-
-.match-card.compact {
-  padding: 20rpx 24rpx;
-  border-bottom: 1rpx solid #f0f0f0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.match-card.compact:last-child {
-  border-bottom: none;
-}
-
-.compact-time {
-  font-size: 26rpx;
-  color: #1890ff;
-  font-weight: 600;
-  width: 60rpx;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.compact-teams {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 32rpx;
-}
-
-.compact-team {
-  font-size: 28rpx;
-  color: #333;
-  font-weight: 500;
-}
-
-.compact-vs {
-  font-size: 22rpx;
-  color: #999;
-  font-weight: 600;
-}
-
 /* ---- 区块 ---- */
-.section {
-  margin-bottom: 32rpx;
-}
-
 .section-bar {
   display: flex;
   align-items: center;
-  margin-bottom: 16rpx;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
   padding: 0 4rpx;
+}
+
+.section-bar-left {
+  display: flex;
+  align-items: center;
 }
 
 .section-bar-dot {
@@ -248,10 +172,6 @@
   border-radius: 4rpx;
   background: linear-gradient(180deg, #667eea, #764ba2);
   margin-right: 12rpx;
-}
-
-.section-bar-dot.hot {
-  background: linear-gradient(180deg, #ff4d4f, #faad14);
 }
 
 .section-bar-dot.upcoming {
@@ -270,148 +190,148 @@
   margin-left: auto;
 }
 
-/* ---- 比赛卡片 ---- */
-.match-list {
+/* ---- 时间轴样式 ---- */
+.timeline-section {
+  padding-bottom: 40rpx;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 40rpx;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 16rpx;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -36rpx;
+  top: 0;
   display: flex;
   flex-direction: column;
-  gap: 20rpx;
-}
-
-.match-card-item {
-  background: #fff;
-  border-radius: 20rpx;
-  overflow: hidden;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
-}
-
-.match-card {
-  padding: 28rpx;
-}
-
-.match-card:active {
-  opacity: 0.9;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding-bottom: 20rpx;
-  border-bottom: 1rpx solid #f0f0f0;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
+.timeline-dot {
+  width: 16rpx;
+  height: 16rpx;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 50%;
+  border: 4rpx solid #fff;
+  box-shadow: 0 2rpx 8rpx rgba(102, 126, 234, 0.4);
+  z-index: 2;
 }
 
-.match-num {
-  font-size: 22rpx;
-  color: #999;
-  font-weight: 500;
+.timeline-line {
+  width: 4rpx;
+  flex: 1;
+  background: linear-gradient(180deg, #667eea 0%, #e8eef3 100%);
+  min-height: 120rpx;
+  margin-top: 8rpx;
+  border-radius: 2rpx;
 }
 
-.group-tag {
-  padding: 4rpx 14rpx;
-  border-radius: 8rpx;
+.timeline-date {
+  margin-bottom: 12rpx;
+  margin-top: 8rpx;
+}
+
+.date-badge {
+  display: inline-block;
+  padding: 8rpx 20rpx;
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: #fff;
-  font-size: 20rpx;
-  font-weight: 700;
-  letter-spacing: 2rpx;
-}
-
-.league-tag {
-  padding: 4rpx 12rpx;
-  border-radius: 8rpx;
-  color: #fff;
-  font-size: 20rpx;
+  font-size: 22rpx;
   font-weight: 600;
+  border-radius: 24rpx;
 }
 
-.header-right {
+/* ---- 比赛卡片 ---- */
+.timeline-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.timeline-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.card-time-row {
   display: flex;
   align-items: center;
-  gap: 12rpx;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx dashed #eee;
 }
 
-.match-time {
-  font-size: 22rpx;
+.card-weekday {
+  font-size: 24rpx;
   color: #1890ff;
   font-weight: 600;
-}
-
-.match-status {
-  font-size: 22rpx;
-  font-weight: 600;
+  background: rgba(24, 144, 255, 0.1);
   padding: 4rpx 12rpx;
   border-radius: 8rpx;
 }
 
-.match-status.finished {
-  color: #999;
-  background: #f5f5f5;
+.card-time {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 700;
 }
 
-/* 队伍行 */
-.teams-row {
+.card-group {
+  font-size: 22rpx;
+  color: #fff;
+  background: linear-gradient(135deg, #ff9a56, #ff6a88);
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  margin-left: auto;
+}
+
+.card-teams {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 24rpx;
 }
 
-.team-info {
+.team {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8rpx;
+  text-align: center;
+}
+
+.team.home {
+  text-align: left;
+}
+
+.team.away {
+  text-align: right;
 }
 
 .team-name {
   font-size: 30rpx;
   color: #333;
-  font-weight: 700;
-  text-align: center;
+  font-weight: 600;
 }
 
-.team-rank {
-  font-size: 20rpx;
+.vs-badge {
+  padding: 0 24rpx;
+  flex-shrink: 0;
+}
+
+.vs-text {
+  font-size: 26rpx;
   color: #999;
+  font-weight: 600;
   background: #f5f5f5;
-  padding: 2rpx 10rpx;
-  border-radius: 9999rpx;
-}
-
-.vs {
-  font-size: 24rpx;
-  color: #ccc;
-  font-weight: 700;
-  padding: 0 24rpx;
-}
-
-/* 比分框 */
-.score-box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8rpx;
-  padding: 0 24rpx;
-}
-
-.home-score,
-.away-score {
-  font-size: 42rpx;
-  font-weight: 700;
-  color: #333;
-}
-
-.score-divider {
-  font-size: 36rpx;
-  color: #ccc;
-  font-weight: 700;
+  padding: 8rpx 20rpx;
+  border-radius: 24rpx;
 }
 
 /* ---- 空状态 ---- */
@@ -440,29 +360,480 @@
   color: #999;
 }
 
-/* ---- 加载更多 ---- */
-.load-more-btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 24rpx;
-  margin-top: 8rpx;
-}
-
-.load-more-text {
-  font-size: 26rpx;
-  color: #667eea;
-  font-weight: 500;
-  padding: 12rpx 40rpx;
-  background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
-  border-radius: 30rpx;
-}
-
-.load-more-text:active {
-  opacity: 0.7;
-}
-
 /* ---- 底部安全区 ---- */
 .bottom-space {
   height: 120rpx;
+}
+
+/* ---- 查看分组按钮 ---- */
+.view-groups-btn {
+  padding: 8rpx 20rpx;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 24rpx;
+  font-size: 22rpx;
+  color: #fff;
+  font-weight: 600;
+}
+
+.view-groups-btn:active {
+  opacity: 0.85;
+}
+
+/* 日期旁边的查看分组按钮 */
+.timeline-date {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+  margin-top: 8rpx;
+}
+
+.view-groups-btn-inline {
+  display: inline-block;
+  padding: 6rpx 20rpx;
+  background: linear-gradient(135deg, #ffd700, #ffb700);
+  color: #1a1a2e;
+  font-size: 22rpx;
+  font-weight: 700;
+  border-radius: 20rpx;
+}
+
+.view-groups-btn-inline:active {
+  opacity: 0.85;
+}
+
+/* ---- 分组弹窗 ---- */
+.groups-modal {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.groups-mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.groups-content {
+  position: relative;
+  width: 100%;
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  padding-bottom: env(safe-area-inset-bottom);
+  display: flex;
+  flex-direction: column;
+}
+
+.groups-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx 32rpx 24rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+.groups-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #333;
+}
+
+.groups-close {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  color: #999;
+}
+
+.groups-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0;
+  gap: 16rpx;
+  color: #999;
+  font-size: 24rpx;
+}
+
+/* 分组Tab选择 */
+.group-tabs {
+  display: flex;
+  padding: 24rpx 32rpx 0;
+  gap: 16rpx;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.group-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.group-tab {
+  padding: 12rpx 28rpx;
+  background: #f5f5f5;
+  border-radius: 24rpx;
+  font-size: 26rpx;
+  color: #666;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.group-tab.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+}
+
+/* 分组表格 */
+.groups-table-wrapper {
+  flex: 1;
+  padding: 24rpx 32rpx;
+  max-height: 60vh;
+}
+
+.groups-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 0;
+  background: #f8f8f8;
+  border-radius: 8rpx;
+  font-size: 22rpx;
+  color: #666;
+  font-weight: 600;
+}
+
+.table-row {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.col-rank {
+  width: 60rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.col-rank.top {
+  color: #ff4d4f;
+  font-weight: 700;
+}
+
+.col-team {
+  flex: 1;
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.col-played,
+.col-win,
+.col-draw,
+.col-loss,
+.col-goals,
+.col-ga {
+  width: 50rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #666;
+}
+
+.col-gd {
+  width: 60rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #666;
+}
+
+.col-gd.positive {
+  color: #52c41a;
+}
+
+.col-gd.negative {
+  color: #ff4d4f;
+}
+
+.col-points {
+  width: 60rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: #667eea;
+  font-weight: 700;
+}
+
+/* ===================== 分组弹窗样式 ===================== */
+.groups-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.groups-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.groups-content {
+  position: relative;
+  width: 94%;
+  max-height: 90vh;
+  background: #fff;
+  border-radius: 24rpx;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.15);
+}
+
+.groups-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 32rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.groups-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.groups-close {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  color: #999;
+  background: #f5f5f5;
+  border-radius: 50%;
+}
+
+.groups-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 0;
+  gap: 16rpx;
+}
+
+.groups-loading .loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #e0e0e0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 分组Tab指示器 */
+.group-tabs-indicator {
+  padding: 20rpx 32rpx;
+  flex-shrink: 0;
+}
+
+.group-tabs-wrapper {
+  display: flex;
+  gap: 16rpx;
+  width: max-content;
+}
+
+.group-tab-btn {
+  padding: 12rpx 28rpx;
+  background: #f5f5f5;
+  border-radius: 24rpx;
+  font-size: 26rpx;
+  color: #666;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+.group-tab-btn.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+}
+
+/* 分组滑动视图 */
+.groups-swiper {
+  flex: 1;
+  min-height: 400rpx;
+  max-height: 70vh;
+}
+
+.group-scroll {
+  height: 100%;
+  padding: 0 24rpx 20rpx;
+  box-sizing: border-box;
+}
+
+/* 分组表格 */
+.groups-content .groups-table {
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  margin-top: 16rpx;
+  border: 1rpx solid #f0f0f0;
+}
+
+.groups-content .table-header {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 16rpx;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  font-size: 24rpx;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.groups-content .table-row {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.groups-content .table-row:last-child {
+  border-bottom: none;
+}
+
+.groups-content .table-row:nth-child(even) {
+  background: #f8f9ff;
+}
+
+.groups-content .col-rank {
+  width: 50rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 600;
+  margin-right: 32rpx;
+}
+
+.groups-content .col-rank.top {
+  color: #ff4d4f;
+  font-weight: 700;
+}
+
+.groups-content .col-team {
+  flex: 1;
+  font-size: 28rpx;
+  color: #1a1a1a;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0;
+}
+
+.groups-content .col-played,
+.groups-content .col-win,
+.groups-content .col-draw,
+.groups-content .col-loss,
+.groups-content .col-goals,
+.groups-content .col-ga {
+  width: 50rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: #333;
+  margin-left: 0;
+}
+
+.groups-content .col-gd {
+  width: 50rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: #333;
+  font-weight: 600;
+}
+
+.groups-content .col-gd.positive {
+  color: #52c41a;
+}
+
+.groups-content .col-gd.negative {
+  color: #ff4d4f;
+}
+
+.groups-content .col-points {
+  width: 60rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 700;
+}
+
+.groups-content .col-points.top {
+  color: #ff4d4f;
+}
+
+/* 底部指示器 */
+.group-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 16rpx 0 24rpx;
+  flex-shrink: 0;
+}
+
+.indicator-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #ddd;
+  transition: all 0.3s;
+}
+
+.indicator-dot.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  width: 24rpx;
+  border-radius: 6rpx;
 }

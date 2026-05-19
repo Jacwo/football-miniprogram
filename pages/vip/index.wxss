@@ -1167,3 +1167,362 @@
   font-size: 22rpx;
   color: #999;
 }
+
+/* ========== 积分充值入口 ========== */
+.credits-entry-section {
+  padding: 0 24rpx 24rpx;
+}
+
+.credits-entry-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.credits-entry-left {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.credits-icon-box {
+  width: 80rpx;
+  height: 80rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.credits-icon {
+  font-size: 40rpx;
+}
+
+.credits-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.credits-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.credits-balance {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.credits-entry-arrow {
+  font-size: 40rpx;
+  color: #ccc;
+}
+
+/* ========== 积分充值弹窗 ========== */
+.credits-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.credits-modal.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+.credits-modal-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.credits-modal-content {
+  position: relative;
+  width: 100%;
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 32rpx 32rpx 0 0;
+  padding-bottom: env(safe-area-inset-bottom);
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.credits-modal.show .credits-modal-content {
+  transform: translateY(0);
+}
+
+.credits-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.credits-modal-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.credits-modal-close {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+  color: #999;
+}
+
+.credits-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx;
+}
+
+.credits-packages {
+  padding: 24rpx;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.credits-package-card {
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+  background: #f8f9fc;
+  border-radius: 16rpx;
+  margin-bottom: 16rpx;
+  border: 3rpx solid transparent;
+  transition: all 0.2s ease;
+}
+
+.credits-package-card.selected {
+  background: rgba(102, 126, 234, 0.08);
+  border-color: #667eea;
+}
+
+.credits-package-card:active {
+  transform: scale(0.98);
+}
+
+.credits-package-icon {
+  font-size: 48rpx;
+  margin-right: 20rpx;
+}
+
+.credits-package-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.credits-package-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.credits-package-points {
+  font-size: 24rpx;
+  color: #667eea;
+}
+
+.credits-package-price {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ff5858;
+  margin-right: 16rpx;
+}
+
+.credits-check {
+  width: 40rpx;
+  height: 40rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+.credits-modal-actions {
+  padding: 24rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.credits-confirm-btn {
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: bold;
+  border: none;
+  border-radius: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.credits-confirm-btn::after {
+  border: none;
+}
+
+.credits-confirm-btn.disabled {
+  background: #ccc;
+}
+
+/* ========== 客服充值弹窗 ========== */
+.customer-modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.customer-modal-content {
+  width: 600rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  overflow: hidden;
+  margin: 0 60rpx;
+}
+
+.customer-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx 32rpx 0;
+}
+
+.customer-modal-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.customer-modal-close {
+  font-size: 48rpx;
+  color: #ccc;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.customer-modal-body {
+  padding: 32rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.customer-tips {
+  text-align: center;
+  margin-bottom: 24rpx;
+}
+
+.customer-tip-text {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.customer-qrcode-container {
+  width: 400rpx;
+  height: 400rpx;
+  background: #f8f9fc;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+}
+
+.customer-qrcode {
+  width: 100%;
+  height: 100%;
+}
+
+.customer-package-info {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 16rpx 24rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24rpx;
+}
+
+.customer-package-text {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: 600;
+}
+
+.customer-price-text {
+  font-size: 32rpx;
+  color: #ffd700;
+  font-weight: bold;
+}
+
+.customer-actions {
+  display: flex;
+  gap: 24rpx;
+  padding: 0 32rpx 32rpx;
+}
+
+.customer-action-btn {
+  flex: 1;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.customer-action-btn::after {
+  border: none;
+}
+
+.customer-action-btn.save {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+}
+
+.customer-action-btn.close {
+  background: #f0f0f0;
+  color: #666;
+}

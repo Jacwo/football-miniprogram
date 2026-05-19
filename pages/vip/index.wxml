@@ -254,15 +254,15 @@ module.exports = {
     <view class="pay-modal-mask" bindtap="onClosePayModal"></view>
     <view class="pay-modal-content">
       <view class="pay-modal-header">
-        <text class="pay-modal-title">扫码支付</text>
+        <text class="pay-modal-title">{{isCreditsPay ? '积分充值' : '扫码支付'}}</text>
         <view class="pay-modal-close" bindtap="onClosePayModal">×</view>
       </view>
-      
+
       <view class="pay-amount">
         <text class="pay-amount-label">支付金额</text>
         <text class="pay-amount-value">¥{{payAmount ? utils.formatPrice(payAmount) : '0.00'}}</text>
       </view>
-      
+
       <view class="pay-qrcode-wrapper">
         <!-- 显示二维码图片 -->
         <image class="pay-qrcode" src="{{qrcodeImage}}" mode="aspectFit" wx:if="{{qrcodeImage}}" />
@@ -279,12 +279,12 @@ module.exports = {
           <text>加载中...</text>
         </view>
       </view>
-      
+
       <view class="pay-tips">
         <text class="pay-tip">请使用微信扫码支付</text>
         <text class="pay-tip-sub">支付完成后请稍等，系统将自动确认</text>
       </view>
-      
+
       <view class="pay-order-info">
         <text class="order-no">订单号: {{outTradeNo}}</text>
       </view>
@@ -294,6 +294,78 @@ module.exports = {
         <button class="pay-action-btn confirm" bindtap="onCheckPayStatus" loading="{{checkingPay}}">
           {{checkingPay ? '查询中...' : '已支付完成'}}
         </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 积分充值弹窗 -->
+  <view class="credits-modal {{showCreditsModal ? 'show' : ''}}" wx:if="{{showCreditsModal}}">
+    <view class="credits-modal-mask" bindtap="onCloseCreditsModal"></view>
+    <view class="credits-modal-content">
+      <view class="credits-modal-header">
+        <text class="credits-modal-title">积分充值</text>
+        <view class="credits-modal-close" bindtap="onCloseCreditsModal">×</view>
+      </view>
+
+      <!-- 加载状态 -->
+      <view class="credits-loading" wx:if="{{creditsLoading}}">
+        <view class="loading-spinner"></view>
+        <text class="loading-text">加载中...</text>
+      </view>
+
+      <!-- 积分套餐列表 -->
+      <view class="credits-packages" wx:else>
+        <view
+          class="credits-package-card {{selectedCreditPackage && selectedCreditPackage.id == item.id ? 'selected' : ''}}"
+          wx:for="{{creditPackages}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="onSelectCreditPackage"
+        >
+          <view class="credits-package-icon">{{item.icon}}</view>
+          <view class="credits-package-info">
+            <text class="credits-package-name">{{item.name}}</text>
+            <text class="credits-package-points">{{item.credits}}积分</text>
+          </view>
+          <view class="credits-package-price">¥{{item.price}}</view>
+          <view class="credits-check" wx:if="{{selectedCreditPackage && selectedCreditPackage.id == item.id}}">✓</view>
+        </view>
+      </view>
+
+      <view class="credits-modal-actions">
+        <button class="credits-confirm-btn {{!selectedCreditPackage ? 'disabled' : ''}}" bindtap="onConfirmCreditsPurchase">
+          {{selectedCreditPackage ? '立即充值 ' + selectedCreditPackage.credits + ' 积分' : '请选择套餐'}}
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 客服充值弹窗 -->
+  <view class="customer-modal-mask" wx:if="{{showCustomerModal}}" bindtap="onCloseCustomerModal">
+    <view class="customer-modal-content" catchtap="preventTap">
+      <view class="customer-modal-header">
+        <text class="customer-modal-title">客服充值</text>
+        <view class="customer-modal-close" bindtap="onCloseCustomerModal">×</view>
+      </view>
+
+      <view class="customer-modal-body">
+        <view class="customer-tips">
+          <text class="customer-tip-text">请扫码添加客服微信，转账后人工充值</text>
+        </view>
+
+        <!-- 客服二维码 -->
+        <view class="customer-qrcode-container">
+          <image
+            class="customer-qrcode"
+            src="https://ai-football.cn/me.png"
+            mode="aspectFit"
+          />
+        </view>
+
+        <view class="customer-package-info" wx:if="{{selectedPackage}}">
+          <text class="customer-package-text">开通: {{selectedPackage.name}}</text>
+          <text class="customer-price-text">¥{{selectedPackage.price}}</text>
+        </view>
       </view>
     </view>
   </view>

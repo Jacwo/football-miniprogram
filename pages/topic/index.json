@@ -4,5 +4,8 @@
   "navigationBarBackgroundColor": "#ffffff",
   "backgroundColor": "#f5f5f5",
   "backgroundTextStyle": "dark",
-  "enablePullDownRefresh": true
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "match-card": "../../components/match-card/index"
+  }
 }

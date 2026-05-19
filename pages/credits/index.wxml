@@ -3,7 +3,13 @@
   <!-- 头部 -->
   <view class="header">
     <view class="header-content">
-      <text class="header-title">积分充值</text>
+      <view class="header-top">
+        <text class="header-title">积分充值</text>
+        <view class="credits-balance" wx:if="{{userInfo}}">
+          <text class="balance-icon">💎</text>
+          <text class="balance-value">{{credits}}</text>
+        </view>
+      </view>
       <text class="header-desc">让您的分析更强大</text>
     </view>
   </view>
@@ -12,49 +18,43 @@
   <view class="packages-section">
     <text class="section-title">选择套餐</text>
     <view class="packages-container">
-      <view
-        class="package-card {{item.selected ? 'selected' : ''}} {{item.popular ? 'popular' : ''}}"
-        wx:for="{{packages}}"
-        wx:key="id"
-        data-id="{{item.id}}"
-        bindtap="onSelectPackage"
-      >
-        <!-- 徽章位置占位符 -->
-        <view class="badges-container">
+      <!-- 加载状态 -->
+      <view class="loading-wrapper" wx:if="{{loading}}">
+        <view class="loading-spinner"></view>
+        <text class="loading-text">加载中...</text>
+      </view>
+      <!-- 套餐列表 -->
+      <view class="packages-grid" wx:else>
+        <view
+          class="package-card {{selectedPackage && selectedPackage.id === item.id ? 'selected' : ''}} {{item.popular ? 'popular' : ''}}"
+          wx:for="{{packages}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="onSelectPackage"
+        >
           <!-- 热销标签 -->
           <view class="popular-badge" wx:if="{{item.popular}}">
             <text>超值</text>
           </view>
 
-          <!-- 首次半价标签 -->
-          <view class="first-price-badge" wx:if="{{isFirstPurchase}}">
-            <text>首次优惠</text>
+          <!-- 卡片内容 -->
+          <view class="package-icon">{{item.icon}}</view>
+
+          <!-- 积分显示 -->
+          <view class="package-points-large">
+            <text class="points-value-large">{{item.credits}}</text>
+            <text class="points-unit-large">积分</text>
           </view>
 
-          <!-- 占位符 - 保持高度一致 -->
-          <view class="badge-placeholder" wx:if="{{!item.popular && !isFirstPurchase}}"></view>
-        </view>
+          <!-- 价格信息 -->
+          <view class="package-price-info">
+            <text class="current-price">¥{{item.price}}</text>
+          </view>
 
-        <!-- 卡片内容 -->
-        <view class="package-icon">{{item.icon}}</view>
-
-        <!-- 积分显示 -->
-        <view class="package-points-large">
-          <text class="points-value-large">{{item.points}}</text>
-          <text class="points-unit-large">积分</text>
-        </view>
-
-        <!-- 价格信息 -->
-        <view class="package-price-info">
-          <text class="original-price" wx:if="{{isFirstPurchase}}">原价¥{{item.price}}</text>
-          <text class="current-price {{isFirstPurchase ? 'discount' : ''}}">
-            ¥{{isFirstPurchase ? item.firstPrice : item.price}}
-          </text>
-        </view>
-
-        <!-- 选中标记 -->
-        <view class="check-mark" wx:if="{{selectedPackage && selectedPackage.id === item.id}}">
-          <text>✓</text>
+          <!-- 选中标记 -->
+          <view class="check-mark" wx:if="{{selectedPackage && selectedPackage.id === item.id}}">
+            <text>✓</text>
+          </view>
         </view>
       </view>
     </view>
@@ -88,97 +88,89 @@
     </view>
   </view>
 
-  <!-- 二维码和联系方式 -->
-  <view class="contact-section">
-    <text class="section-title">充值方式</text>
-
-    <!-- 充值步骤 -->
-    <view class="steps-container">
-      <view class="step-item">
-        <view class="step-number">1</view>
-        <view class="step-content">
-          <text class="step-title">选择套餐</text>
-          <text class="step-desc">选择{{selectedPackage ? selectedPackage.points + '积分' : '合适的套餐'}}</text>
-        </view>
-      </view>
-      <view class="step-item">
-        <view class="step-number">2</view>
-        <view class="step-content">
-          <text class="step-title">扫码添加微信</text>
-          <text class="step-desc">告诉客服要充{{selectedPackage ? selectedPackage.points + '积分' : '哪个套餐'}}</text>
-        </view>
-      </view>
-      <view class="step-item">
-        <view class="step-number">3</view>
-        <view class="step-content">
-          <text class="step-title">转账充值</text>
-          <text class="step-desc">转账¥{{selectedPackage ? (isFirstPurchase ? selectedPackage.firstPrice : selectedPackage.price) : '待选择'}} 即可到账</text>
-        </view>
-      </view>
-    </view>
-
-    <!-- 二维码 -->
-    <view class="qrcode-box">
-      <text class="qrcode-title">添加微信二维码</text>
-      <image class="qrcode-image" src="https://ai-football.cn/me.png" mode="aspectFit" />
-      <text class="qrcode-desc">或通过微信号联系客服</text>
-    </view>
-
-    <!-- 客服按钮 -->
-    <view class="contact-buttons">
-      <button
-        class="contact-btn"
-        open-type="contact"
-        session-from="credits_page"
-      >
-        <text class="btn-icon">💬</text>
-        <text class="btn-text">联系客服</text>
-      </button>
-    </view>
+  <!-- 充值按钮 -->
+  <view class="purchase-section">
+    <button
+      class="purchase-btn {{!selectedPackage ? 'disabled' : ''}}"
+      bindtap="onConfirmPurchase"
+    >
+      {{selectedPackage ? '立即充值 ' + selectedPackage.credits + ' 积分' : '请选择套餐'}}
+    </button>
   </view>
 
-  <!-- 联系方式弹窗 -->
-  <view class="modal-mask" wx:if="{{showContactModal}}" bindtap="onCloseContactModal">
-    <view class="modal-content" catchtap="preventTap">
-      <view class="modal-header">
-        <text class="modal-title">{{selectedPackage ? '充值¥' + selectedPackage.price : '选择套餐'}}</text>
-        <view class="modal-close" bindtap="onCloseContactModal">×</view>
+  <!-- 底部安全区域 -->
+  <view class="safe-area-bottom"></view>
+
+  <!-- 支付弹窗 -->
+  <view class="pay-modal-mask" wx:if="{{showPayModal}}" bindtap="onClosePayModal">
+    <view class="pay-modal-content" catchtap="preventTap">
+      <view class="pay-modal-header">
+        <text class="pay-modal-title">微信支付</text>
+        <view class="pay-modal-close" bindtap="onClosePayModal">×</view>
       </view>
 
-      <view class="modal-body">
-        <view class="modal-item" wx:if="{{selectedPackage}}">
-          <text class="label">套餐：</text>
-          <text class="value">{{selectedPackage.price}}元 / {{selectedPackage.points}}积分</text>
+      <view class="pay-modal-body">
+        <!-- 金额 -->
+        <view class="pay-amount">
+          <text class="amount-label">支付金额</text>
+          <text class="amount-value">¥{{payAmountYuan}}</text>
         </view>
 
-        <view class="modal-item">
-          <text class="label">微信号：</text>
-          <view class="input-with-btn">
-            <input class="modal-input" type="text" placeholder="向客服说明您选择的套餐" />
-            <view class="copy-btn" bindtap="onCopyWechat">
-              <text>复制微信</text>
-            </view>
+        <!-- 二维码 -->
+        <view class="qrcode-container">
+          <image
+            class="pay-qrcode"
+            src="{{qrcodeImage}}"
+            mode="aspectFit"
+            wx:if="{{qrcodeImage}}"
+          />
+          <view class="qrcode-placeholder" wx:else>
+            <text>加载中...</text>
           </view>
         </view>
 
-        <view class="modal-tips">
-          <text class="tips-title">充值流程：</text>
-          <text class="tips-item">1. 复制客服微信号，在微信中添加</text>
-          <text class="tips-item">2. 告诉客服您选择的套餐和用户ID</text>
-          <text class="tips-item">3. 按价格转账给客服</text>
-          <text class="tips-item">4. 客服确认收款后为您充值积分</text>
+        <!-- 提示 -->
+        <view class="pay-tips">
+          <text class="tip-text">请使用微信扫描二维码支付</text>
         </view>
       </view>
 
-      <view class="modal-footer">
-        <view class="modal-btn cancel" bindtap="onCloseContactModal">关闭</view>
-        <button class="modal-btn confirm" open-type="contact" session-from="credits_charge">
-          {{selectedPackage ? '联系客服充值' : '先选择套餐'}}
+      <view class="pay-actions">
+        <button class="pay-action-btn cancel" bindtap="onClosePayModal">取消</button>
+        <button class="pay-action-btn confirm" bindtap="onCheckPayStatus" loading="{{checkingPay}}">
+          {{checkingPay ? '查询中...' : '已支付完成'}}
         </button>
       </view>
     </view>
   </view>
 
-  <!-- 底部安全区域 -->
-  <view class="safe-area-bottom"></view>
+  <!-- 客服充值弹窗 -->
+  <view class="customer-modal-mask" wx:if="{{showCustomerModal}}" bindtap="onCloseCustomerModal">
+    <view class="customer-modal-content" catchtap="preventTap">
+      <view class="customer-modal-header">
+        <text class="customer-modal-title">客服充值</text>
+        <view class="customer-modal-close" bindtap="onCloseCustomerModal">×</view>
+      </view>
+
+      <view class="customer-modal-body">
+        <view class="customer-tips">
+          <text class="customer-tip-text">请扫码添加客服微信，转账后人工充值</text>
+        </view>
+
+        <!-- 客服二维码 -->
+        <view class="customer-qrcode-container">
+          <image
+            class="customer-qrcode"
+            src="https://ai-football.cn/me.png"
+            mode="aspectFit"
+          />
+        </view>
+
+        <view class="customer-package-info" wx:if="{{selectedPackage}}">
+          <text class="customer-package-text">充值: {{selectedPackage.credits}} 积分</text>
+          <text class="customer-price-text">¥{{selectedPackage.price}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
 </view>

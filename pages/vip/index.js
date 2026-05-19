@@ -21,7 +21,14 @@ Page({
     payAmount: 0,
     payTimer: null,
     currentOutTradeNo: '',
-    checkingPay: false
+    checkingPay: false,
+    isCreditsPay: false,
+    credits: 0,
+    showCreditsModal: false,
+    creditsLoading: false,
+    creditPackages: [],
+    selectedCreditPackage: null,
+    showCustomerModal: false
   },
 
   onLoad() {
@@ -73,7 +80,12 @@ Page({
       vipExpireTimeStr = this.formatExpireTime(userInfo.vipExpireTime)
     }
 
-    this.setData({ isLoggedIn, userInfo, vipExpireTimeStr })
+    this.setData({
+      isLoggedIn,
+      userInfo,
+      vipExpireTimeStr,
+      credits: userInfo?.credits || 0
+    })
     this.loadSkuList()
   },
 
@@ -145,6 +157,25 @@ Page({
       return
     }
 
+    // 弹出选择框
+    wx.showActionSheet({
+      itemList: ['微信支付', '客服充值'],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          // 微信支付
+          this.doWechatPay()
+        } else if (res.tapIndex === 1) {
+          // 客服充值
+          this.doCustomerService()
+        }
+      }
+    })
+  },
+
+  // 微信支付
+  async doWechatPay() {
+    const { selectedPackage } = this.data
+
     wx.showLoading({ title: '正在创建订单...' })
 
     try {
@@ -162,11 +193,10 @@ Page({
         this.setData({
           showPayModal: true,
           qrcodeUrl: res.codeUrl,
-          qrcodeImage: res.qrcodeImage || '', // 使用后端返回的二维码图片
+          qrcodeImage: res.qrcodeImage || '',
           outTradeNo: res.outTradeNo || '',
           payAmount: res.amount || Math.round(selectedPackage.price * 100)
         })
-        // 开始轮询
         this.startPayPolling(res.outTradeNo)
       } else {
         wx.showToast({ title: '创建订单失败', icon: 'none' })
@@ -176,6 +206,45 @@ Page({
       console.error('创建订单失败:', error)
       wx.showToast({ title: error.message || '创建订单失败', icon: 'none' })
     }
+  },
+
+  // 客服充值
+  doCustomerService() {
+    this.setData({
+      showCustomerModal: true
+    })
+  },
+
+  // 关闭客服弹窗
+  onCloseCustomerModal() {
+    this.setData({
+      showCustomerModal: false
+    })
+  },
+
+  // 保存客服二维码到相册
+  onSaveQrcode() {
+    wx.showLoading({ title: '保存中...' })
+    wx.downloadFile({
+      url: 'https://ai-football.cn/me.png',
+      success: (res) => {
+        wx.saveImageToPhotosAlbum({
+          filePath: res.tempFilePath,
+          success: () => {
+            wx.hideLoading()
+            wx.showToast({ title: '已保存到相册', icon: 'success' })
+          },
+          fail: () => {
+            wx.hideLoading()
+            wx.showToast({ title: '保存失败', icon: 'none' })
+          }
+        })
+      },
+      fail: () => {
+        wx.hideLoading()
+        wx.showToast({ title: '下载失败', icon: 'none' })
+      }
+    })
   },
 
   startPayPolling(outTradeNo) {
@@ -212,13 +281,18 @@ Page({
           clearInterval(timer)
           this.setData({ checkingPay: false })
           // 显示支付详情
-          const amountYuan = res.amount < 100 ? res.amount : (res.amount / 100).toFixed(2)
+          let successContent = ''
+          if (this.data.isCreditsPay) {
+            successContent = `恭喜您成功充值${this.data.selectedCreditPackage.credits}积分！`
+          } else {
+            successContent = `恭喜您成功开通${this.data.selectedPackage.name}！`
+          }
           wx.showModal({
             title: '支付成功',
-            content: `恭喜您成功开通${this.data.selectedPackage.name}！`,
+            content: successContent,
             showCancel: false,
             success: () => {
-              this.setData({ showPayModal: false, currentOutTradeNo: '' })
+              this.setData({ showPayModal: false, currentOutTradeNo: '', isCreditsPay: false })
               this.loadUserInfo()
             }
           })
@@ -266,7 +340,7 @@ Page({
       success: (res) => {
         if (res.confirm) {
           this.stopPayPolling()
-          this.setData({ showPayModal: false, currentOutTradeNo: '' })
+          this.setData({ showPayModal: false, currentOutTradeNo: '', isCreditsPay: false })
         }
       }
     })
@@ -290,6 +364,117 @@ Page({
 
   onShareAppMessage() {
     return { title: 'AI足球智能体 - 开通会员享无限分析', path: '/pages/vip/index' }
+  },
+
+  // ========== 积分充值相关 ==========
+
+  // 打开积分充值弹窗
+  onOpenCredits() {
+    this.setData({ showCreditsModal: true })
+    this.loadCreditPackages()
+  },
+
+  // 关闭积分充值弹窗
+  onCloseCreditsModal() {
+    this.setData({ showCreditsModal: false, selectedCreditPackage: null })
+  },
+
+  // 加载积分套餐列表
+  async loadCreditPackages() {
+    if (this.data.creditPackages.length > 0) return
+
+    this.setData({ creditsLoading: true })
+    try {
+      const list = await skuApi.getSkuList({ category: 2, status: 1 })
+      const creditPackages = (list || []).map((item) => ({
+        id: item.id,
+        skuId: item.id,
+        name: item.skuName || (item.credits >= 500 ? '大礼包' : '积分包'),
+        credits: item.credits || 0,
+        icon: item.credits >= 500 ? '💎' : '💰',
+        price: item.price ? (item.price / 100) : 0,
+        popular: item.popular || false
+      }))
+
+      creditPackages.sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0))
+
+      this.setData({ creditPackages, creditsLoading: false })
+
+      const defaultSelected = creditPackages.find(p => p.popular) || creditPackages[0]
+      if (defaultSelected) {
+        this.setData({ selectedCreditPackage: defaultSelected })
+      }
+    } catch (error) {
+      console.error('加载积分套餐失败:', error)
+      this.setData({ creditsLoading: false })
+      this.setData({
+        creditPackages: [
+          { id: 1, skuId: 1, name: '积分包', credits: 100, icon: '💰', price: 30, popular: false },
+          { id: 2, skuId: 2, name: '大礼包', credits: 500, icon: '💎', price: 150, popular: true }
+        ]
+      })
+      this.setData({
+        selectedCreditPackage: { id: 2, skuId: 2, name: '大礼包', credits: 500, icon: '💎', price: 150, popular: true }
+      })
+    }
+  },
+
+  // 选择积分套餐
+  onSelectCreditPackage(e) {
+    const { id } = e.currentTarget.dataset
+    if (id) {
+      const selectedCreditPackage = this.data.creditPackages.find(p => p.id == id)
+      this.setData({ selectedCreditPackage })
+    }
+  },
+
+  // 确认积分充值
+  async onConfirmCreditsPurchase() {
+    const { selectedCreditPackage, isLoggedIn } = this.data
+
+    if (!selectedCreditPackage) {
+      wx.showToast({ title: '请选择套餐', icon: 'none' })
+      return
+    }
+
+    if (!isLoggedIn) {
+      wx.showToast({ title: '请先登录', icon: 'none' })
+      setTimeout(() => { wx.navigateTo({ url: '/pages/login/index' }) }, 1500)
+      return
+    }
+
+    wx.showLoading({ title: '正在创建订单...' })
+
+    try {
+      const res = await payApi.createWxNativePay({
+        skuId: selectedCreditPackage.skuId,
+        amount: Math.round(selectedCreditPackage.price * 100),
+        attach: `积分充值-${selectedCreditPackage.name}`,
+        clientIp: '127.0.0.1',
+        userId: this.data.userInfo.id
+      })
+
+      wx.hideLoading()
+
+      if (res.codeUrl) {
+        this.setData({
+          showCreditsModal: false,
+          showPayModal: true,
+          isCreditsPay: true,
+          qrcodeUrl: res.codeUrl,
+          qrcodeImage: res.qrcodeImage || '',
+          outTradeNo: res.outTradeNo || '',
+          payAmount: res.amount || Math.round(selectedCreditPackage.price * 100)
+        })
+        this.startPayPolling(res.outTradeNo)
+      } else {
+        wx.showToast({ title: '创建订单失败', icon: 'none' })
+      }
+    } catch (error) {
+      wx.hideLoading()
+      console.error('创建订单失败:', error)
+      wx.showToast({ title: error.message || '创建订单失败', icon: 'none' })
+    }
   },
 
   // 复制支付链接

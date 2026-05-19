@@ -28,7 +28,13 @@
       <text class="team-name">{{match.homeTeam}}</text>
       <text class="team-rank" wx:if="{{match.homeTeamRank}}">[{{match.homeTeamRank}}]</text>
     </view>
-    <text class="vs">VS</text>
+    <!-- 已完成比赛显示比分 -->
+    <view class="score-box" wx:if="{{match.homeScore != null && match.awayScore != null}}">
+      <text class="home-score">{{match.homeScore}}</text>
+      <text class="score-divider">:</text>
+      <text class="away-score">{{match.awayScore}}</text>
+    </view>
+    <text class="vs" wx:else>VS</text>
     <view class="team-info away">
       <text class="team-name">{{match.awayTeam}}</text>
       <text class="team-rank" wx:if="{{match.awayTeamRank}}">[{{match.awayTeamRank}}]</text>
@@ -58,20 +64,25 @@
       <view class="detail-tags" wx:if="{{match.homeTags && match.homeTags.length}}">
         <text class="tag-item" wx:for="{{match.homeTags}}" wx:key="index">{{item}}</text>
       </view>
-      <!-- 球队建议 (VIP专属) -->
-      <view class="advice-section" wx:if="{{match.homeAdvice}}">
+      <!-- 球队建议 -->
+      <view class="advice-section" wx:if="{{isVip}}">
         <view class="advice-header">
           <text class="advice-label">球队建议</text>
-          <view class="vip-required" wx:if="{{!isVip}}">
+        </view>
+        <view class="advice-content">
+          <text class="advice-text">{{match.homeAdvice || '暂无建议'}}</text>
+        </view>
+      </view>
+      <view class="advice-section locked" wx:elif="{{match.homeAdvice}}">
+        <view class="advice-header">
+          <text class="advice-label">球队建议</text>
+          <view class="vip-required">
             <view class="vip-lock-icon">🔒</view>
             <text class="vip-hint">VIP可见</text>
           </view>
         </view>
-        <view class="advice-content {{isVip ? '' : 'blurred'}}" wx:if="{{isVip}}">
-          <text class="advice-text">{{match.homeAdvice}}</text>
-        </view>
-        <view class="advice-content blurred" wx:else>
-          <text class="advice-text">开通VIP查看专业建议</text>
+        <view class="advice-content blurred">
+          <text class="advice-text">{{match.homeAdvice || '暂无建议'}}</text>
         </view>
       </view>
     </view>
@@ -87,27 +98,32 @@
       <view class="detail-tags" wx:if="{{match.awayTags && match.awayTags.length}}">
         <text class="tag-item" wx:for="{{match.awayTags}}" wx:key="index">{{item}}</text>
       </view>
-      <!-- 球队建议 (VIP专属) -->
-      <view class="advice-section" wx:if="{{match.awayAdvice}}">
+      <!-- 球队建议 -->
+      <view class="advice-section" wx:if="{{isVip}}">
         <view class="advice-header">
           <text class="advice-label">球队建议</text>
-          <view class="vip-required" wx:if="{{!isVip}}">
+        </view>
+        <view class="advice-content">
+          <text class="advice-text">{{match.awayAdvice || '暂无建议'}}</text>
+        </view>
+      </view>
+      <view class="advice-section locked" wx:elif="{{match.awayAdvice}}">
+        <view class="advice-header">
+          <text class="advice-label">球队建议</text>
+          <view class="vip-required">
             <view class="vip-lock-icon">🔒</view>
             <text class="vip-hint">VIP可见</text>
           </view>
         </view>
-        <view class="advice-content {{isVip ? '' : 'blurred'}}" wx:if="{{isVip}}">
-          <text class="advice-text">{{match.awayAdvice}}</text>
-        </view>
-        <view class="advice-content blurred" wx:else>
-          <text class="advice-text">开通VIP查看专业建议</text>
+        <view class="advice-content blurred">
+          <text class="advice-text">{{match.awayAdvice || '暂无建议'}}</text>
         </view>
       </view>
     </view>
   </view>
 
-  <!-- AI分析 + 欧赔 (4列) -->
-  <view class="odds-row">
+  <!-- AI分析 + 欧赔 (4列) - 已完成比赛不显示 -->
+  <view class="odds-row" wx:if="{{!isFinished}}">
     <view class="odds-cell action-cell {{isVip ? 'vip-unlocked' : (isUnlocked ? 'unlocked' : 'locked')}}" catchtap="onAnalyze" wx:if="{{showAiAnalysis}}">
       <view class="action-content">
         <text class="action-tag {{isVip ? 'vip-tag-text' : ''}}">AI</text>
@@ -135,8 +151,8 @@
     </view>
   </view>
 
-  <!-- 查看详情 + 让球赔率 (4列) -->
-  <view class="odds-row handicap-row" wx:if="{{match.odds.goalLine}}">
+  <!-- 查看详情 + 让球赔率 (4列) - 已完成比赛不显示 -->
+  <view class="odds-row handicap-row" wx:if="{{match.odds.goalLine && !isFinished}}">
     <view class="odds-cell detail-cell" catchtap="onTap">
       <text class="detail-text">分析</text>
     </view>
@@ -154,8 +170,8 @@
     </view>
   </view>
 
-  <!-- 无让球时的详情入口 -->
-  <view class="odds-row" wx:else>
+  <!-- 无让球时的详情入口 - 已完成比赛显示分析按钮 -->
+  <view class="odds-row" wx:if="{{isFinished || !match.odds.goalLine}}">
     <view class="odds-cell detail-cell full" catchtap="onTap">
       <text class="detail-text">分析</text>
     </view>

@@ -15,14 +15,8 @@ Page({
     championsLeague: {}, // 欧冠专题
     worldCup: {}, // 世界杯专题
     championsLeagueMatches: [], // 欧冠相关比赛
-    // 模拟选号按钮位置
-    calculatorX: 500,
-    calculatorY: 120,
     // 功能开关
-    showCalculator: false, // 是否显示模拟选号按钮
     showAiAnalysis: false, // 是否显示AI分析按钮
-    // 展开的比赛ID
-    expandedMatchId: null,
   },
 
   onLoad() {
@@ -47,47 +41,58 @@ Page({
     }
   },
 
+  // 将比赛数据转换为 match-card 组件需要的格式
+  transformMatchList(matches) {
+    return matches.map(item => ({
+      id: item.matchId,
+      matchNumStr: item.matchNumStr || '',
+      league: item.leagueAbbName || '',
+      leagueColor: item.leagueColor || '667eea',
+      homeTeam: item.homeTeamAbbName || '',
+      awayTeam: item.awayTeamAbbName || '',
+      homeTeamRank: item.homeTeamRank || '',
+      awayTeamRank: item.awayTeamRank || '',
+      homeScore: item.homeScore,
+      awayScore: item.awayScore,
+      isFinished: item.homeScore !== undefined && item.awayScore !== undefined,
+      matchTime: item.matchTime || '',
+      fullMatchTime: item.matchDate ? `${item.matchDate} ${item.matchTime || ''}` : (item.fullMatchTime || ''),
+      // Tips 相关字段
+      homeTags: item.homeTags ? (typeof item.homeTags === 'string' ? item.homeTags.split(',') : item.homeTags) : [],
+      homeFormTrend: item.homeFormTrend || '',
+      homeAdvice: item.homeAdvice || '',
+      awayTags: item.awayTags ? (typeof item.awayTags === 'string' ? item.awayTags.split(',') : item.awayTags) : [],
+      awayFormTrend: item.awayFormTrend || '',
+      awayAdvice: item.awayAdvice || '',
+      // 赔率数据
+      odds: {
+        home: item.homeWin || '-',
+        draw: item.draw || '-',
+        away: item.awayWin || '-',
+        goalLine: item.goalLine || null,
+        hhome: item.hhomeWin || item.hhome || '-',
+        hdraw: item.hdraw || '-',
+        haway: item.hawayWin || item.haway || '-',
+      },
+      // 保留原始数据用于跳转
+      _originalMatch: item,
+    }));
+  },
+
   // 检查功能开关
   async checkFeatures() {
     try {
       const result = await matchApi.checkFeatures();
-      const showCalculator = result === true;
-      this.setData({ showCalculator, showAiAnalysis: showCalculator });
+      this.setData({ showAiAnalysis: result === true });
     } catch (error) {
       console.error("检查功能开关失败:", error);
-      this.setData({ showCalculator: false, showAiAnalysis: false });
+      this.setData({ showAiAnalysis: false });
     }
-  },
-
-  // 跳转到模拟选号（只包含当前页面的热门比赛）
-  onCalculator() {
-    if (!userStore.isLoggedIn()) {
-      wx.showToast({ title: "请先登录", icon: "none" });
-      wx.navigateTo({ url: "/pages/login/index" });
-      return;
-    }
-
-    // 将当前页面的热门比赛数据传递给计算器页面
-    const hotMatches = this.data.hotMatches;
-    if (hotMatches && hotMatches.length > 0) {
-      const matchData = encodeURIComponent(JSON.stringify(hotMatches));
-      wx.navigateTo({
-        url: `/pages/calculator/index?matches=${matchData}&source=topic`,
-      });
-    } else {
-      wx.showToast({ title: "暂无热门比赛", icon: "none" });
-    }
-  },
-
-  // 模拟选号按钮拖动
-  onCalculatorMove() {
-    this._lastMoveTime = Date.now();
   },
 
   // 点击热门比赛卡片
   onHotMatchTap(e) {
-    const { matchid } = e.currentTarget.dataset;
-    const match = this.data.hotMatches.find(m => m.matchId === matchid);
+    const { match } = e.detail;
     if (!match) return;
 
     if (!userStore.isLoggedIn()) {
@@ -95,40 +100,28 @@ Page({
       wx.navigateTo({ url: "/pages/login/index" });
       return;
     }
+
+    // 获取原始数据用于跳转
+    const originalMatch = match._originalMatch || match;
+    const matchId = match.id || originalMatch.matchId;
 
     // 跳转到分析页面（数据分析免费）
     wx.navigateTo({
-      url: `/pages/analysis/index?matchId=${match.matchId}`,
-    });
-  },
-
-  // 数据分析按钮点击（免费，直接跳转分析页）
-  onDataAnalyze(e) {
-    const { matchid } = e.currentTarget.dataset;
-    const match = this.data.hotMatches.find(m => m.matchId === matchid);
-    if (!match) return;
-
-    if (!userStore.isLoggedIn()) {
-      wx.showToast({ title: "请先登录", icon: "none" });
-      wx.navigateTo({ url: "/pages/login/index" });
-      return;
-    }
-
-    // 免费跳转到分析页面
-    wx.navigateTo({
-      url: `/pages/analysis/index?matchId=${match.matchId}`,
+      url: `/pages/analysis/index?matchId=${matchId}`,
     });
   },
 
   // AI分析按钮点击
   onAiAnalyze(e) {
-    const { matchid } = e.currentTarget.dataset;
-    const match = this.data.hotMatches.find(m => m.matchId === matchid);
+    const { match } = e.detail;
     if (!match) return;
+
+    // 获取原始数据
+    const originalMatch = match._originalMatch || match;
 
     if (!userStore.isLoggedIn()) {
       const app = getApp();
-      app.globalData.pendingAnalysisMatch = match;
+      app.globalData.pendingAnalysisMatch = originalMatch;
       wx.navigateTo({ url: "/pages/login/index" });
       return;
     }
@@ -138,7 +131,7 @@ Page({
 
     // VIP直接跳转
     if (isVip) {
-      this.navigateToAiAnalysis(match);
+      this.navigateToAiAnalysis(originalMatch);
       return;
     }
 
@@ -168,7 +161,7 @@ Page({
       cancelText: "取消",
       success: async (res) => {
         if (res.confirm) {
-          await this.unlockAiAnalysis(match, userInfo.id, pointsNeeded);
+          await this.unlockAiAnalysis(originalMatch, userInfo.id, pointsNeeded);
         }
       },
     });
@@ -205,14 +198,14 @@ Page({
   navigateToAiAnalysis(match) {
     const matchInfo = encodeURIComponent(
       JSON.stringify({
-        league: match.leagueAbbName,
-        homeTeam: match.homeTeamAbbName,
-        awayTeam: match.awayTeamAbbName,
+        league: match.leagueAbbName || match.league,
+        homeTeam: match.homeTeamAbbName || match.homeTeam,
+        awayTeam: match.awayTeamAbbName || match.awayTeam,
       }),
     );
 
     wx.navigateTo({
-      url: `/pages/ai-analysis/index?matchId=${match.matchId}&matchInfo=${matchInfo}`,
+      url: `/pages/ai-analysis/index?matchId=${match.matchId || match.id}&matchInfo=${matchInfo}`,
     });
   },
 
@@ -223,8 +216,15 @@ Page({
     const userInfo = userStore.getUserInfo();
     if (!userInfo) return;
 
-    const match = this.data.hotMatches.find(m => m.matchId === targetMatch.matchId);
+    // 从原始数据中查找
+    const match = this.data.hotMatches.find(m => {
+      const original = m._originalMatch || m;
+      return original.matchId === targetMatch.matchId;
+    });
     if (!match) return;
+
+    // 获取原始数据
+    const originalMatch = match._originalMatch || match;
 
     const isVip = userInfo.isVip === true;
     const userPoints = userInfo.point || 0;
@@ -253,12 +253,12 @@ Page({
         cancelText: "取消",
         success: async (res) => {
           if (res.confirm) {
-            await this.unlockAiAnalysis(match, userInfo.id, pointsNeeded);
+            await this.unlockAiAnalysis(originalMatch, userInfo.id, pointsNeeded);
           }
         },
       });
     } else {
-      this.navigateToAiAnalysis(match);
+      this.navigateToAiAnalysis(originalMatch);
     }
   },
 
@@ -294,6 +294,11 @@ Page({
         }
       });
 
+      // 格式化世界杯日期
+      if (worldCup.startDate && worldCup.endDate) {
+        worldCup.formattedDate = this.formatDateRange(worldCup.startDate, worldCup.endDate);
+      }
+
       // 筛选欧冠相关比赛
       const championsLeagueMatches = championsLeague.topicName 
         ? hotMatches.filter(m => {
@@ -302,8 +307,11 @@ Page({
           })
         : [];
 
+      // 转换热门比赛数据为 match-card 组件需要的格式
+      const transformedHotMatches = this.transformMatchList(hotMatches);
+
       this.setData({
-        hotMatches,
+        hotMatches: transformedHotMatches,
         majorEvents,
         hotTopics,
         selectTopics,
@@ -356,5 +364,36 @@ Page({
     wx.navigateTo({
       url: `/pages/topic-detail/index?topicId=${id}&topicName=${encodeURIComponent(name || '')}&imageUrl=${encodeURIComponent(url || '')}`,
     });
+  },
+
+  // 跳转到VIP页面
+  goToVip() {
+    wx.navigateTo({
+      url: '/pages/vip/index',
+    });
+  },
+
+  // 格式化日期范围
+  formatDateRange(startDate, endDate) {
+    if (!startDate || !endDate) return '';
+
+    const formatDate = (dateStr) => {
+      const date = new Date(dateStr);
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      return `${month}月${day}日`;
+    };
+
+    const start = formatDate(startDate);
+    const end = formatDate(endDate);
+
+    // 如果年份相同，只显示月日
+    const startYear = new Date(startDate).getFullYear();
+    const endYear = new Date(endDate).getFullYear();
+
+    if (startYear === endYear) {
+      return `${start} - ${end}`;
+    }
+    return `${startYear}${start} - ${endYear}${end}`;
   },
 });

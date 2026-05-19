@@ -5,6 +5,62 @@
   position: relative;
 }
 
+/* 公告栏 */
+.announcement-bar {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx;
+  background: linear-gradient(90deg, #fff9e6 0%, #fff 100%);
+  border-bottom: 1rpx solid #ffe58f;
+}
+
+.announcement-icon {
+  font-size: 32rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.announcement-scroll-wrapper {
+  flex: 1;
+  overflow: hidden;
+  height: 48rpx;
+}
+
+.announcement-content {
+  display: flex;
+  align-items: center;
+  height: 48rpx;
+  white-space: nowrap;
+}
+
+.announcement-text {
+  font-size: 26rpx;
+  color: #d48806;
+  line-height: 48rpx;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-right: 60rpx;
+}
+
+/* 横向滚动动画 - 复制文字实现无缝滚动 */
+.announcement-content.marquee {
+  animation: marquee 15s linear infinite;
+  display: inline-flex;
+}
+
+.announcement-content.marquee .announcement-text {
+  flex-shrink: 0;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 /* 模拟选号按钮 - 可拖动区域 */
 .calculator-area {
   position: fixed;
