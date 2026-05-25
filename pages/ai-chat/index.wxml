@@ -1,23 +1,5 @@
 <!-- pages/ai-chat/index.wxml -->
-<view class="chat-page">
-  <!-- 顶部工具栏 -->
-  <view class="toolbar">
-    <view class="toolbar-left">
-      <view class="match-info" wx:if="{{matchInfo}}">
-        <text class="match-text">{{matchInfo.homeTeam}} vs {{matchInfo.awayTeam}}</text>
-      </view>
-      <view class="points-info" wx:else>
-        <text class="points-icon">💎</text>
-        <text class="points-text">{{userPoints}}</text>
-      </view>
-    </view>
-    <view class="toolbar-right">
-      <view class="tool-btn" bindtap="onClearChat">
-        <text class="tool-text">清空</text>
-      </view>
-    </view>
-  </view>
-
+<view class="chat-page" style="padding-bottom: {{keyboardHeight}}px">
   <!-- 消息列表 -->
   <scroll-view
     class="message-list"
@@ -26,7 +8,6 @@
     scroll-with-animation="true"
     enhanced="true"
     show-scrollbar="false"
-    style="height: calc(100vh - 200rpx - {{keyboardHeight}}px)"
   >
     <!-- 欢迎信息 -->
     <view class="welcome-section" wx:if="{{messages.length === 0}}">
@@ -37,12 +18,77 @@
       <text class="welcome-desc">专业的足球赛事分析，为你提供比赛预测与策略建议</text>
     </view>
 
-    <!-- 快速问题 -->
-    <view class="quick-section" wx:if="{{showQuickQuestions && messages.length === 0}}">
-      <quick-questions
-        title="猜你想问"
-        bind:select="onQuestionSelect"
-      />
+    <!-- 比赛 + 智能体选择区域（无消息时显示） -->
+    <view class="setup-section" wx:if="{{messages.length === 0}}">
+      <!-- 第一步：选择比赛 -->
+      <view class="setup-step">
+        <view class="setup-step-header">
+          <view class="setup-step-num">1</view>
+          <text class="setup-step-title">选择比赛</text>
+        </view>
+        <view class="setup-step-desc">选择一场想要分析的比赛</view>
+        <!-- 已选比赛 -->
+        <view class="setup-match-selected" wx:if="{{selectedMatch}}" bindtap="onShowMatchPicker">
+          <text class="setup-match-text">{{selectedMatch.league}} {{selectedMatch.homeTeam}} vs {{selectedMatch.awayTeam}}</text>
+          <text class="setup-match-sub">{{selectedMatch.matchNumStr}} {{selectedMatch.matchTime}}</text>
+          <text class="setup-match-switch">点击切换 ›</text>
+        </view>
+        <!-- 未选比赛 -->
+        <view class="setup-match-btn" wx:else bindtap="onShowMatchPicker">
+          <text class="setup-match-btn-icon">⚽</text>
+          <text class="setup-match-btn-text">选择比赛</text>
+        </view>
+      </view>
+
+      <!-- 第二步：选择智能体（比赛已选后才激活） -->
+      <view class="setup-step" wx:if="{{selectedMatch}}">
+        <view class="setup-step-header">
+          <view class="setup-step-num">2</view>
+          <text class="setup-step-title">选择智能体</text>
+        </view>
+        <view class="setup-step-desc">选择一个AI智能体来为你分析</view>
+        <!-- 已选智能体 -->
+        <view class="setup-agent-selected" wx:if="{{selectedAgent}}">
+          <image class="setup-agent-avatar" src="{{selectedAgent.avatar || '/images/icons/user-avatar.png'}}" mode="aspectFill" />
+          <text class="setup-agent-name">{{selectedAgent.agentName}}</text>
+        </view>
+        <!-- 未选智能体：加载中 -->
+        <view class="agent-loading" wx:elif="{{agentLoading}}">
+          <text>加载中...</text>
+        </view>
+        <!-- 未选智能体：列表 -->
+        <view class="agent-grid" wx:elif="{{agentList.length > 0}}">
+          <view
+            class="agent-card {{item.isDefault ? 'agent-default' : ''}}"
+            wx:for="{{agentList}}"
+            wx:key="id"
+            data-agent="{{item}}"
+            bindtap="onAgentSelect"
+          >
+            <image class="agent-avatar" src="{{item.avatar || '/images/icons/user-avatar.png'}}" mode="aspectFill" />
+            <view class="agent-info">
+              <view class="agent-name-row">
+                <text class="agent-name">{{item.agentName}}</text>
+                <view class="agent-default-tag" wx:if="{{item.isDefault}}">
+                  <text>默认</text>
+                </view>
+              </view>
+              <text class="agent-desc">{{item.description || '暂无描述'}}</text>
+              <text class="agent-factor" wx:if="{{item.factorCount}}">已配置 {{item.factorCount}} 个因素</text>
+            </view>
+            <text class="agent-arrow">›</text>
+          </view>
+        </view>
+        <!-- 未选智能体：空状态 -->
+        <view class="agent-empty" wx:elif="{{agentList.length === 0}}">
+          <text class="agent-empty-text">暂无可用智能体</text>
+        </view>
+        <!-- 新建智能体按钮 -->
+        <view class="create-agent-btn" bindtap="onShowCreateAgent">
+          <text class="create-agent-icon">＋</text>
+          <text class="create-agent-text">新建专属智能体</text>
+        </view>
+      </view>
     </view>
 
     <!-- 消息气泡 -->
@@ -61,20 +107,27 @@
       />
     </view>
 
-    <!-- 回答完成后的快速问题 -->
-    <view class="quick-section-bottom" wx:if="{{showQuickQuestions && messages.length > 0 && !typing}}" id="msg-{{messages.length}}">
-      <quick-questions
-        title="继续问我"
-        bind:select="onQuestionSelect"
-      />
-    </view>
-
     <!-- 底部占位 -->
     <view class="list-footer"></view>
   </scroll-view>
 
-  <!-- 输入区域 -->
-  <view class="input-section safe-area-bottom">
+  <!-- 底部控制区 -->
+  <view class="bottom-section">
+    <!-- 紧凑信息栏：比赛 + 智能体 + 清空 -->
+    <view class="info-bar">
+      <view class="info-bar-left" bindtap="onShowMatchPicker">
+        <text class="info-bar-match" wx:if="{{selectedMatch}}">{{selectedMatch.homeTeam}} vs {{selectedMatch.awayTeam}}</text>
+        <text class="info-bar-match-empty" wx:else>选择比赛</text>
+        <text class="info-bar-arrow">▼</text>
+      </view>
+      <view class="info-bar-right">
+        <text class="info-bar-agent" wx:if="{{selectedAgent}}">{{selectedAgent.agentName}}</text>
+        <view class="info-bar-clear" bindtap="onClearChat">
+          <text>清空</text>
+        </view>
+      </view>
+    </view>
+
     <!-- 正在生成提示 -->
     <view class="generating-tip" wx:if="{{typing}}">
       <text class="tip-text">AI 正在思考...</text>
@@ -85,27 +138,294 @@
 
     <!-- 输入框 -->
     <view class="input-wrapper">
-      <view class="input-cost-tip">
-        <text class="cost-text">💎 {{pointsPerAnalysis}} 积分/次</text>
-      </view>
       <input
         class="chat-input"
-        placeholder="输入你的问题..."
+        placeholder="{{selectedMatch ? (selectedAgent ? '输入你的问题...' : '请先选择智能体') : '请先选择比赛'}}"
         placeholder-class="input-placeholder"
         value="{{inputText}}"
         bindinput="onInputChange"
         bindconfirm="onSend"
+        bindfocus="onInputFocus"
+        bindblur="onInputBlur"
         confirm-type="send"
         adjust-position="{{false}}"
-        cursor-spacing="20"
-        disabled="{{sending}}"
+        cursor-spacing="10"
+        disabled="{{sending || !selectedMatch || !selectedAgent}}"
       />
       <view
-        class="send-btn {{inputText.trim() && !sending ? 'active' : ''}}"
+        class="send-btn {{inputText.trim() && !sending && selectedMatch && selectedAgent ? 'active' : ''}}"
         bindtap="onSend"
       >
         <text class="send-icon">➤</text>
       </view>
     </view>
+  </view>
+</view>
+
+<!-- 智能体详情弹窗 -->
+<view class="agent-detail-mask" wx:if="{{showAgentDetail}}" catchtap="onCloseAgentDetail">
+  <view class="agent-detail-popup" catchtap="preventTap">
+    <!-- 头部 -->
+    <view class="detail-header">
+      <view class="detail-close" catchtap="onCloseAgentDetail">
+        <text class="close-icon">×</text>
+      </view>
+      <text class="detail-title">智能体详情</text>
+    </view>
+
+    <!-- 加载中 -->
+    <view class="detail-loading" wx:if="{{agentDetailLoading}}">
+      <text>加载中...</text>
+    </view>
+
+    <!-- 详情内容 -->
+    <scroll-view class="detail-scroll" scroll-y enhanced show-scrollbar="{{false}}" wx:else>
+      <view class="detail-content" wx:if="{{agentDetail}}">
+        <!-- 智能体基本信息 -->
+        <view class="detail-agent-info">
+          <image class="detail-avatar" src="{{agentDetail.avatar || '/images/icons/user-avatar.png'}}" mode="aspectFill" />
+          <view class="detail-agent-meta">
+            <view class="detail-name-row">
+              <text class="detail-agent-name">{{agentDetail.agentName}}</text>
+              <view class="detail-tag default" wx:if="{{agentDetail.isDefault}}">默认</view>
+              <view class="detail-tag system" wx:if="{{agentDetail.isSystem}}">系统</view>
+            </view>
+            <text class="detail-agent-desc">{{agentDetail.description || '暂无描述'}}</text>
+            <text class="detail-factor-count" wx:if="{{agentDetail.factorConfigs && agentDetail.factorConfigs.length}}">
+              已配置 {{agentDetail.factorConfigs.length}} 个因素
+            </text>
+          </view>
+        </view>
+
+        <!-- 确认选择按钮 -->
+        <view class="detail-confirm-btn" bindtap="onConfirmSelectAgent">
+          <text>确认选择此智能体</text>
+        </view>
+
+        <!-- 因素配置列表 -->
+        <view class="detail-factor-section" wx:if="{{factorGroups.length > 0}}">
+          <view class="factor-group" wx:for="{{factorGroups}}" wx:key="groupName" wx:for-index="groupIndex">
+            <view class="factor-group-header">
+              <text class="factor-group-name">{{item.groupDisplayName || item.groupName}}</text>
+              <text class="factor-group-count">{{item.items.length}}个</text>
+            </view>
+            <view class="factor-list">
+              <view class="factor-item {{factor.isEnabled ? '' : 'disabled'}}" wx:for="{{item.items}}" wx:for-item="factor" wx:for-index="itemIndex" wx:key="id">
+                <view class="factor-top">
+                  <view class="factor-name-row">
+                    <text class="factor-name">{{factor.factorName}}</text>
+                    <text class="factor-code">#{{factor.factorCode}}</text>
+                  </view>
+                  <!-- 系统智能体：只显示状态 -->
+                  <view class="factor-status" wx:if="{{agentDetail.isSystem && !factor.isEnabled}}">
+                    <text>已禁用</text>
+                  </view>
+                  <!-- 非系统智能体 BASIC 组：始终开启，开关置灰不可操作 -->
+                  <view
+                    class="switch-wrapper factor-switch factor-switch-basic active"
+                    wx:if="{{!agentDetail.isSystem && factor.factorGroup === 'BASIC'}}"
+                  >
+                    <view class="switch-thumb"></view>
+                  </view>
+                  <!-- 非系统智能体 非BASIC组：可切换开关 -->
+                  <view
+                    class="switch-wrapper factor-switch {{factor.isEnabled ? 'active' : ''}} {{savingFactor && savingFactorId === factor.factorCode ? 'saving' : ''}}"
+                    wx:if="{{!agentDetail.isSystem && factor.factorGroup !== 'BASIC'}}"
+                    catchtap="onToggleFactorEnabled"
+                    data-factorcode="{{factor.factorCode}}"
+                    data-groupindex="{{groupIndex}}"
+                    data-itemindex="{{itemIndex}}"
+                  >
+                    <view class="switch-thumb"></view>
+                  </view>
+                </view>
+                <text class="factor-desc" wx:if="{{factor.description}}">{{factor.description}}</text>
+                <view class="factor-prompt" wx:if="{{factor.promptTemplate}}">
+                  <text class="factor-prompt-label">Prompt模板</text>
+                  <text class="factor-prompt-text">{{factor.promptTemplate}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+
+          <!-- 非系统智能体：新增因素按钮 -->
+          <view class="add-factor-btn" wx:if="{{!agentDetail.isSystem}}" bindtap="onShowAddFactor">
+            <text class="add-factor-icon">＋</text>
+            <text class="add-factor-text">添加因素</text>
+          </view>
+        </view>
+
+        <!-- 无因素配置 -->
+        <view class="detail-empty-factor" wx:else>
+          <text>暂无因素配置</text>
+        </view>
+
+        <!-- 新增因素表单（非系统智能体） -->
+        <view class="add-factor-form" wx:if="{{showAddFactor && !agentDetail.isSystem}}">
+          <view class="add-factor-form-title">
+            <text>添加新因素</text>
+            <view class="add-factor-form-close" catchtap="onCloseAddFactor">
+              <text class="close-icon small">×</text>
+            </view>
+          </view>
+          <view class="add-factor-field">
+            <text class="add-factor-label">因素名称 <text class="required">*</text></text>
+            <input
+              class="add-factor-input"
+              placeholder="输入因素名称"
+              placeholder-class="create-placeholder"
+              value="{{newFactorName}}"
+              bindinput="onNewFactorNameInput"
+              maxlength="50"
+            />
+          </view>
+          <view class="add-factor-field">
+            <text class="add-factor-label">因素描述</text>
+            <textarea
+              class="add-factor-textarea"
+              placeholder="描述该因素的作用"
+              placeholder-class="create-placeholder"
+              value="{{newFactorDesc}}"
+              bindinput="onNewFactorDescInput"
+              maxlength="200"
+              auto-height
+            />
+          </view>
+          <view class="add-factor-field">
+            <text class="add-factor-label">Prompt模板</text>
+            <textarea
+              class="add-factor-textarea"
+              placeholder="使用 {value} 作为占位符，例如：请分析球队的 {value}"
+              placeholder-class="create-placeholder"
+              value="{{newFactorPrompt}}"
+              bindinput="onNewFactorPromptInput"
+              maxlength="500"
+              auto-height
+            />
+          </view>
+          <view class="add-factor-submit-btn {{savingFactor ? 'loading' : ''}}" bindtap="onSubmitNewFactor">
+            <text wx:if="{{!savingFactor}}">确认添加</text>
+            <text wx:else>保存中...</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>
+
+<!-- 新建智能体弹窗 -->
+<view class="agent-detail-mask" wx:if="{{showCreateAgent}}" catchtap="onCloseCreateAgent">
+  <view class="agent-detail-popup create-popup" catchtap="preventTap">
+    <!-- 头部 -->
+    <view class="detail-header">
+      <view class="detail-close" catchtap="onCloseCreateAgent">
+        <text class="close-icon">×</text>
+      </view>
+      <text class="detail-title">新建专属智能体</text>
+    </view>
+
+    <!-- 表单区域 -->
+    <scroll-view class="detail-scroll create-form-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+      <view class="create-form">
+        <!-- 智能体名称 -->
+        <view class="create-form-item">
+          <view class="create-form-label">
+            <text class="create-label-text">智能体名称</text>
+            <text class="create-label-required">*</text>
+          </view>
+          <input
+            class="create-input"
+            placeholder="给智能体起个名字"
+            placeholder-class="create-placeholder"
+            value="{{createAgentName}}"
+            bindinput="onCreateNameInput"
+            maxlength="20"
+          />
+        </view>
+
+        <!-- 智能体描述 -->
+        <view class="create-form-item">
+          <view class="create-form-label">
+            <text class="create-label-text">智能体描述</text>
+          </view>
+          <textarea
+            class="create-textarea"
+            placeholder="描述智能体的用途和特点"
+            placeholder-class="create-placeholder"
+            value="{{createAgentDesc}}"
+            bindinput="onCreateDescInput"
+            maxlength="200"
+            auto-height
+          />
+        </view>
+
+        <!-- 复制系统配置 -->
+        <view class="create-form-item">
+          <view class="create-switch-row" bindtap="onToggleCopySystem">
+            <view class="create-switch-info">
+              <text class="create-label-text">复制系统默认配置</text>
+              <text class="create-switch-desc">使用系统预设的因素配置作为初始模板</text>
+            </view>
+            <view class="switch-wrapper {{createAgentCopySystem ? 'active' : ''}}">
+              <view class="switch-thumb"></view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 提交按钮 -->
+        <view class="create-submit-btn {{createAgentLoading ? 'loading' : ''}}" bindtap="onSubmitCreateAgent">
+          <text wx:if="{{!createAgentLoading}}">确认创建</text>
+          <text wx:else>创建中...</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>
+
+<!-- 比赛选择弹窗 -->
+<view class="agent-detail-mask" wx:if="{{showMatchPicker}}" catchtap="onCloseMatchPicker">
+  <view class="agent-detail-popup create-popup" catchtap="preventTap">
+    <view class="detail-header">
+      <view class="detail-close" catchtap="onCloseMatchPicker">
+        <text class="close-icon">×</text>
+      </view>
+      <text class="detail-title">选择比赛</text>
+    </view>
+    <scroll-view class="detail-scroll create-form-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+      <!-- 加载中 -->
+      <view class="match-picker-loading" wx:if="{{matchLoading}}">
+        <text>加载中...</text>
+      </view>
+      <!-- 比赛列表 -->
+      <view class="match-picker-list" wx:elif="{{matchList.length > 0}}">
+        <view
+          class="match-picker-item {{selectedMatch && selectedMatch.id === item.id ? 'selected' : ''}}"
+          wx:for="{{matchList}}"
+          wx:key="id"
+          data-match="{{item}}"
+          bindtap="onSelectMatch"
+        >
+          <view class="mp-match-info">
+            <view class="mp-match-header">
+              <text class="mp-match-num" wx:if="{{item.matchNumStr}}">{{item.matchNumStr}}</text>
+              <text class="mp-match-league">{{item.league}}</text>
+            </view>
+            <view class="mp-match-teams">
+              <text class="mp-team-name">{{item.homeTeam}}</text>
+              <text class="mp-vs">vs</text>
+              <text class="mp-team-name">{{item.awayTeam}}</text>
+            </view>
+            <text class="mp-match-time" wx:if="{{item.matchTime}}">{{item.matchDate}} {{item.matchTime}}</text>
+          </view>
+          <view class="mp-check" wx:if="{{selectedMatch && selectedMatch.id === item.id}}">
+            <text>✓</text>
+          </view>
+        </view>
+      </view>
+      <!-- 空状态 -->
+      <view class="match-picker-empty" wx:else>
+        <text>暂无可选比赛</text>
+      </view>
+    </scroll-view>
   </view>
 </view>

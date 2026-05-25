@@ -2,7 +2,6 @@
   "navigationBarTitleText": "AI 助手",
   "usingComponents": {
     "message-bubble": "/components/message-bubble/index",
-    "quick-questions": "/components/quick-questions/index",
     "empty-state": "/components/empty-state/index"
   }
 }

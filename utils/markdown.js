@@ -36,15 +36,25 @@ function parseMarkdown(markdown) {
 
     // 引用
     if (line.startsWith('>')) {
-      nodes.push(parseBlockquote(line))
+      const quoteResult = parseBlockquote(lines, i)
+      nodes.push(quoteResult.node)
+      i = quoteResult.endIndex + 1
+      continue
+    }
+
+    // 分隔线 — 必须在列表之前，避免 --- 被当作列表
+    if (line.match(/^[-*_]{3,}\s*$/)) {
+      nodes.push({ type: 'hr' })
       i++
       continue
     }
 
-    // 无序列表（支持 - 后面有空格或直接跟 ** 的情况）
-    if (line.match(/^\s*[-*+]\s/) || line.match(/^\s*-\*\*/)) {
+    // 无序列表（支持 -/* /+ 后跟空格或直接跟 ** 的情况）
+    if (line.match(/^\s*[-*+]\s/) || line.match(/^\s*[-*+]\*\*/)) {
       const listResult = parseList(lines, i, 'ul')
-      nodes.push(listResult.node)
+      if (listResult.node.items && listResult.node.items.length > 0) {
+        nodes.push(listResult.node)
+      }
       i = listResult.endIndex + 1
       continue
     }
@@ -52,15 +62,10 @@ function parseMarkdown(markdown) {
     // 有序列表
     if (line.match(/^\s*\d+\.\s/) || line.match(/^\s*\d+\.\*\*/)) {
       const listResult = parseList(lines, i, 'ol')
-      nodes.push(listResult.node)
+      if (listResult.node.items && listResult.node.items.length > 0) {
+        nodes.push(listResult.node)
+      }
       i = listResult.endIndex + 1
-      continue
-    }
-
-    // 分隔线
-    if (line.match(/^[-*_]{3,}\s*$/)) {
-      nodes.push({ type: 'hr' })
-      i++
       continue
     }
 
@@ -113,13 +118,39 @@ function parseHeading(line) {
 }
 
 /**
- * 解析引用块
+ * 解析引用块（支持多行）
  */
-function parseBlockquote(line) {
-  const text = line.replace(/^>\s*/, '')
+function parseBlockquote(lines, startIndex) {
+  const contentLines = []
+  let i = startIndex
+
+  while (i < lines.length) {
+    const line = lines[i]
+    if (line.startsWith('>')) {
+      contentLines.push(line.replace(/^>\s?/, ''))
+      i++
+    } else if (!line.trim()) {
+      // 空行可能表示引用结束，但也可能只是段落分隔
+      // 看下一行是否还是引用
+      if (i + 1 < lines.length && lines[i + 1].startsWith('>')) {
+        contentLines.push('')
+        i++
+      } else {
+        break
+      }
+    } else {
+      break
+    }
+  }
+
+  const text = contentLines.join('\n')
+
   return {
-    type: 'blockquote',
-    children: parseInline(text)
+    node: {
+      type: 'blockquote',
+      children: parseInline(text)
+    },
+    endIndex: i - 1
   }
 }
 
@@ -156,22 +187,29 @@ function parseCodeBlock(lines, startIndex) {
 function parseList(lines, startIndex, type) {
   const items = []
   let i = startIndex
-  // 支持 - 后面有空格或没空格的情况
-  const regex = type === 'ul' ? /^\s*[-*+]\s*(.+)$/ : /^\s*\d+\.\s*(.+)$/
+  // 用 .* 替代 .+ 以支持空内容列表项（如 "- "）
+  const regex = type === 'ul' ? /^\s*[-*+]\s*(.*)$/ : /^\s*\d+\.\s*(.*)$/
 
   while (i < lines.length) {
     const line = lines[i]
     const match = line.match(regex)
 
-    if (!match) {
-      break
-    }
+    if (!match) break
 
+    // 空内容也视为有效列表项
     items.push({
       type: 'li',
-      children: parseInline(match[1])
+      children: parseInline(match[1] || '')
     })
     i++
+  }
+
+  // 如果一个列表项都没收集到，退回该行（避免死循环）
+  if (items.length === 0) {
+    return {
+      node: { type, items: [] },
+      endIndex: startIndex  // 让外层从同一行重新判断
+    }
   }
 
   return {
@@ -206,8 +244,31 @@ function parseInline(text) {
   let remaining = cleanText
 
   while (remaining) {
+    // 行内代码 `code` — 优先于粗体，避免 `code` 被粗体吞掉
+    let match = remaining.match(/^`([^`]+)`(.*)$/)
+    if (match) {
+      nodes.push({
+        type: 'code-inline',
+        text: match[1]
+      })
+      remaining = match[2]
+      continue
+    }
+
+    // 行内代码在中间 xxx`code`xxx
+    match = remaining.match(/^(.+?)`([^`]+)`(.*)$/)
+    if (match) {
+      nodes.push({ type: 'text', text: match[1] })
+      nodes.push({
+        type: 'code-inline',
+        text: match[2]
+      })
+      remaining = match[3]
+      continue
+    }
+
     // 粗体 **text** (完整格式)
-    let match = remaining.match(/^\*\*(.+?)\*\*(.*)$/)
+    match = remaining.match(/^\*\*(.+?)\*\*(.*)$/)
     if (match) {
       nodes.push({
         type: 'strong',
@@ -237,28 +298,6 @@ function parseInline(text) {
         text: match[1]
       })
       remaining = match[2]
-      continue
-    }
-
-    // 行内代码 `code`
-    match = remaining.match(/^`([^`]+)`(.*)$/)
-    if (match) {
-      nodes.push({
-        type: 'code-inline',
-        text: match[1]
-      })
-      remaining = match[2]
-      continue
-    }
-
-    match = remaining.match(/^(.+?)`([^`]+)`(.*)$/)
-    if (match) {
-      nodes.push({ type: 'text', text: match[1] })
-      nodes.push({
-        type: 'code-inline',
-        text: match[2]
-      })
-      remaining = match[3]
       continue
     }
 

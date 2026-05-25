@@ -1,7 +1,16 @@
 // pages/ai-chat/index.js - AI 对话页面（核心功能）
 const streamApi = require('../../api/stream')
 const userStore = require('../../store/user')
-const userApi = require('../../api/user')
+const agentApi = require('../../api/agent')
+const matchApi = require('../../api/match')
+
+// 因素分组显示名映射
+const GROUP_DISPLAY_MAP = {
+  'BASIC': '基础信息',
+  'HISTORY': '历史数据',
+  'STATS': '统计数据',
+  'INFO': '情报数据'
+}
 
 Page({
   data: {
@@ -9,37 +18,56 @@ Page({
     inputText: '',
     sending: false,
     typing: false,
-    matchInfo: null,
-    matchId: null,
-    showQuickQuestions: true,
     scrollToView: '',
     keyboardHeight: 0,
     deepThinking: false,
-    pointsPerAnalysis: 1, // 每次分析消耗积分
-    userPoints: 0 // 用户当前积分
+    // 比赛选择
+    selectedMatch: null, // 当前选中的比赛
+    showMatchPicker: false, // 比赛选择弹窗
+    matchList: [], // 可选比赛列表
+    matchLoading: false, // 比赛列表加载中
+    // 智能体
+    selectedAgent: null, // 当前选中的智能体
+    agentList: [], // 智能体列表
+    agentLoading: true, // 智能体列表加载中
+    showAgentDetail: false, // 是否显示智能体详情弹窗
+    agentDetail: null, // 当前查看的智能体详情
+    agentDetailLoading: false, // 详情加载中
+    factorGroups: [], // 因素分组列表
+    // 新建智能体弹窗
+    showCreateAgent: false,
+    createAgentName: '',
+    createAgentDesc: '',
+    createAgentCopySystem: true,
+    createAgentLoading: false,
+    // 新增因素
+    showAddFactor: false,
+    newFactorName: '',
+    newFactorDesc: '',
+    newFactorPrompt: '',
+    savingFactor: false,
+    savingFactorId: null
   },
 
   // 流式请求控制器
   _streamController: null,
 
   onLoad(options) {
-    // 获取比赛信息
+    // 如果从其他页面传来比赛参数，自动选中
     if (options.matchInfo) {
       try {
-        const matchInfo = JSON.parse(decodeURIComponent(options.matchInfo))
-        this.setData({ matchInfo })
+        const match = JSON.parse(decodeURIComponent(options.matchInfo))
+        this.setData({ selectedMatch: match })
       } catch (e) {
         console.error('解析比赛信息失败:', e)
       }
     }
 
-    // 获取比赛ID
-    if (options.matchId) {
-      this.setData({ matchId: options.matchId })
-    }
+    // 加载比赛列表
+    this.loadMatchList()
 
-    // 加载用户积分
-    this.loadUserPoints()
+    // 加载智能体列表
+    this.loadAgentList()
 
     // 加载历史消息
     this.loadMessages()
@@ -56,23 +84,11 @@ Page({
       this.getTabBar().setData({ selected: 1 })
     }
 
-    // 刷新用户积分
-    this.loadUserPoints()
-
-    // 检查是否有从比赛页面传来的数据
-    const app = getApp()
-    if (app.globalData.pendingMatch) {
-      const match = app.globalData.pendingMatch
-      this.setData({
-        matchInfo: {
-          league: match.league,
-          homeTeam: match.homeTeam,
-          awayTeam: match.awayTeam
-        },
-        inputText: `请帮我分析 ${match.league} ${match.homeTeam} vs ${match.awayTeam} 这场比赛`
-      })
-      // 清除数据，避免重复使用
-      app.globalData.pendingMatch = null
+    // 刷新智能体列表和比赛列表（如果已登录）
+    const userInfo = userStore.getUserInfo()
+    if (userInfo && userInfo.id) {
+      this.loadAgentList()
+      this.loadMatchList()
     }
   },
 
@@ -83,11 +99,28 @@ Page({
     this.saveMessages()
   },
 
-  // 加载用户积分
-  loadUserPoints() {
+  // 加载智能体列表
+  async loadAgentList() {
     const userInfo = userStore.getUserInfo()
-    if (userInfo && typeof userInfo.point !== 'undefined') {
-      this.setData({ userPoints: userInfo.point || 0 })
+    if (!userInfo || !userInfo.id) {
+      this.setData({ agentLoading: false, agentList: [] })
+      return
+    }
+
+    this.setData({ agentLoading: true })
+
+    try {
+      const list = await agentApi.getAgentList(userInfo.id)
+      this.setData({
+        agentList: list || [],
+        agentLoading: false
+      })
+    } catch (e) {
+      console.error('加载智能体列表失败:', e)
+      this.setData({
+        agentList: [],
+        agentLoading: false
+      })
     }
   },
 
@@ -95,10 +128,7 @@ Page({
   loadMessages() {
     try {
       const messages = wx.getStorageSync('ai-chat-messages') || []
-      this.setData({
-        messages,
-        showQuickQuestions: messages.length === 0
-      })
+      this.setData({ messages })
 
       if (messages.length > 0) {
         this.scrollToBottom()
@@ -124,9 +154,27 @@ Page({
     this.setData({ inputText: e.detail.value })
   },
 
+  // 输入框聚焦 — 键盘弹起时滚动到底部
+  onInputFocus() {
+    // 延迟一下等键盘弹出
+    setTimeout(() => {
+      this.scrollToBottom()
+    }, 300)
+  },
+
+  // 输入框失焦 — 键盘收起后 reset
+  onInputBlur() {
+    // 键盘收起后重置高度，回弹
+    setTimeout(() => {
+      if (!this.data.keyboardHeight) {
+        this.scrollToBottom()
+      }
+    }, 150)
+  },
+
   // 发送消息
   async onSend() {
-    const { inputText, sending, messages, pointsPerAnalysis, userPoints } = this.data
+    const { inputText, sending, messages, selectedMatch, selectedAgent } = this.data
 
     if (sending || !inputText.trim()) return
 
@@ -136,20 +184,15 @@ Page({
       return
     }
 
-    // 检查积分是否足够
-    if (userPoints < pointsPerAnalysis) {
-      wx.showModal({
-        title: '积分不足',
-        content: `AI分析需要消耗 ${pointsPerAnalysis} 积分，您当前积分为 ${userPoints}，请做任务或者联系客服获取积分。`,
-        confirmText: '我的页面',
-        cancelText: '取消',
-        success: (res) => {
-          if (res.confirm) {
-            // 跳转到我的页面
-            wx.switchTab({ url: '/pages/profile/index' })
-          }
-        }
-      })
+    // 检查是否选择了比赛
+    if (!selectedMatch) {
+      wx.showToast({ title: '请先选择比赛', icon: 'none' })
+      return
+    }
+
+    // 检查是否选择了智能体
+    if (!selectedAgent) {
+      wx.showToast({ title: '请先选择智能体', icon: 'none' })
       return
     }
 
@@ -173,57 +216,26 @@ Page({
       messages: [...messages, userMessage, assistantMessage],
       inputText: '',
       sending: true,
-      typing: true,
-      showQuickQuestions: false
+      typing: true
     })
 
     this.scrollToBottom()
 
-    // 构建消息历史
-    const chatMessages = this.buildChatMessages(userMessage)
-
     // 开始流式请求
-    this.startStream(chatMessages, assistantMessage.id)
-  },
-
-  // 构建聊天消息
-  buildChatMessages(userMessage) {
-    const { messages, matchInfo } = this.data
-    const chatMessages = []
-
-    // 如果有比赛信息，添加系统提示
-    if (matchInfo) {
-      chatMessages.push({
-        role: 'system',
-        content: `用户正在查看一场足球比赛：${matchInfo.league} ${matchInfo.homeTeam} vs ${matchInfo.awayTeam}。请基于这场比赛提供分析和建议。`
-      })
-    }
-
-    // 添加历史消息（最近 10 条）
-    const recentMessages = messages.slice(-10).filter(m => m.content)
-    recentMessages.forEach(msg => {
-      chatMessages.push({
-        role: msg.role,
-        content: msg.content
-      })
-    })
-
-    // 添加当前用户消息
-    chatMessages.push({
-      role: 'user',
-      content: userMessage.content
-    })
-
-    return chatMessages
+    this.startStream(userMessage.content, assistantMessage.id)
   },
 
   // 开始流式请求
-  startStream(chatMessages, messageId) {
-    const { deepThinking } = this.data
+  startStream(message, messageId) {
+    const { deepThinking, selectedMatch, selectedAgent } = this.data
+    const userInfo = userStore.getUserInfo()
 
     this._streamController = streamApi.smartStreamChat({
-      messages: chatMessages,
+      message,
       deepThinking,
+      userId: userInfo.id,
+      agentId: selectedAgent.id,
+      matchId: selectedMatch.id,
       onMessage: (text) => {
         this.appendMessage(messageId, text)
       },
@@ -266,74 +278,18 @@ Page({
 
   // 完成消息
   finishMessage(messageId) {
-    const { messages, pointsPerAnalysis } = this.data
+    const { messages } = this.data
     const index = messages.findIndex(m => m.id === messageId)
 
     if (index !== -1) {
       this.setData({
         [`messages[${index}].typing`]: false,
         sending: false,
-        typing: false,
-        showQuickQuestions: true
+        typing: false
       })
-
-      // 扣减积分
-      this.deductPoints(pointsPerAnalysis)
 
       this.saveMessages()
       this.scrollToBottom()
-    }
-  },
-
-  // 扣减积分
-  async deductPoints(points) {
-    const userInfo = userStore.getUserInfo()
-    if (!userInfo || !userInfo.id) {
-      console.error('用户信息缺失')
-      return
-    }
-
-    const { matchId } = this.data
-
-    try {
-      // 显示扣减提示
-      wx.showLoading({
-        title: `消耗${points}积分中...`,
-        mask: true
-      })
-
-      // 调用后端接口扣减积分（传入matchId）
-      await userApi.deductPoint(userInfo.id, points, matchId)
-
-      // 重新拉取用户信息
-      const latestUserInfo = await userApi.getUserInfoById(userInfo.id)
-
-      if (latestUserInfo) {
-        // 更新本地存储
-        const app = getApp()
-        app.globalData.userInfo = latestUserInfo
-        wx.setStorageSync('userInfo', latestUserInfo)
-
-        // 更新页面显示
-        this.setData({ userPoints: latestUserInfo.point || 0 })
-      }
-
-      wx.hideLoading()
-
-      // 显示扣减成功提示
-      wx.showToast({
-        title: `消耗${points}积分`,
-        icon: 'success',
-        duration: 2000
-      })
-    } catch (e) {
-      wx.hideLoading()
-      console.error('扣减积分失败:', e)
-      wx.showToast({
-        title: '积分扣减失败',
-        icon: 'error',
-        duration: 2000
-      })
     }
   },
 
@@ -393,6 +349,254 @@ Page({
     this.onSend()
   },
 
+  // 选择智能体 - 查看详情
+  async onAgentSelect(e) {
+    const { agent } = e.currentTarget.dataset
+    if (!agent) return
+
+    const userInfo = userStore.getUserInfo()
+    if (!userInfo || !userInfo.id) return
+
+    this.setData({
+      showAgentDetail: true,
+      agentDetailLoading: true,
+      agentDetail: null,
+      factorGroups: []
+    })
+
+    try {
+      const detail = await agentApi.getAgentDetail(userInfo.id, agent.id)
+      // 按 factorGroup 分组
+      const groupMap = {}
+      const factorConfigs = detail.factorConfigs || []
+      factorConfigs.forEach(item => {
+        const group = item.factorGroup || '其他'
+        if (!groupMap[group]) {
+          groupMap[group] = {
+            groupName: group,
+            groupDisplayName: GROUP_DISPLAY_MAP[group] || group,
+            items: []
+          }
+        }
+        groupMap[group].items.push(item)
+      })
+      // 将 BASIC 组排在最前面
+      const factorGroups = Object.values(groupMap).sort((a, b) => {
+        if (a.groupName === 'BASIC') return -1
+        if (b.groupName === 'BASIC') return 1
+        return 0
+      })
+
+      this.setData({
+        agentDetail: detail,
+        factorGroups,
+        agentDetailLoading: false
+      })
+    } catch (e) {
+      console.error('加载智能体详情失败:', e)
+      wx.showToast({ title: '加载详情失败', icon: 'none' })
+      this.setData({
+        showAgentDetail: false,
+        agentDetailLoading: false
+      })
+    }
+  },
+
+  // 关闭智能体详情弹窗
+  onCloseAgentDetail() {
+    this.setData({ showAgentDetail: false })
+  },
+
+  // 阻止事件冒泡
+  preventTap() {},
+
+  // 显示新建智能体弹窗
+  onShowCreateAgent() {
+    this.setData({
+      showCreateAgent: true,
+      createAgentName: '',
+      createAgentDesc: '',
+      createAgentCopySystem: true,
+      createAgentLoading: false
+    })
+  },
+
+  // 关闭新建智能体弹窗
+  onCloseCreateAgent() {
+    this.setData({ showCreateAgent: false })
+  },
+
+  // 新建智能体 - 名称输入
+  onCreateNameInput(e) {
+    this.setData({ createAgentName: e.detail.value })
+  },
+
+  // 新建智能体 - 描述输入
+  onCreateDescInput(e) {
+    this.setData({ createAgentDesc: e.detail.value })
+  },
+
+  // 新建智能体 - 切换复制系统配置
+  onToggleCopySystem() {
+    this.setData({ createAgentCopySystem: !this.data.createAgentCopySystem })
+  },
+
+  // 提交新建智能体
+  async onSubmitCreateAgent() {
+    const { createAgentName, createAgentDesc, createAgentCopySystem, createAgentLoading } = this.data
+
+    if (createAgentLoading) return
+
+    const name = createAgentName.trim()
+    if (!name) {
+      wx.showToast({ title: '请输入智能体名称', icon: 'none' })
+      return
+    }
+
+    const userInfo = userStore.getUserInfo()
+    if (!userInfo || !userInfo.id) {
+      wx.showToast({ title: '请先登录', icon: 'none' })
+      return
+    }
+
+    this.setData({ createAgentLoading: true })
+
+    try {
+      await agentApi.createAgent({
+        userId: userInfo.id,
+        agentName: name,
+        description: createAgentDesc.trim(),
+        avatar: '',
+        copySystemConfig: createAgentCopySystem
+      })
+
+      wx.showToast({ title: '创建成功', icon: 'success' })
+
+      // 关闭弹窗并刷新列表
+      this.setData({
+        showCreateAgent: false,
+        createAgentLoading: false
+      })
+
+      this.loadAgentList()
+    } catch (e) {
+      console.error('创建智能体失败:', e)
+      wx.showToast({ title: e.message || '创建失败', icon: 'none' })
+      this.setData({ createAgentLoading: false })
+    }
+  },
+
+  // 切换因素启用状态（非系统智能体）
+  async onToggleFactorEnabled(e) {
+    const { factorcode, groupindex, itemindex } = e.currentTarget.dataset
+    const { agentDetail, factorGroups } = this.data
+    if (!agentDetail || agentDetail.isSystem) return
+
+    const factor = factorGroups[groupindex].items[itemindex]
+    if (!factor) return
+
+    // BASIC 组不允许禁用
+    if (factor.factorGroup === 'BASIC') return
+
+    // 乐观更新 UI
+    const newEnabled = !factor.isEnabled
+    this.setData({
+      [`factorGroups[${groupindex}].items[${itemindex}].isEnabled`]: newEnabled,
+      savingFactor: true,
+      savingFactorId: factorcode
+    })
+
+    const userInfo = userStore.getUserInfo()
+    try {
+      await agentApi.saveFactor({
+        userId: userInfo.id,
+        agentId: agentDetail.id,
+        factorCode: factorcode,
+        isEnabled: newEnabled,
+        weight: factor.weight || 1
+      })
+    } catch (e) {
+      console.error('保存因素配置失败:', e)
+      // 恢复原状态
+      this.setData({
+        [`factorGroups[${groupindex}].items[${itemindex}].isEnabled`]: !newEnabled
+      })
+      wx.showToast({ title: '操作失败', icon: 'none' })
+    } finally {
+      this.setData({
+        savingFactor: false,
+        savingFactorId: null
+      })
+    }
+  },
+
+  // 显示新增因素表单
+  onShowAddFactor() {
+    this.setData({
+      showAddFactor: true,
+      newFactorName: '',
+      newFactorDesc: '',
+      newFactorPrompt: ''
+    })
+  },
+
+  // 关闭新增因素表单
+  onCloseAddFactor() {
+    this.setData({ showAddFactor: false })
+  },
+
+  // 新增因素 - 名称输入
+  onNewFactorNameInput(e) {
+    this.setData({ newFactorName: e.detail.value })
+  },
+
+  // 新增因素 - 描述输入
+  onNewFactorDescInput(e) {
+    this.setData({ newFactorDesc: e.detail.value })
+  },
+
+  // 新增因素 - Prompt模板输入
+  onNewFactorPromptInput(e) {
+    this.setData({ newFactorPrompt: e.detail.value })
+  },
+
+  // 提交新增因素
+  async onSubmitNewFactor() {
+    const { newFactorName, newFactorDesc, newFactorPrompt, agentDetail, savingFactor } = this.data
+    if (savingFactor) return
+
+    const name = newFactorName.trim()
+    if (!name) {
+      wx.showToast({ title: '请输入因素名称', icon: 'none' })
+      return
+    }
+
+    const userInfo = userStore.getUserInfo()
+    if (!userInfo || !userInfo.id) return
+
+    this.setData({ savingFactor: true })
+
+    try {
+      await agentApi.createCustomFactor({
+        userId: userInfo.id,
+        agentId: agentDetail.id,
+        factorName: name,
+        description: newFactorDesc.trim(),
+        promptTemplate: newFactorPrompt.trim()
+      })
+
+      wx.showToast({ title: '添加成功', icon: 'success' })
+
+      // 刷新详情
+      this.setData({ showAddFactor: false, savingFactor: false })
+      this.onAgentSelect({ currentTarget: { dataset: { agent: agentDetail } } })
+    } catch (e) {
+      console.error('新增因素失败:', e)
+      wx.showToast({ title: e.message || '添加失败', icon: 'none' })
+      this.setData({ savingFactor: false })
+    }
+  },
+
   // 切换深度思考模式
   onToggleDeepThinking() {
     const { deepThinking } = this.data
@@ -404,6 +608,73 @@ Page({
     })
   },
 
+  // 加载比赛列表
+  async loadMatchList() {
+    this.setData({ matchLoading: true })
+    try {
+      const result = await matchApi.getTodayMatches()
+      const list = result.list || result || []
+      // 转换比赛数据为简洁格式
+      const matchList = list.map(m => ({
+        id: m.matchId || m.id,
+        homeTeam: m.homeTeamAbbName || m.homeTeam,
+        awayTeam: m.awayTeamAbbName || m.awayTeam,
+        league: m.leagueAbbName || m.league,
+        matchNumStr: m.matchNumStr,
+        matchTime: m.matchTime,
+        matchDate: m.matchDate
+      }))
+      this.setData({ matchList, matchLoading: false })
+    } catch (e) {
+      console.error('加载比赛列表失败:', e)
+      this.setData({ matchLoading: false, matchList: [] })
+    }
+  },
+
+  // 打开比赛选择弹窗
+  onShowMatchPicker() {
+    this.setData({ showMatchPicker: true })
+    // 如果列表为空，重新加载
+    if (this.data.matchList.length === 0) {
+      this.loadMatchList()
+    }
+  },
+
+  // 关闭比赛选择弹窗
+  onCloseMatchPicker() {
+    this.setData({ showMatchPicker: false })
+  },
+
+  // 选择比赛
+  onSelectMatch(e) {
+    const { match } = e.currentTarget.dataset
+    this.setData({
+      selectedMatch: match,
+      showMatchPicker: false,
+      // 清空之前的对话
+      messages: [],
+      inputText: ''
+    })
+    wx.removeStorageSync('ai-chat-messages')
+  },
+
+  // 确认选择智能体（从详情弹窗中选中）
+  onConfirmSelectAgent() {
+    const { agentDetail } = this.data
+    if (!agentDetail) return
+
+    this.setData({
+      selectedAgent: {
+        id: agentDetail.id,
+        agentName: agentDetail.agentName,
+        avatar: agentDetail.avatar,
+        isDefault: agentDetail.isDefault,
+        isSystem: agentDetail.isSystem
+      },
+      showAgentDetail: false
+    })
+  },
+
   // 清空对话
   onClearChat() {
     wx.showModal({
@@ -411,10 +682,7 @@ Page({
       content: '确定要清空所有对话记录吗？',
       success: (res) => {
         if (res.confirm) {
-          this.setData({
-            messages: [],
-            showQuickQuestions: true
-          })
+          this.setData({ messages: [] })
           wx.removeStorageSync('ai-chat-messages')
 
           wx.showToast({

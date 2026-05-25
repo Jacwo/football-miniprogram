@@ -574,6 +574,13 @@ Page({
     });
   },
 
+  // 龙虾 AI对话
+  onLobsterChat() {
+    wx.navigateTo({
+      url: "/pages/ai-chat/index",
+    });
+  },
+
   // 打开活动中心
   onActivityCenter() {
     const { isLoggedIn } = this.data;

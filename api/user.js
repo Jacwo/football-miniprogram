@@ -37,7 +37,7 @@ function getUserInfo() {
  * @param {string} id 用户ID
  */
 function getUserInfoById(id) {
-  return post('/api/user/info', { id }, { showLoading: false })
+  return post('/api/user/info', { id, _t: Date.now() }, { showLoading: false })
 }
 
 /**
@@ -55,7 +55,7 @@ function updateUserInfo(data) {
  * @param {string} matchId 比赛ID（可选）
  */
 function deductPoint(id, deductPoint, matchId) {
-  const params = { id, deductPoint }
+  const params = { id, deductPoint, _t: Date.now() }
   if (matchId) params.matchId = matchId
   return post('/api/user/point/deduct', params)
 }

@@ -4,10 +4,11 @@
     <!-- 标题 -->
     <view wx:if="{{item.type === 'heading'}}" class="md-heading md-h{{item.level}}">
       <block wx:for="{{item.children}}" wx:for-item="child" wx:key="index">
-        <text wx:if="{{child.type === 'text'}}">{{child.text}}</text>
-        <text wx:elif="{{child.type === 'strong'}}" class="md-strong">{{child.text}}</text>
-        <text wx:elif="{{child.type === 'em'}}" class="md-em">{{child.text}}</text>
-        <text wx:elif="{{child.type === 'code-inline'}}" class="md-code-inline">{{child.text}}</text>
+        <text wx:if="{{child.type === 'text'}}" selectable="{{selectable}}">{{child.text}}</text>
+        <text wx:elif="{{child.type === 'strong'}}" class="md-strong" selectable="{{selectable}}">{{child.text}}</text>
+        <text wx:elif="{{child.type === 'em'}}" class="md-em" selectable="{{selectable}}">{{child.text}}</text>
+        <text wx:elif="{{child.type === 'code-inline'}}" class="md-code-inline" selectable="{{selectable}}">{{child.text}}</text>
+        <text wx:elif="{{child.type === 'link'}}" class="md-link" data-url="{{child.url}}" bindtap="onLinkTap">{{child.text}}</text>
       </block>
     </view>
 
@@ -27,19 +28,22 @@
       <view class="code-header">
         <text class="code-language">{{item.language || 'code'}}</text>
         <view class="copy-btn" data-index="{{index}}" bindtap="copyCode">
-          <text class="copy-text">复制</text>
+          <text class="copy-text">{{copiedIndex === index ? '已复制' : '复制'}}</text>
         </view>
       </view>
-      <scroll-view class="code-content" scroll-x="true" enhanced="true" show-scrollbar="false">
+      <scroll-view class="code-content" scroll-x="true" enhanced="true" show-scrollbar="true">
         <text class="code-text" selectable="true" user-select="true">{{item.content}}</text>
       </scroll-view>
     </view>
 
-    <!-- 引用 -->
+    <!-- 引用块 -->
     <view wx:elif="{{item.type === 'blockquote'}}" class="md-blockquote">
       <block wx:for="{{item.children}}" wx:for-item="child" wx:key="index">
         <text wx:if="{{child.type === 'text'}}" selectable="{{selectable}}">{{child.text}}</text>
         <text wx:elif="{{child.type === 'strong'}}" class="md-strong" selectable="{{selectable}}">{{child.text}}</text>
+        <text wx:elif="{{child.type === 'em'}}" class="md-em" selectable="{{selectable}}">{{child.text}}</text>
+        <text wx:elif="{{child.type === 'code-inline'}}" class="md-code-inline" selectable="{{selectable}}">{{child.text}}</text>
+        <text wx:elif="{{child.type === 'link'}}" class="md-link" data-url="{{child.url}}" bindtap="onLinkTap">{{child.text}}</text>
       </block>
     </view>
 
@@ -51,7 +55,9 @@
           <block wx:for="{{li.children}}" wx:for-item="child" wx:key="index">
             <text wx:if="{{child.type === 'text'}}" selectable="{{selectable}}">{{child.text}}</text>
             <text wx:elif="{{child.type === 'strong'}}" class="md-strong" selectable="{{selectable}}">{{child.text}}</text>
+            <text wx:elif="{{child.type === 'em'}}" class="md-em" selectable="{{selectable}}">{{child.text}}</text>
             <text wx:elif="{{child.type === 'code-inline'}}" class="md-code-inline" selectable="{{selectable}}">{{child.text}}</text>
+            <text wx:elif="{{child.type === 'link'}}" class="md-link" data-url="{{child.url}}" bindtap="onLinkTap">{{child.text}}</text>
           </block>
         </view>
       </view>
@@ -65,7 +71,9 @@
           <block wx:for="{{li.children}}" wx:for-item="child" wx:key="index">
             <text wx:if="{{child.type === 'text'}}" selectable="{{selectable}}">{{child.text}}</text>
             <text wx:elif="{{child.type === 'strong'}}" class="md-strong" selectable="{{selectable}}">{{child.text}}</text>
+            <text wx:elif="{{child.type === 'em'}}" class="md-em" selectable="{{selectable}}">{{child.text}}</text>
             <text wx:elif="{{child.type === 'code-inline'}}" class="md-code-inline" selectable="{{selectable}}">{{child.text}}</text>
+            <text wx:elif="{{child.type === 'link'}}" class="md-link" data-url="{{child.url}}" bindtap="onLinkTap">{{child.text}}</text>
           </block>
         </view>
       </view>

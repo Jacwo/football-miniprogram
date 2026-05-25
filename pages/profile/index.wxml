@@ -106,6 +106,23 @@
       </view>
     </view>
 
+    <!-- 龙虾 AI智能问答 -->
+    <view class="lobster-card" wx:if="{{isLoggedIn && userInfo}}" bindtap="onLobsterChat">
+      <view class="lobster-card-left">
+        <view class="lobster-icon-wrapper">
+          <text>🦞</text>
+        </view>
+        <view class="lobster-card-info">
+          <text class="lobster-card-title">龙虾 · AI智能问答</text>
+          <text class="lobster-card-desc">VIP限时免费，点击体验</text>
+        </view>
+      </view>
+      <view class="lobster-card-right">
+        <view class="lobster-tag">免费</view>
+        <text class="lobster-card-arrow">›</text>
+      </view>
+    </view>
+
     <!-- 会员中心 -->
     <view class="vip-entry-section" wx:if="{{isLoggedIn && userInfo && showVipButton}}">
       <view class="vip-entry-card" bindtap="onVipCenter">
@@ -166,8 +183,8 @@
   <view class="menu-section">
     <!-- 分享给好友 -->
     <button class="menu-item" open-type="share">
-      <view class="menu-left">
-        <text class="menu-icon">📤</text>
+      <view class="menu-item-inner">
+        <view class="menu-icon-box menu-icon-share">📤</view>
         <view class="menu-info">
           <text class="menu-title">分享给好友</text>
           <text class="menu-desc">邀请好友一起使用</text>
@@ -178,8 +195,8 @@
 
     <!-- 联系客服 -->
     <button class="menu-item" open-type="contact">
-      <view class="menu-left">
-        <text class="menu-icon">👨‍💼</text>
+      <view class="menu-item-inner">
+        <view class="menu-icon-box menu-icon-service">💬</view>
         <view class="menu-info">
           <text class="menu-title">联系客服</text>
           <text class="menu-desc">24小时在线客服</text>
@@ -188,7 +205,7 @@
       <text class="menu-arrow">›</text>
     </button>
 
-    <!-- 其他菜单 -->
+    <!-- 其他菜单项 -->
     <view
       class="menu-item"
       wx:for="{{menuList}}"
@@ -198,8 +215,8 @@
       data-action="{{item.action}}"
       bindtap="onMenuTap"
     >
-      <view class="menu-left">
-        <text class="menu-icon">{{item.icon}}</text>
+      <view class="menu-item-inner">
+        <view class="menu-icon-box menu-icon-{{item.action}}">{{item.icon}}</view>
         <view class="menu-info">
           <text class="menu-title">{{item.title}}</text>
           <text class="menu-desc">{{item.desc}}</text>
@@ -210,16 +227,27 @@
   </view>
 
   <!-- 其他操作 -->
-  <view class="action-section">
-    <view class="action-item" bindtap="onClearCache">
-      <text class="action-text">清除缓存</text>
+  <view class="menu-section">
+    <view class="menu-item" bindtap="onClearCache">
+      <view class="menu-item-inner">
+        <view class="menu-icon-box menu-icon-clear">🧹</view>
+        <view class="menu-info">
+          <text class="menu-title">清除缓存</text>
+          <text class="menu-desc">释放存储空间</text>
+        </view>
+      </view>
+      <text class="menu-arrow">›</text>
     </view>
-  </view>
 
-  <!-- 退出登录 -->
-  <view class="logout-section" wx:if="{{isLoggedIn}}">
-    <view class="logout-btn" bindtap="onLogout">
-      <text class="logout-text">退出登录</text>
+    <view class="menu-item menu-item-logout" wx:if="{{isLoggedIn}}" bindtap="onLogout">
+      <view class="menu-item-inner">
+        <view class="menu-icon-box menu-icon-logout">🚪</view>
+        <view class="menu-info">
+          <text class="menu-title logout-title">退出登录</text>
+          <text class="menu-desc">安全退出当前账号</text>
+        </view>
+      </view>
+      <text class="menu-arrow">›</text>
     </view>
   </view>
 

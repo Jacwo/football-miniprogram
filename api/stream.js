@@ -6,15 +6,18 @@ const app = getApp()
  * 需要基础库 2.20.2+
  *
  * @param {Object} options 配置项
- * @param {Array} options.messages 消息历史
+ * @param {string} options.message 用户消息
  * @param {boolean} options.deepThinking 是否开启深度思考
+ * @param {string} options.userId 用户ID
+ * @param {string} options.agentId 智能体ID
+ * @param {string} options.matchId 比赛ID
  * @param {Function} options.onMessage 收到消息回调
  * @param {Function} options.onComplete 完成回调
  * @param {Function} options.onError 错误回调
  * @returns {Object} 包含 abort 方法的控制器
  */
 function streamChat(options) {
-  const { messages, deepThinking = false, onMessage, onComplete, onError } = options
+  const { message, deepThinking = false, userId, agentId, matchId, onMessage, onComplete, onError } = options
 
   const token = app.globalData.token
   let buffer = ''
@@ -24,8 +27,11 @@ function streamChat(options) {
     url: `${app.globalData.baseUrl}/api/stream/chat`,
     method: 'POST',
     data: {
-      messages,
+      message,
       deepThinking,
+      userId,
+      agentId,
+      matchId,
       stream: true
     },
     header: {
@@ -121,7 +127,7 @@ function streamChat(options) {
  * @param {Object} options 配置项
  */
 function streamChatPolling(options) {
-  const { messages, deepThinking = false, onMessage, onComplete, onError } = options
+  const { message, deepThinking = false, userId, agentId, matchId, onMessage, onComplete, onError } = options
 
   const token = app.globalData.token
   let sessionId = null
@@ -133,8 +139,11 @@ function streamChatPolling(options) {
     url: `${app.globalData.baseUrl}/api/stream/chat/start`,
     method: 'POST',
     data: {
-      messages,
-      deepThinking
+      message,
+      deepThinking,
+      userId,
+      agentId,
+      matchId
     },
     header: {
       'Content-Type': 'application/json',
