@@ -49,8 +49,14 @@
         <view class="setup-step-desc">选择一个AI智能体来为你分析</view>
         <!-- 已选智能体 -->
         <view class="setup-agent-selected" wx:if="{{selectedAgent}}">
+          <view class="setup-agent-back" catchtap="onSwitchAgent">
+            <text class="setup-agent-back-icon">‹</text>
+          </view>
           <image class="setup-agent-avatar" src="{{selectedAgent.avatar || '/images/icons/user-avatar.png'}}" mode="aspectFill" />
           <text class="setup-agent-name">{{selectedAgent.agentName}}</text>
+          <view class="setup-agent-reselect" catchtap="onReSelectAgent">
+            <text class="setup-agent-switch-tip">切换 ›</text>
+          </view>
         </view>
         <!-- 未选智能体：加载中 -->
         <view class="agent-loading" wx:elif="{{agentLoading}}">
@@ -121,8 +127,14 @@
         <text class="info-bar-arrow">▼</text>
       </view>
       <view class="info-bar-right">
-        <text class="info-bar-agent" wx:if="{{selectedAgent}}">{{selectedAgent.agentName}}</text>
-        <view class="info-bar-clear" bindtap="onClearChat">
+        <view class="info-bar-agent" wx:if="{{selectedAgent}}" catchtap="onReSelectAgent">
+          <text class="info-bar-agent-text">{{selectedAgent.agentName}}</text>
+          <text class="info-bar-agent-switch">‹</text>
+        </view>
+        <view class="info-bar-model" wx:if="{{selectedAgent}}">
+          <text class="info-bar-model-text">{{modelName}}</text>
+        </view>
+        <view class="info-bar-clear" catchtap="onClearChat">
           <text>清空</text>
         </view>
       </view>
@@ -207,36 +219,57 @@
           <view class="factor-group" wx:for="{{factorGroups}}" wx:key="groupName" wx:for-index="groupIndex">
             <view class="factor-group-header">
               <text class="factor-group-name">{{item.groupDisplayName || item.groupName}}</text>
-              <text class="factor-group-count">{{item.items.length}}个</text>
             </view>
             <view class="factor-list">
               <view class="factor-item {{factor.isEnabled ? '' : 'disabled'}}" wx:for="{{item.items}}" wx:for-item="factor" wx:for-index="itemIndex" wx:key="id">
                 <view class="factor-top">
                   <view class="factor-name-row">
                     <text class="factor-name">{{factor.factorName}}</text>
-                    <text class="factor-code">#{{factor.factorCode}}</text>
                   </view>
-                  <!-- 系统智能体：只显示状态 -->
-                  <view class="factor-status" wx:if="{{agentDetail.isSystem && !factor.isEnabled}}">
-                    <text>已禁用</text>
-                  </view>
-                  <!-- 非系统智能体 BASIC 组：始终开启，开关置灰不可操作 -->
-                  <view
-                    class="switch-wrapper factor-switch factor-switch-basic active"
-                    wx:if="{{!agentDetail.isSystem && factor.factorGroup === 'BASIC'}}"
-                  >
-                    <view class="switch-thumb"></view>
-                  </view>
-                  <!-- 非系统智能体 非BASIC组：可切换开关 -->
-                  <view
-                    class="switch-wrapper factor-switch {{factor.isEnabled ? 'active' : ''}} {{savingFactor && savingFactorId === factor.factorCode ? 'saving' : ''}}"
-                    wx:if="{{!agentDetail.isSystem && factor.factorGroup !== 'BASIC'}}"
-                    catchtap="onToggleFactorEnabled"
-                    data-factorcode="{{factor.factorCode}}"
-                    data-groupindex="{{groupIndex}}"
-                    data-itemindex="{{itemIndex}}"
-                  >
-                    <view class="switch-thumb"></view>
+                  <view class="factor-right-actions">
+                    <!-- 自定义因素：编辑/删除按钮 -->
+                    <view class="factor-actions" wx:if="{{!agentDetail.isSystem && factor.isCustom}}">
+                      <view
+                        class="factor-action-btn edit"
+                        catchtap="onEditFactor"
+                        data-factorcode="{{factor.factorCode}}"
+                        data-groupindex="{{groupIndex}}"
+                        data-itemindex="{{itemIndex}}"
+                      >
+                        <text class="factor-action-icon">✎</text>
+                      </view>
+                      <view
+                        class="factor-action-btn delete"
+                        catchtap="onDeleteFactor"
+                        data-factorcode="{{factor.factorCode}}"
+                        data-groupindex="{{groupIndex}}"
+                        data-itemindex="{{itemIndex}}"
+                      >
+                        <text class="factor-action-icon">✕</text>
+                      </view>
+                    </view>
+                    <!-- 系统智能体：只显示状态 -->
+                    <view class="factor-status" wx:if="{{agentDetail.isSystem && !factor.isEnabled}}">
+                      <text>已禁用</text>
+                    </view>
+                    <!-- 非系统智能体 BASIC 组：始终开启，开关置灰不可操作 -->
+                    <view
+                      class="switch-wrapper factor-switch factor-switch-basic active"
+                      wx:if="{{!agentDetail.isSystem && factor.factorGroup === 'BASIC'}}"
+                    >
+                      <view class="switch-thumb"></view>
+                    </view>
+                    <!-- 非系统智能体 非BASIC组：可切换开关 -->
+                    <view
+                      class="switch-wrapper factor-switch {{factor.isEnabled ? 'active' : ''}} {{savingFactor && savingFactorId === factor.factorCode ? 'saving' : ''}}"
+                      wx:if="{{!agentDetail.isSystem && factor.factorGroup !== 'BASIC'}}"
+                      catchtap="onToggleFactorEnabled"
+                      data-factorcode="{{factor.factorCode}}"
+                      data-groupindex="{{groupIndex}}"
+                      data-itemindex="{{itemIndex}}"
+                    >
+                      <view class="switch-thumb"></view>
+                    </view>
                   </view>
                 </view>
                 <text class="factor-desc" wx:if="{{factor.description}}">{{factor.description}}</text>
@@ -260,56 +293,68 @@
           <text>暂无因素配置</text>
         </view>
 
-        <!-- 新增因素表单（非系统智能体） -->
-        <view class="add-factor-form" wx:if="{{showAddFactor && !agentDetail.isSystem}}">
-          <view class="add-factor-form-title">
-            <text>添加新因素</text>
-            <view class="add-factor-form-close" catchtap="onCloseAddFactor">
-              <text class="close-icon small">×</text>
-            </view>
-          </view>
-          <view class="add-factor-field">
-            <text class="add-factor-label">因素名称 <text class="required">*</text></text>
-            <input
-              class="add-factor-input"
-              placeholder="输入因素名称"
-              placeholder-class="create-placeholder"
-              value="{{newFactorName}}"
-              bindinput="onNewFactorNameInput"
-              maxlength="50"
-            />
-          </view>
-          <view class="add-factor-field">
-            <text class="add-factor-label">因素描述</text>
-            <textarea
-              class="add-factor-textarea"
-              placeholder="描述该因素的作用"
-              placeholder-class="create-placeholder"
-              value="{{newFactorDesc}}"
-              bindinput="onNewFactorDescInput"
-              maxlength="200"
-              auto-height
-            />
-          </view>
-          <view class="add-factor-field">
-            <text class="add-factor-label">Prompt模板</text>
-            <textarea
-              class="add-factor-textarea"
-              placeholder="使用 {value} 作为占位符，例如：请分析球队的 {value}"
-              placeholder-class="create-placeholder"
-              value="{{newFactorPrompt}}"
-              bindinput="onNewFactorPromptInput"
-              maxlength="500"
-              auto-height
-            />
-          </view>
-          <view class="add-factor-submit-btn {{savingFactor ? 'loading' : ''}}" bindtap="onSubmitNewFactor">
-            <text wx:if="{{!savingFactor}}">确认添加</text>
-            <text wx:else>保存中...</text>
-          </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>
+
+<!-- 因素添加/编辑抽屉 -->
+<view class="drawer-mask" wx:if="{{showFactorDrawer}}" catchtap="onCloseFactorDrawer">
+  <view class="drawer-popup" catchtap="preventTap">
+    <view class="drawer-header">
+      <view class="drawer-close" catchtap="onCloseFactorDrawer">
+        <text class="close-icon">×</text>
+      </view>
+      <text class="drawer-title">{{factorDrawerMode === 'add' ? '添加因素' : '编辑因素'}}</text>
+    </view>
+    <scroll-view class="drawer-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+      <view class="drawer-form">
+        <view class="drawer-field">
+          <text class="drawer-label">因素名称 <text class="required">*</text></text>
+          <input
+            class="drawer-input"
+            placeholder="输入因素名称"
+            placeholder-class="create-placeholder"
+            value="{{factorFormName}}"
+            bindinput="onFactorFormNameInput"
+            maxlength="50"
+          />
+        </view>
+        <view class="drawer-field">
+          <text class="drawer-label">因素描述</text>
+          <textarea
+            class="drawer-textarea"
+            placeholder="描述该因素的作用"
+            placeholder-class="create-placeholder"
+            value="{{factorFormDesc}}"
+            bindinput="onFactorFormDescInput"
+            maxlength="200"
+            auto-height
+          />
+        </view>
+        <view class="drawer-field">
+          <text class="drawer-label">Prompt模板</text>
+          <textarea
+            class="drawer-textarea"
+            placeholder="使用 {value} 作为占位符，例如：请分析球队的 {value}"
+            placeholder-class="create-placeholder"
+            value="{{factorFormPrompt}}"
+            bindinput="onFactorFormPromptInput"
+            maxlength="500"
+            auto-height
+          />
         </view>
       </view>
     </scroll-view>
+    <view class="drawer-footer">
+      <view class="drawer-cancel" bindtap="onCloseFactorDrawer">
+        <text>取消</text>
+      </view>
+      <view class="drawer-submit {{savingFactor ? 'loading' : ''}}" bindtap="onSubmitFactorForm">
+        <text wx:if="{{!savingFactor}}">{{factorDrawerMode === 'add' ? '确认添加' : '保存修改'}}</text>
+        <text wx:else>保存中...</text>
+      </view>
+    </view>
   </view>
 </view>
 

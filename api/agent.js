@@ -1,5 +1,5 @@
 // api/agent.js - 智能体相关接口
-const { get, post } = require('./index')
+const { get, post, put } = require('./index')
 
 /**
  * 获取用户的智能体列表
@@ -74,11 +74,40 @@ function createCustomFactor(data) {
   return post('/api/agent/factor/createCustom', { ...data, _t: Date.now() }, { showLoading: true })
 }
 
+/**
+ * 更新自定义因素
+ * @param {Object} data
+ * @param {string} data.userId 用户ID
+ * @param {string} data.factorCode 因素编码
+ * @param {string} data.factorName 因素名称
+ * @param {string} data.description 因素描述
+ * @param {string} data.promptTemplate Prompt模板（使用{value}作为占位符）
+ * @returns {Promise<Object>}
+ */
+function updateCustomFactor(data) {
+  const { userId, factorCode, ...body } = data
+  return put(`/api/agent/factor/updateCustom/${userId}/${factorCode}`, { ...body, _t: Date.now() }, { showLoading: true })
+}
+
+/**
+ * 删除自定义因素
+ * @param {Object} data
+ * @param {string} data.userId 用户ID
+ * @param {string} data.factorCode 因素编码
+ * @returns {Promise<Object>}
+ */
+function deleteCustomFactor(data) {
+  const { userId, factorCode } = data
+  return post(`/api/agent/factor/deleteCustom/${userId}/${factorCode}`, { _t: Date.now() }, { showLoading: true })
+}
+
 module.exports = {
   getAgentList,
   getAgentDetail,
   createAgent,
   saveFactor,
   batchSaveFactors,
-  createCustomFactor
+  createCustomFactor,
+  updateCustomFactor,
+  deleteCustomFactor
 }

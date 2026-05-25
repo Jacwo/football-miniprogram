@@ -21,6 +21,7 @@ Page({
     scrollToView: '',
     keyboardHeight: 0,
     deepThinking: false,
+    modelName: 'deepseek-v4-flash',
     // 比赛选择
     selectedMatch: null, // 当前选中的比赛
     showMatchPicker: false, // 比赛选择弹窗
@@ -40,11 +41,13 @@ Page({
     createAgentDesc: '',
     createAgentCopySystem: true,
     createAgentLoading: false,
-    // 新增因素
-    showAddFactor: false,
-    newFactorName: '',
-    newFactorDesc: '',
-    newFactorPrompt: '',
+    // 新增/编辑因素抽屉
+    showFactorDrawer: false,
+    factorDrawerMode: 'add', // 'add' | 'edit'
+    factorFormName: '',
+    factorFormDesc: '',
+    factorFormPrompt: '',
+    editingFactorCode: null, // 编辑时的 factorCode
     savingFactor: false,
     savingFactorId: null
   },
@@ -378,6 +381,8 @@ Page({
             items: []
           }
         }
+        // 标记是否为自定义因素
+        item.isCustom = item.factorGroup === 'CUSTOM'
         groupMap[group].items.push(item)
       })
       // 将 BASIC 组排在最前面
@@ -530,42 +535,58 @@ Page({
     }
   },
 
-  // 显示新增因素表单
+  // ========== 因素抽屉（新增/编辑） ==========
+  // 显示添加因素抽屉
   onShowAddFactor() {
     this.setData({
-      showAddFactor: true,
-      newFactorName: '',
-      newFactorDesc: '',
-      newFactorPrompt: ''
+      showFactorDrawer: true,
+      factorDrawerMode: 'add',
+      factorFormName: '',
+      factorFormDesc: '',
+      factorFormPrompt: '',
+      editingFactorCode: null
     })
   },
 
-  // 关闭新增因素表单
-  onCloseAddFactor() {
-    this.setData({ showAddFactor: false })
+  // 显示编辑因素抽屉
+  onEditFactor(e) {
+    const { factorcode, groupindex, itemindex } = e.currentTarget.dataset
+    const { factorGroups } = this.data
+    const factor = factorGroups[groupindex].items[itemindex]
+    if (!factor) return
+
+    this.setData({
+      showFactorDrawer: true,
+      factorDrawerMode: 'edit',
+      factorFormName: factor.factorName || '',
+      factorFormDesc: factor.description || '',
+      factorFormPrompt: factor.promptTemplate || '',
+      editingFactorCode: factorcode
+    })
   },
 
-  // 新增因素 - 名称输入
-  onNewFactorNameInput(e) {
-    this.setData({ newFactorName: e.detail.value })
+  // 关闭因素抽屉
+  onCloseFactorDrawer() {
+    this.setData({ showFactorDrawer: false })
   },
 
-  // 新增因素 - 描述输入
-  onNewFactorDescInput(e) {
-    this.setData({ newFactorDesc: e.detail.value })
+  // 抽屉表单项输入
+  onFactorFormNameInput(e) {
+    this.setData({ factorFormName: e.detail.value })
+  },
+  onFactorFormDescInput(e) {
+    this.setData({ factorFormDesc: e.detail.value })
+  },
+  onFactorFormPromptInput(e) {
+    this.setData({ factorFormPrompt: e.detail.value })
   },
 
-  // 新增因素 - Prompt模板输入
-  onNewFactorPromptInput(e) {
-    this.setData({ newFactorPrompt: e.detail.value })
-  },
-
-  // 提交新增因素
-  async onSubmitNewFactor() {
-    const { newFactorName, newFactorDesc, newFactorPrompt, agentDetail, savingFactor } = this.data
+  // 提交因素表单（新增 or 编辑）
+  async onSubmitFactorForm() {
+    const { factorFormName, factorFormDesc, factorFormPrompt, factorDrawerMode, editingFactorCode, agentDetail, savingFactor } = this.data
     if (savingFactor) return
 
-    const name = newFactorName.trim()
+    const name = factorFormName.trim()
     if (!name) {
       wx.showToast({ title: '请输入因素名称', icon: 'none' })
       return
@@ -574,27 +595,75 @@ Page({
     const userInfo = userStore.getUserInfo()
     if (!userInfo || !userInfo.id) return
 
-    this.setData({ savingFactor: true })
+    this.setData({ savingFactor: true, savingFactorId: editingFactorCode || 'new' })
 
     try {
-      await agentApi.createCustomFactor({
-        userId: userInfo.id,
-        agentId: agentDetail.id,
-        factorName: name,
-        description: newFactorDesc.trim(),
-        promptTemplate: newFactorPrompt.trim()
-      })
+      if (factorDrawerMode === 'add') {
+        await agentApi.createCustomFactor({
+          userId: userInfo.id,
+          agentId: agentDetail.id,
+          factorName: name,
+          description: factorFormDesc.trim(),
+          promptTemplate: factorFormPrompt.trim()
+        })
+        wx.showToast({ title: '添加成功', icon: 'success' })
+      } else {
+        await agentApi.updateCustomFactor({
+          userId: userInfo.id,
+          factorCode: editingFactorCode,
+          factorName: name,
+          description: factorFormDesc.trim(),
+          promptTemplate: factorFormPrompt.trim()
+        })
+        wx.showToast({ title: '更新成功', icon: 'success' })
+      }
 
-      wx.showToast({ title: '添加成功', icon: 'success' })
-
-      // 刷新详情
-      this.setData({ showAddFactor: false, savingFactor: false })
+      // 关闭抽屉并刷新详情
+      this.setData({ showFactorDrawer: false, savingFactor: false, savingFactorId: null })
       this.onAgentSelect({ currentTarget: { dataset: { agent: agentDetail } } })
     } catch (e) {
-      console.error('新增因素失败:', e)
-      wx.showToast({ title: e.message || '添加失败', icon: 'none' })
-      this.setData({ savingFactor: false })
+      console.error('因素操作失败:', e)
+      wx.showToast({ title: e.message || '操作失败', icon: 'none' })
+      this.setData({ savingFactor: false, savingFactorId: null })
     }
+  },
+
+  // 删除自定义因素
+  onDeleteFactor(e) {
+    const { factorcode, groupindex, itemindex } = e.currentTarget.dataset
+    const { factorGroups, agentDetail } = this.data
+    const factor = factorGroups[groupindex].items[itemindex]
+    if (!factor) return
+
+    wx.showModal({
+      title: '确认删除',
+      content: `确定要删除因素「${factor.factorName}」吗？此操作不可撤销。`,
+      confirmColor: '#ef4444',
+      success: async (res) => {
+        if (!res.confirm) return
+
+        const userInfo = userStore.getUserInfo()
+        if (!userInfo || !userInfo.id) return
+
+        this.setData({ savingFactor: true, savingFactorId: factorcode })
+
+        try {
+          await agentApi.deleteCustomFactor({
+            userId: userInfo.id,
+            factorCode: factorcode
+          })
+
+          wx.showToast({ title: '删除成功', icon: 'success' })
+
+          this.setData({ savingFactor: false, savingFactorId: null })
+          this.onAgentSelect({ currentTarget: { dataset: { agent: agentDetail } } })
+        } catch (e) {
+          console.error('删除因素失败:', e)
+          wx.showToast({ title: e.message || '删除失败', icon: 'none' })
+          this.setData({ savingFactor: false, savingFactorId: null })
+        }
+      }
+    })
   },
 
   // 切换深度思考模式
@@ -656,6 +725,26 @@ Page({
       inputText: ''
     })
     wx.removeStorageSync('ai-chat-messages')
+  },
+
+  // 切换智能体 — 返回到智能体列表
+  onSwitchAgent() {
+    this.setData({ selectedAgent: null })
+  },
+
+  // 重新选择智能体 — 点击已选智能体打开详情
+  onReSelectAgent() {
+    const { selectedAgent } = this.data
+    if (!selectedAgent) return
+
+    // 构造一个简化的 agent 对象传给 onAgentSelect
+    this.onAgentSelect({
+      currentTarget: {
+        dataset: {
+          agent: selectedAgent
+        }
+      }
+    })
   },
 
   // 确认选择智能体（从详情弹窗中选中）
