@@ -184,6 +184,14 @@ function checkVipStatus(userId) {
   return get(`/api/user/vip/status/${userId}`, {}, { showLoading: false })
 }
 
+/**
+ * 检查VIP状态（返回true/false）
+ * @param {string} userId 用户ID
+ */
+function checkVip(userId) {
+  return get(`/api/vip/check/${userId}`, { _t: Date.now() }, { showLoading: false })
+}
+
 module.exports = {
   sendSms,
   login,
@@ -203,5 +211,6 @@ module.exports = {
   getUserMedals,
   buyVipPackage,
   renewVip,
-  checkVipStatus
+  checkVipStatus,
+  checkVip
 }

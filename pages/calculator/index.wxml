@@ -52,6 +52,20 @@
           <text class="team-name away">{{item.awayTeamAbbName}}</text>
         </view>
 
+        <!-- AI帮选 -->
+        <view class="ai-recommend {{selectedMap[item.matchId + '_had_' + item.aiHadValue] || selectedMap[item.matchId + '_hhad_' + item.aiHhadValue] ? 'ai-selected' : ''}}"
+              wx:if="{{item.aiResult || item.aiLetResult}}"
+              data-matchid="{{item.matchId}}"
+              data-hadv="{{item.aiHadValue}}" data-hadodds="{{item.aiHadOdds}}"
+              data-hhadv="{{item.aiHhadValue}}" data-hhadodds="{{item.aiHhadOdds}}"
+              bindtap="onAiRecommendTap">
+          <view class="ai-bar-inner">
+            <text class="ai-bar-icon">✨</text>
+            <text class="ai-bar-text">AI帮选 · 一键勾选推荐结果</text>
+            <text class="ai-bar-arrow">→</text>
+          </view>
+        </view>
+
         <!-- 赔率区域 -->
         <view class="odds-wrapper">
           <view class="odds-left">

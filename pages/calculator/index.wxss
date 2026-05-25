@@ -201,6 +201,70 @@
   padding: 0 12rpx;
 }
 
+/* AI帮选 */
+.ai-recommend {
+  margin-bottom: 8rpx;
+  padding: 6rpx 14rpx;
+  background: linear-gradient(135deg, rgba(102,126,234,0.06) 0%, rgba(118,75,162,0.06) 100%);
+  border: 1rpx dashed #667eea;
+  border-radius: 8rpx;
+  animation: aiBorderPulse 2s ease-in-out infinite;
+}
+
+.ai-recommend:active {
+  transform: scale(0.98);
+}
+
+.ai-recommend.ai-selected {
+  background: linear-gradient(135deg, rgba(102,126,234,0.12) 0%, rgba(118,75,162,0.12) 100%);
+  border-style: solid;
+  border-color: rgba(102,126,234,0.5);
+  animation: none;
+}
+
+@keyframes aiBorderPulse {
+  0%, 100% { border-color: rgba(102,126,234,0.35); }
+  50% { border-color: rgba(102,126,234,0.7); }
+}
+
+.ai-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.ai-bar-icon {
+  font-size: 20rpx;
+  animation: aiSpark 2s ease-in-out infinite;
+}
+
+@keyframes aiSpark {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.15); }
+}
+
+.ai-bar-text {
+  flex: 1;
+  font-size: 20rpx;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.ai-recommend.ai-selected .ai-bar-text {
+  color: #4a5cd4;
+}
+
+.ai-bar-arrow {
+  font-size: 18rpx;
+  color: #667eea;
+  animation: aiArrow 1.5s ease-in-out infinite;
+}
+
+@keyframes aiArrow {
+  0%, 100% { transform: translateX(0); opacity: 0.7; }
+  50% { transform: translateX(4rpx); opacity: 1; }
+}
+
 /* 赔率区域包装 */
 .odds-wrapper {
   display: flex;

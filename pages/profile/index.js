@@ -114,6 +114,21 @@ Page({
         console.error("获取用户信息失败:", error);
         // 获取失败时使用本地缓存的用户信息
       }
+
+      // 检查VIP状态并刷新缓存
+      try {
+        const isVip = await userApi.checkVip(userInfo.id);
+        if (typeof isVip === 'boolean') {
+          userInfo.isVip = isVip;
+          wx.setStorageSync("userInfo", userInfo);
+          const app = getApp();
+          if (app && app.globalData) {
+            app.globalData.userInfo = userInfo;
+          }
+        }
+      } catch (error) {
+        console.error("检查VIP状态失败:", error);
+      }
     }
 
     // 格式化VIP到期时间

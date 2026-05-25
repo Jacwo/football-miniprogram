@@ -35,6 +35,7 @@ Page({
     this.checkFeatures();
     this.loadMatches();
     this.loadAnnouncements();
+    this.checkVipStatus();
   },
 
   onShow() {
@@ -489,5 +490,24 @@ Page({
         date: dateMap[weekday] || "",
         matches: groups[weekday].sort((a, b) => a.matchNum - b.matchNum),
       }));
+  },
+
+  // 检查VIP状态并刷新前端缓存
+  async checkVipStatus() {
+    const userInfo = userStore.getUserInfo();
+    if (!userStore.isLoggedIn() || !userInfo || !userInfo.id) return;
+    try {
+      const isVip = await userApi.checkVip(userInfo.id);
+      if (typeof isVip === 'boolean') {
+        userInfo.isVip = isVip;
+        wx.setStorageSync("userInfo", userInfo);
+        const app = getApp();
+        if (app && app.globalData) {
+          app.globalData.userInfo = userInfo;
+        }
+      }
+    } catch (error) {
+      console.error("检查VIP状态失败:", error);
+    }
   },
 });

@@ -55,8 +55,9 @@ Page({
     if (options.matches) {
       try {
         const hotMatches = JSON.parse(decodeURIComponent(options.matches));
+        const matches = hotMatches.map(m => this.parseAiRecommend(m))
         this.setData({
-          matches: hotMatches,
+          matches,
           loading: false,
           source: options.source || '',
           pageTitle: '热门比赛模拟'
@@ -300,7 +301,8 @@ Page({
     this.setData({ loading: true, error: null })
     try {
       const res = await matchApi.getCalculatorMatches()
-      const matches = res.data || res || []
+      const rawMatches = res.data || res || []
+      const matches = rawMatches.map(m => this.parseAiRecommend(m))
       this.setData({ matches, loading: false })
     } catch (error) {
       console.error('加载比赛数据失败:', error)
@@ -308,11 +310,95 @@ Page({
     }
   },
 
+  // 解析AI推荐字段
+  parseAiRecommend(match) {
+    const aiHadMap = { '胜': 'H', '主胜': 'H', '平': 'D', '平局': 'D', '负': 'A', '主负': 'A', '客胜': 'A' }
+    const aiHhadMap = { '让胜': 'H', '让平': 'D', '让负': 'A' }
+
+    match.aiHadValue = aiHadMap[match.aiResult] || null
+    match.aiHhadValue = aiHhadMap[match.aiLetResult] || null
+
+    // 获取AI推荐对应的赔率
+    match.aiHadOdds = null
+    match.aiHhadOdds = null
+    if (match.aiHadValue === 'H') match.aiHadOdds = match.hadH
+    else if (match.aiHadValue === 'D') match.aiHadOdds = match.hadD
+    else if (match.aiHadValue === 'A') match.aiHadOdds = match.hadA
+
+    if (match.aiHhadValue === 'H') match.aiHhadOdds = match.hhadH
+    else if (match.aiHhadValue === 'D') match.aiHhadOdds = match.hhadD
+    else if (match.aiHhadValue === 'A') match.aiHhadOdds = match.hhadA
+
+    return match
+  },
+
   onSelectOption(e) {
     const { matchid, type, value, odds } = e.currentTarget.dataset
     // 赔率为空时不响应
     if (odds == null || odds === '' || odds === undefined) return
     this.toggleSelection(matchid, type, value, this.parseOdds(odds))
+  },
+
+  // 点击AI推荐标签，选中/取消两个选项
+  onAiRecommendTap(e) {
+    // VIP限制：仅VIP用户可使用AI帮选
+    const userInfo = userStore.getUserInfo()
+    if (!userInfo || !userInfo.isVip) {
+      wx.showModal({
+        title: 'VIP专属功能',
+        content: 'AI帮选是会员专属功能，开通会员即可使用',
+        confirmText: '开通会员',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: '/pages/vip/index' })
+          }
+        }
+      })
+      return
+    }
+
+    const { matchid, hadv, hadodds, hhadv, hhadodds } = e.currentTarget.dataset
+    const { selections, selectedMap } = this.data
+    const hadKey = `${matchid}_had_${hadv}`
+    const hhadKey = `${matchid}_hhad_${hhadv}`
+    const isSelected = selectedMap[hadKey] || selectedMap[hhadKey]
+
+    if (isSelected) {
+      // 取消选中
+      if (!selections[matchid]) selections[matchid] = []
+      delete selectedMap[hadKey]
+      delete selectedMap[hhadKey]
+      selections[matchid] = selections[matchid].filter(
+        item => !(item.type === 'had' && item.value === hadv) && !(item.type === 'hhad' && item.value === hhadv)
+      )
+      if (selections[matchid].length === 0) delete selections[matchid]
+    } else {
+      // 新场次检查8场上限
+      if (!selections[matchid] && Object.keys(selections).length >= 8) {
+        wx.showToast({ title: '最多选择8场比赛', icon: 'none', duration: 1500 })
+        return
+      }
+      if (!selections[matchid]) selections[matchid] = []
+      // 选中两个
+      if (hadv && hadodds != null && hadodds !== '') {
+        if (!selections[matchid].some(s => s.type === 'had' && s.value === hadv)) {
+          selections[matchid].push({ type: 'had', value: hadv, odds: this.parseOdds(hadodds) })
+        }
+        selectedMap[hadKey] = true
+      }
+      if (hhadv && hhadodds != null && hhadodds !== '') {
+        if (!selections[matchid].some(s => s.type === 'hhad' && s.value === hhadv)) {
+          selections[matchid].push({ type: 'hhad', value: hhadv, odds: this.parseOdds(hhadodds) })
+        }
+        selectedMap[hhadKey] = true
+      }
+    }
+
+    const selectedCount = Object.keys(selections).length
+    this.setData({ selections, selectedMap, selectedCount })
+    this.updateAvailablePassTypes()
+    this.calculateBets()
   },
 
   // 解析赔率（处理字符串格式）
@@ -421,6 +507,11 @@ Page({
       if (selections[matchId].length === 0) delete selections[matchId]
       delete selectedMap[key]
     } else {
+      // 新场次需检查是否超过8场上限
+      if (selections[matchId].length === 0 && Object.keys(selections).length >= 8) {
+        wx.showToast({ title: '最多选择8场比赛', icon: 'none', duration: 1500 })
+        return
+      }
       selections[matchId].push({ type, value, odds })
       selectedMap[key] = true
     }
