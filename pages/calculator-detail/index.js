@@ -1,4 +1,4 @@
-// pages/calculator-detail/index.js - 模拟选号记录详情
+// pages/calculator-detail/index.js - 足球计算器记录详情
 const matchApi = require('../../api/match')
 const userStore = require('../../store/user')
 
@@ -31,48 +31,7 @@ Page({
     this.loadRecord(id)
   },
 
-  /**
-   * 运行中奖金额计算测试用例
-   * 验证不同场景下的计算准确性
-   */
-  runBonusCalculationTests() {
-    console.log('\n\n========== 开始运行中奖金额计算测试 ==========\n')
 
-    // 测试用例1：单关 - 2场比赛各选1个选项，全部命中
-    this.testCase1()
-
-    // 测试用例2：2串1 - 2场比赛各选1个选项，全部命中
-    this.testCase2()
-
-    // 测试用例3：3串1 + 4串1 - 4场比赛，全部命中
-    this.testCase3()
-
-    // 测试用例4：混合玩法 - 同场选择胜平负和让球胜平负
-    this.testCase4()
-
-    // 测试用例5：多选项 - 同场同玩法选多个选项
-    this.testCase5()
-
-    // 测试用例6：3串1 + 2串1 混合
-    this.testCase6()
-
-    // 测试用例7：比分玩法
-    this.testCase7()
-
-    // 测试用例8：部分场次未命中导致未中奖
-    this.testCase8()
-
-    // 测试用例9：同场同玩法选多个，只有部分命中
-    this.testCase9()
-
-    // 测试用例10：冲突场景 - had H 和 hhad A 不能同时命中
-    this.testCase10()
-
-    // 测试用例11：复杂场景 - 4串1、5串1、6串1
-    this.testCase11()
-
-    console.log('\n========== 测试完成 ==========\n')
-  },
 
   /**
    * 测试用例1：单关
@@ -1322,7 +1281,7 @@ Page({
     const typeMap = {}
     const typeDescMap = {
       'had': '胜平负',
-      'hhad': '让球胜平负',
+      'hhad': '让球',
       'crs': '比分',
       'ttg': '总进球',
       'hafu': '半全场'
@@ -1333,7 +1292,7 @@ Page({
       if (!typeMap[type]) {
         typeMap[type] = {
           type,
-          typeDesc: opt.optionTypeDesc || typeDescMap[type] || type,
+          typeDesc:  typeDescMap[type] || opt.optionTypeDesc || type,
           goalLine: opt.goalLine,
           matchResultDesc: opt.matchResultDesc,
           checkTime: opt.checkTime,

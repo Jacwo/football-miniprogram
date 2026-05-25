@@ -31,7 +31,7 @@
       </view>
     </view>
 
-    <!-- 模拟选号内容 -->
+    <!-- 足球计算器内容 -->
     <view class="tab-content" wx:if="{{currentTab === 'play'}}">
     <!-- 比赛列表 -->
     <scroll-view class="match-scroll" scroll-y enhanced show-scrollbar="{{false}}">
@@ -61,17 +61,17 @@
                 <text class="section-title">胜平负</text>
                 <view class="odds-group {{item.bettingSingle == 1 || item.bettingSingle == true ? 'single' : ''}}">
                   <text class="single-corner" wx:if="{{item.bettingSingle == 1 || item.bettingSingle == true}}">单</text>
-                  <view class="odds-item {{selectedMap[item.matchId + '_had_H'] ? 'active' : ''}}" data-matchid="{{item.matchId}}" data-type="had" data-value="H" data-odds="{{item.hadH}}" bindtap="onSelectOption">
+                  <view class="odds-item {{!item.hadH ? 'disabled' : ''}} {{selectedMap[item.matchId + '_had_H'] ? 'active' : ''}}" data-matchid="{{item.matchId}}" data-type="had" data-value="H" data-odds="{{item.hadH}}" bindtap="onSelectOption">
                     <text class="odds-label">胜</text>
-                    <text class="odds-value">{{item.hadH}}</text>
+                    <text class="odds-value">{{item.hadH || '-'}}</text>
                   </view>
-                  <view class="odds-item {{selectedMap[item.matchId + '_had_D'] ? 'active' : ''}}" data-matchid="{{item.matchId}}" data-type="had" data-value="D" data-odds="{{item.hadD}}" bindtap="onSelectOption">
+                  <view class="odds-item {{!item.hadD ? 'disabled' : ''}} {{selectedMap[item.matchId + '_had_D'] ? 'active' : ''}}" data-matchid="{{item.matchId}}" data-type="had" data-value="D" data-odds="{{item.hadD}}" bindtap="onSelectOption">
                     <text class="odds-label">平</text>
-                    <text class="odds-value">{{item.hadD}}</text>
+                    <text class="odds-value">{{item.hadD || '-'}}</text>
                   </view>
-                  <view class="odds-item {{selectedMap[item.matchId + '_had_A'] ? 'active' : ''}}" data-matchid="{{item.matchId}}" data-type="had" data-value="A" data-odds="{{item.hadA}}" bindtap="onSelectOption">
+                  <view class="odds-item {{!item.hadA ? 'disabled' : ''}} {{selectedMap[item.matchId + '_had_A'] ? 'active' : ''}}" data-matchid="{{item.matchId}}" data-type="had" data-value="A" data-odds="{{item.hadA}}" bindtap="onSelectOption">
                     <text class="odds-label">负</text>
-                    <text class="odds-value">{{item.hadA}}</text>
+                    <text class="odds-value">{{item.hadA || '-'}}</text>
                   </view>
                 </view>
               </view>
@@ -82,17 +82,17 @@
               <view class="odds-inline-row">
                 <text class="section-title">让球<text class="goalline">({{item.hhadGoalLine}})</text></text>
                 <view class="odds-group">
-                  <view class="odds-item {{selectedMap[item.matchId + '_hhad_H'] ? 'active' : ''}}" data-matchid="{{item.matchId}}" data-type="hhad" data-value="H" data-odds="{{item.hhadH}}" bindtap="onSelectOption">
+                  <view class="odds-item {{!item.hhadH ? 'disabled' : ''}} {{selectedMap[item.matchId + '_hhad_H'] ? 'active' : ''}}" data-matchid="{{item.matchId}}" data-type="hhad" data-value="H" data-odds="{{item.hhadH}}" bindtap="onSelectOption">
                     <text class="odds-label">胜</text>
-                    <text class="odds-value">{{item.hhadH}}</text>
+                    <text class="odds-value">{{item.hhadH || '-'}}</text>
                   </view>
-                  <view class="odds-item {{selectedMap[item.matchId + '_hhad_D'] ? 'active' : ''}}" data-matchid="{{item.matchId}}" data-type="hhad" data-value="D" data-odds="{{item.hhadD}}" bindtap="onSelectOption">
+                  <view class="odds-item {{!item.hhadD ? 'disabled' : ''}} {{selectedMap[item.matchId + '_hhad_D'] ? 'active' : ''}}" data-matchid="{{item.matchId}}" data-type="hhad" data-value="D" data-odds="{{item.hhadD}}" bindtap="onSelectOption">
                     <text class="odds-label">平</text>
-                    <text class="odds-value">{{item.hhadD}}</text>
+                    <text class="odds-value">{{item.hhadD || '-'}}</text>
                   </view>
-                  <view class="odds-item {{selectedMap[item.matchId + '_hhad_A'] ? 'active' : ''}}" data-matchid="{{item.matchId}}" data-type="hhad" data-value="A" data-odds="{{item.hhadA}}" bindtap="onSelectOption">
+                  <view class="odds-item {{!item.hhadA ? 'disabled' : ''}} {{selectedMap[item.matchId + '_hhad_A'] ? 'active' : ''}}" data-matchid="{{item.matchId}}" data-type="hhad" data-value="A" data-odds="{{item.hhadA}}" bindtap="onSelectOption">
                     <text class="odds-label">负</text>
-                    <text class="odds-value">{{item.hhadA}}</text>
+                    <text class="odds-value">{{item.hhadA || '-'}}</text>
                   </view>
                 </view>
               </view>
@@ -126,7 +126,7 @@
       <view class="records-empty" wx:elif="{{records.length === 0}}">
         <text class="empty-icon">📋</text>
         <text class="empty-text">暂无记录</text>
-        <text class="empty-tip">保存模拟选号后记录将显示在这里</text>
+        <text class="empty-tip">保存足球计算器方案后记录将显示在这里</text>
       </view>
       <scroll-view class="records-scroll" scroll-y wx:else>
         <view class="record-swipe-wrapper" wx:for="{{records}}" wx:key="id">
@@ -165,7 +165,7 @@
       </scroll-view>
     </view>
 
-    <!-- 底部操作栏 - 仅在模拟选号tab显示 -->
+    <!-- 底部操作栏 - 仅在足球计算器tab显示 -->
     <view class="bottom-bar" wx:if="{{currentTab === 'play'}}">
       <!-- 过关方式选择 -->
       <view class="pass-type-row" wx:if="{{availablePassTypes.length > 0}}">

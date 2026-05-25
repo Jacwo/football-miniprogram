@@ -22,11 +22,11 @@ Page({
       { value: "4", label: "进行中" },
       { value: "5", label: "已完成" },
     ],
-    // 模拟选号按钮位置
+    // 足球计算器按钮位置
     calculatorX: 500,
     calculatorY: 120,
     // 功能开关
-    showCalculator: false, // 是否显示模拟选号按钮
+    showCalculator: false, // 是否显示足球计算器按钮
     // 公告
     announcements: [],
   },
@@ -410,7 +410,7 @@ Page({
     });
   },
 
-  // 跳转到模拟选号
+  // 跳转到足球计算器
   onCalculator() {
     // 检查登录状态，未登录则跳转登录页
     if (!userStore.isLoggedIn()) {
@@ -425,7 +425,7 @@ Page({
     });
   },
 
-  // 模拟选号按钮拖动
+  // 足球计算器按钮拖动
   onCalculatorMove(e) {
     // 记录最新位置，防止tap事件被误触
     this._lastMoveTime = Date.now();

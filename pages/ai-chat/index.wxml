@@ -33,7 +33,7 @@
       <view class="welcome-icon">
         <image src="/images/logo.png" mode="aspectFit" class="ai-icon" />
       </view>
-      <text class="welcome-title">足球分析助手</text>
+      <text class="welcome-title">AI足球智能体</text>
       <text class="welcome-desc">专业的足球赛事分析，为你提供比赛预测与策略建议</text>
     </view>
 

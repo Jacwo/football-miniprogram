@@ -13,14 +13,23 @@ page {
 
 /* 页面头部 */
 .page-header {
-  position: relative;
-  padding: 60rpx 32rpx 24rpx;
+  padding: 24rpx 32rpx 24rpx 32rpx;
+  padding-right: 200rpx; /* 避开胶囊按钮 */
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title-section {
   display: flex;
   align-items: center;
 }
 
 .page-title {
-  font-size: 40rpx;
+  font-size: 36rpx;
   color: #fff;
   font-weight: 800;
   letter-spacing: 2rpx;
@@ -28,20 +37,19 @@ page {
 }
 
 .header-share-btn {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 0 24rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 0 28rpx;
   height: 60rpx;
   line-height: 60rpx;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   border: none;
   border-radius: 30rpx;
   font-size: 26rpx;
   color: #667eea;
   font-weight: 600;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.12);
 }
 
 .header-share-btn::after {
@@ -603,7 +611,7 @@ page {
 }
 
 .bottom-placeholder {
-  height: 40rpx;
+  height: calc(env(safe-area-inset-bottom) + 120rpx);
 }
 
 /* 单关计划浮动按钮 */

@@ -35,6 +35,7 @@ Page({
   },
 
   onLoad() {
+    this._isFirstShow = true;
     this.setData({ loading: true });
     this.checkFeatures(); // 获取配置，控制历史tab显示
     this.loadLiveMatches();
@@ -62,6 +63,11 @@ Page({
     // 设置tabBar选中状态
     if (typeof this.getTabBar === "function" && this.getTabBar()) {
       this.getTabBar().setData({ selectedPath: "/pages/match-result/index" });
+    }
+    // 首次显示时跳过（onLoad已加载），后续切换tab时刷新
+    if (this._isFirstShow) {
+      this._isFirstShow = false;
+      return;
     }
     if (this.data.activeTab === "live") {
       this.loadLiveMatches();

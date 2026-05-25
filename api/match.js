@@ -122,12 +122,30 @@ function getDragonAnalysis(sampleSize = 10) {
   return get(`/api/dragon/analysis/analyze?sampleSize=${sampleSize}&t=${timestamp}`)
 }
 
+// checkFeatures 的缓存
+let _featuresCache = null;
+let _featuresCacheTime = 0;
+const FEATURES_CACHE_TTL = 5 * 60 * 1000; // 5分钟缓存
+
 /**
  * 检查功能开关状态
+ * @param {boolean} forceRefresh 是否强制刷新缓存
  * @returns {Promise} 返回功能开关配置
  */
-function checkFeatures() {
-  return post('/api/match/check/config')
+function checkFeatures(forceRefresh = false) {
+  const now = Date.now();
+  // 有有效缓存且不强制刷新时，直接返回缓存
+  if (!forceRefresh && _featuresCache !== null && (now - _featuresCacheTime) < FEATURES_CACHE_TTL) {
+    return Promise.resolve(_featuresCache);
+  }
+  return post('/api/match/check/config').then(result => {
+    _featuresCache = result;
+    _featuresCacheTime = now;
+    // 同步写入 globalData，供 tabbar 等组件同步读取
+    const app = getApp();
+    app.globalData.showHistory = result === true;
+    return result;
+  });
 }
 
 /**

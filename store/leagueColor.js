@@ -2,15 +2,47 @@
 
 const STORAGE_KEY = 'league_colors'
 
+// 内存缓存，避免频繁读写 storage
+let colorCache = null
+
 /**
- * 获取所有联赛颜色缓存
+ * 获取所有联赛颜色缓存（异步）
  */
 function getAll() {
-  try {
-    return wx.getStorageSync(STORAGE_KEY) || {}
-  } catch (e) {
-    return {}
-  }
+  if (colorCache) return colorCache
+
+  // 异步加载存储数据，同时返回空对象兜底
+  loadFromStorage()
+  return {}
+}
+
+/**
+ * 从本地存储加载颜色数据
+ */
+function loadFromStorage() {
+  wx.getStorage({
+    key: STORAGE_KEY,
+    success: (res) => {
+      colorCache = res.data || {}
+    },
+    fail: () => {
+      colorCache = {}
+    }
+  })
+}
+
+/**
+ * 保存颜色数据到本地存储（异步）
+ */
+function saveToStorage() {
+  if (!colorCache) return
+  wx.setStorage({
+    key: STORAGE_KEY,
+    data: colorCache,
+    fail: (e) => {
+      console.error('保存联赛颜色失败:', e)
+    }
+  })
 }
 
 /**
@@ -20,7 +52,7 @@ function getAll() {
  */
 function getColor(key, defaultColor = '667eea') {
   if (!key) return defaultColor
-  const colors = getAll()
+  const colors = colorCache || {}
   return colors[key] || defaultColor
 }
 
@@ -31,13 +63,9 @@ function getColor(key, defaultColor = '667eea') {
  */
 function setColor(leagueId, color) {
   if (!leagueId || !color) return
-  const colors = getAll()
-  colors[leagueId] = color
-  try {
-    wx.setStorageSync(STORAGE_KEY, colors)
-  } catch (e) {
-    console.error('保存联赛颜色失败:', e)
-  }
+  if (!colorCache) colorCache = {}
+  colorCache[leagueId] = color
+  saveToStorage()
 }
 
 /**
@@ -47,34 +75,33 @@ function setColor(leagueId, color) {
 function batchSetColors(matches) {
   if (!Array.isArray(matches) || matches.length === 0) return
 
-  const colors = getAll()
+  if (!colorCache) {
+    // 首次调用时异步加载存储
+    loadFromStorage()
+    colorCache = {}
+  }
+
   let updated = false
 
   matches.forEach(match => {
-    // 兼容不同的字段名
     const leagueId = match.leagueId || match.leagueCode || match.league_id
     const leagueName = match.leagueName || match.leagueAbbName || match.league
     const color = match.backColor || match.leagueColor || match.color
 
     if (color) {
-      // 同时用 leagueId 和 leagueName 作为 key 缓存
       if (leagueId) {
-        colors[leagueId] = color
+        colorCache[leagueId] = color
         updated = true
       }
       if (leagueName) {
-        colors[leagueName] = color
+        colorCache[leagueName] = color
         updated = true
       }
     }
   })
 
   if (updated) {
-    try {
-      wx.setStorageSync(STORAGE_KEY, colors)
-    } catch (e) {
-      console.error('批量保存联赛颜色失败:', e)
-    }
+    saveToStorage()
   }
 }
 
@@ -82,11 +109,13 @@ function batchSetColors(matches) {
  * 清除缓存
  */
 function clear() {
-  try {
-    wx.removeStorageSync(STORAGE_KEY)
-  } catch (e) {
-    console.error('清除联赛颜色缓存失败:', e)
-  }
+  colorCache = null
+  wx.removeStorage({
+    key: STORAGE_KEY,
+    fail: (e) => {
+      console.error('清除联赛颜色缓存失败:', e)
+    }
+  })
 }
 
 module.exports = {

@@ -3,9 +3,6 @@
   <!-- VIP专属光效 -->
   <view class="vip-glow" wx:if="{{isVip}}"></view>
 
-  <!-- 单场角标 -->
-  <view class="single-badge" wx:if="{{match.isSingleMatch}}">单</view>
-
   <!-- 顶部信息 -->
   <view class="card-header">
     <view class="header-left">
@@ -148,6 +145,10 @@
     <view class="odds-cell">
       <text class="odds-label">客胜</text>
       <text class="odds-num">{{match.odds.away || '-'}}</text>
+    </view>
+    <!-- 单场红框覆盖层（不干扰布局） -->
+    <view class="odds-single-overlay" wx:if="{{match.isSingleMatch}}">
+      <text class="single-odds-corner">单</text>
     </view>
   </view>
 

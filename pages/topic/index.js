@@ -17,6 +17,7 @@ Page({
     championsLeagueMatches: [], // 欧冠相关比赛
     // 功能开关
     showAiAnalysis: false, // 是否显示AI分析按钮
+    isRefreshing: false, // 下拉刷新状态
   },
 
   onLoad() {
@@ -335,7 +336,15 @@ Page({
     this.loadTopicData();
   },
 
-  // 下拉刷新
+  // scroll-view 下拉刷新
+  onScrollRefresh() {
+    this.setData({ isRefreshing: true });
+    this.loadTopicData().finally(() => {
+      this.setData({ isRefreshing: false });
+    });
+  },
+
+  // 页面级下拉刷新（兼容场景）
   onPullDownRefresh() {
     this.loadTopicData().finally(() => {
       wx.stopPullDownRefresh();

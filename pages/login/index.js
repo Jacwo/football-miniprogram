@@ -3,6 +3,7 @@ const userStore = require('../../store/user')
 
 Page({
   data: {
+    loginMode: 'wx', // 默认微信登录
     phone: '',
     code: '',
     agreed: false,
@@ -16,6 +17,14 @@ Page({
     // 检查是否已登录
     if (userStore.isLoggedIn()) {
       this.navigateBack()
+    }
+  },
+
+  // 切换登录方式
+  onSwitchMode(e) {
+    const mode = e.currentTarget.dataset.mode
+    if (mode !== this.data.loginMode) {
+      this.setData({ loginMode: mode })
     }
   },
 
@@ -137,7 +146,8 @@ Page({
         const app = getApp()
         const hasPendingAnalysis = !!app.globalData.pendingAnalysisMatch
 
-        setTimeout(() => {
+        this._navigateTimer = setTimeout(() => {
+          this._navigateTimer = null;
           if (hasPendingAnalysis) {
             // 返回首页，首页会自动处理待分析的比赛
             wx.switchTab({ url: '/pages/index/index' })
@@ -227,7 +237,8 @@ Page({
         const app = getApp()
         const hasPendingAnalysis = !!app.globalData.pendingAnalysisMatch
 
-        setTimeout(() => {
+        this._navigateTimer = setTimeout(() => {
+          this._navigateTimer = null;
           if (hasPendingAnalysis) {
             wx.switchTab({ url: '/pages/index/index' })
           } else {
@@ -274,6 +285,11 @@ Page({
   onUnload() {
     if (this._countdownTimer) {
       clearInterval(this._countdownTimer)
+    }
+    // 清理导航延迟任务，避免页面卸载后仍触发路由跳转导致 onAppRouteDone 报错
+    if (this._navigateTimer) {
+      clearTimeout(this._navigateTimer);
+      this._navigateTimer = null;
     }
   }
 })

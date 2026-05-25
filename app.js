@@ -4,6 +4,7 @@ App({
     userInfo: null,
     token: null,
     isLoggedIn: false,
+    showHistory: true, // 功能开关缓存，供tabbar同步读取
     baseUrl: 'https://ai-football.cn/foot' // 需要替换为实际的 API 域名
   },
 
@@ -51,6 +52,13 @@ App({
 
   // 加载远程 tabBar 图标
   loadRemoteTabBarIcons() {
+    // 非tabBar页面（如登录页）不需要加载tabBar图标
+    const pages = getCurrentPages();
+    const currentPage = pages.length > 0 ? pages[pages.length - 1] : null;
+    if (currentPage && typeof currentPage.getTabBar !== 'function') {
+      return;
+    }
+
     const cacheKey = 'tabBarIconsCache'
     const cachedIcons = wx.getStorageSync(cacheKey)
 
@@ -114,18 +122,27 @@ App({
     })
   },
 
-  // 初始化用户状态
-  initUserState() {
-    const token = wx.getStorageSync('token')
-    const userInfo = wx.getStorageSync('userInfo')
+  // 初始化用户状态（异步，不阻塞启动）
+  async initUserState() {
+    try {
+      const [tokenRes, userInfoRes] = await Promise.all([
+        new Promise((resolve) => wx.getStorage({ key: 'token', success: resolve, fail: () => resolve({}) })),
+        new Promise((resolve) => wx.getStorage({ key: 'userInfo', success: resolve, fail: () => resolve({}) }))
+      ])
 
-    if (token) {
-      this.globalData.token = token
-      this.globalData.isLoggedIn = true
-    }
+      const token = tokenRes.data
+      const userInfo = userInfoRes.data
 
-    if (userInfo) {
-      this.globalData.userInfo = userInfo
+      if (token) {
+        this.globalData.token = token
+        this.globalData.isLoggedIn = true
+      }
+
+      if (userInfo) {
+        this.globalData.userInfo = userInfo
+      }
+    } catch (e) {
+      // 静默处理
     }
   },
 

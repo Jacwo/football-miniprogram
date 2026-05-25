@@ -11,11 +11,11 @@
     </view>
   </view>
 
-  <!-- 模拟选号入口 - 可拖动 -->
+  <!-- 足球计算器入口 - 可拖动 -->
   <movable-area class="calculator-area" wx:if="{{showCalculator}}">
     <movable-view class="calculator-btn" direction="all" x="{{calculatorX}}" y="{{calculatorY}}" bindchange="onCalculatorMove" bindtap="onCalculator">
       <text class="calculator-icon">🎮</text>
-      <text class="calculator-text">模拟选号</text>
+      <text class="calculator-text">足球计算器</text>
     </movable-view>
   </movable-area>
 

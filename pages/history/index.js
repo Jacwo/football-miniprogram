@@ -28,6 +28,7 @@ Page({
 
   onLoad() {
     console.log("======== 历史记录页面 onLoad ========");
+    this._isFirstShow = true;
     // 默认加载历史记录
     this.loadHistory();
   },
@@ -37,7 +38,16 @@ Page({
     if (typeof this.getTabBar === "function" && this.getTabBar()) {
       this.getTabBar().setData({ selectedPath: "/pages/history/index" });
     }
-    // 每次显示页面时刷新数据，确保显示最新内容
+    // 从子页面返回时跳过刷新
+    if (this._hasNavigated) {
+      this._hasNavigated = false;
+      return;
+    }
+    // 首次显示时onLoad已加载，跳过；其他Tab切换回来时刷新
+    if (this._isFirstShow) {
+      this._isFirstShow = false;
+      return;
+    }
     if (this.data.list.length > 0) {
       console.log("列表已有数据，执行刷新");
       this.refreshHistory();
@@ -172,6 +182,8 @@ Page({
 
     const { record } = e.detail;
     const matchId = record && record.matchId;
+    // 标记已跳转，返回时不刷新列表
+    this._hasNavigated = true;
     wx.navigateTo({
       url: `/pages/history-detail/index?id=` + matchId,
     });

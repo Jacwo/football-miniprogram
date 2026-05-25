@@ -4,7 +4,8 @@ const userStore = require('../../store/user')
 
 Page({
   data: {
-    currentTab: 'play', // play: 模拟选号, records: 我的记录
+    currentTab: 'play', // play: 足球计算器, records: 我的记录
+    pageTitle: '足球计算器',
     matches: [],
     loading: true,
     error: null,
@@ -46,7 +47,7 @@ Page({
     // 来源标识（用于区分首页和专题页）
     source: '',
     // 页面标题
-    pageTitle: '模拟选号'
+    pageTitle: '足球计算器'
   },
 
   onLoad(options) {
@@ -70,6 +71,12 @@ Page({
   },
 
   onShow() {
+    // 从子页面返回时跳过刷新
+    if (this._hasNavigated) {
+      this._hasNavigated = false;
+      return;
+    }
+
     // 检查是否有待切换的tab（登录后返回）
     if (this.data.pendingTab && userStore.isLoggedIn()) {
       const tab = this.data.pendingTab
@@ -178,7 +185,9 @@ Page({
       '3_1': '3串1',
       '4_1': '4串1',
       '5_1': '5串1',
-      '6_1': '6串1'
+      '6_1': '6串1',
+      '7_1': '7串1',
+      '8_1': '8串1'
     }
     return passTypes.map(p => map[p] || p).join('/')
   },
@@ -192,6 +201,8 @@ Page({
       return
     }
     if (!record || !record.id) return
+    // 标记已跳转，返回时不刷新列表
+    this._hasNavigated = true;
     wx.navigateTo({
       url: `/pages/calculator-detail/index?id=${record.id}`
     })
@@ -299,6 +310,8 @@ Page({
 
   onSelectOption(e) {
     const { matchid, type, value, odds } = e.currentTarget.dataset
+    // 赔率为空时不响应
+    if (odds == null || odds === '' || odds === undefined) return
     this.toggleSelection(matchid, type, value, this.parseOdds(odds))
   },
 

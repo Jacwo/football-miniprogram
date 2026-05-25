@@ -313,6 +313,14 @@
   border-left-color: transparent;
 }
 
+.odds-item.disabled {
+  opacity: 0.35;
+}
+
+.odds-item.disabled:active {
+  transform: none;
+}
+
 .odds-label {
   font-size: 24rpx;
   color: #333;

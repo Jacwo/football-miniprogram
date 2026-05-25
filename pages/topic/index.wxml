@@ -13,7 +13,7 @@
   </view>
 
   <!-- 主内容 -->
-  <scroll-view class="topic-scroll" scroll-y enable-back-to-top="true" wx:else>
+  <scroll-view class="topic-scroll" scroll-y enable-back-to-top="true" refresher-enabled="{{true}}" refresher-triggered="{{isRefreshing}}" bindrefresherrefresh="onScrollRefresh" wx:else>
     <!-- 轮播图 -->
     <view class="swiper-section" wx:if="{{majorEvents.length > 0}}">
       <swiper class="event-swiper" indicator-dots autoplay circular indicator-color="rgba(255,255,255,0.4)" indicator-active-color="#ffffff">

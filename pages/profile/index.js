@@ -373,8 +373,9 @@ Page({
       await userApi.userSign(userInfo.id);
       wx.hideLoading();
 
+      const isVip = userInfo.isVip;
       wx.showToast({
-        title: "签到成功，获得1积分",
+        title: `签到成功，获得${isVip ? '10' : '1'}积分`,
         icon: "success",
         duration: 2000,
       });
@@ -553,7 +554,7 @@ Page({
     wx.showModal({
       title: "关于我们",
       content:
-        "足球分析助手是一款专业的足球比赛分析工具，为您提供智能 AI 分析、赛事数据、预测建议等服务。",
+        "AI足球智能体是一款专业的足球比赛分析工具，为您提供智能 AI 分析、赛事数据、预测建议等服务。",
       showCancel: false,
     });
   },

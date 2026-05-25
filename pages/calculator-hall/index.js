@@ -24,6 +24,7 @@ Page({
     isDragging: false,
     // 功能开关
     showDragon: false, // 是否显示斩龙按钮
+    statusBarHeight: 0, // 状态栏高度
 
     // 数据发现相关
     leagues: [], // 联赛列表
@@ -43,13 +44,17 @@ Page({
   },
 
   onLoad() {
+    this._isFirstShow = true;
     // 初始化浮动按钮位置（右下角）
-    const windowWidth = wx.getSystemInfoSync().windowWidth;
-    const windowHeight = wx.getSystemInfoSync().windowHeight;
+    const systemInfo = wx.getSystemInfoSync();
+    const windowWidth = systemInfo.windowWidth;
+    const windowHeight = systemInfo.windowHeight;
+    const statusBarHeight = systemInfo.statusBarHeight;
     const btnWidth = 80; // rpx转换为px需要乘以系数，这里使用相对值
     const btnHeight = 80;
 
     this.setData({
+      statusBarHeight: statusBarHeight,
       dragX: windowWidth - btnWidth - 20, // 右边距20px
       dragY: windowHeight - btnHeight - 100, // 上面预留100px空间给底部
     });
@@ -65,7 +70,17 @@ Page({
         selectedPath: "/pages/calculator-hall/index",
       });
     }
-    // 每次显示时刷新列表和功能开关
+    // 首次显示时跳过（onLoad已加载），后续Tab切换回来时刷新
+    if (this._isFirstShow) {
+      this._isFirstShow = false;
+      return;
+    }
+    // 从子页面返回时跳过刷新
+    if (this._hasNavigated) {
+      this._hasNavigated = false;
+      return;
+    }
+    // 从其他Tab切换回来时刷新
     this.checkFeatures();
     this.loadRecommendations();
   },
@@ -499,6 +514,9 @@ Page({
       });
       return;
     }
+
+    // 标记已跳转，返回时不刷新列表
+    this._hasNavigated = true;
 
     wx.navigateTo({
       url: `/pages/calculator-detail/index?id=${record.id}&from=hall`,

@@ -1,14 +1,17 @@
 <!-- pages/calculator-hall/index.wxml - 推荐方案大厅 -->
 <view class="hall-page">
   <!-- 顶部区域（标题+Tab） -->
-  <view class="top-section">
+  <view class="top-section" style="padding-top: {{statusBarHeight + 6}}px;">
     <!-- 页面标题 -->
     <view class="page-header">
       <view class="header-content">
         <view class="title-section">
-          <text class="page-title">🏆 大厅</text>
+          <text class="page-title">大厅</text>
         </view>
-        <button class="header-share-btn" open-type="share">分享</button>
+        <button class="header-share-btn" open-type="share">
+          <text>📤</text>
+          <text>分享</text>
+        </button>
       </view>
     </view>
     <!-- Tab 切换 -->
