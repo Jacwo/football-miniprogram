@@ -44,6 +44,9 @@ Page({
       this.getTabBar().setData({ selectedPath: "/pages/index/index" });
     }
 
+    // 检查VIP状态
+    this.checkVipStatus();
+
     // 如果从登录页返回，且有待分析的比赛
     const app = getApp();
     if (app.globalData.pendingAnalysisMatch && userStore.isLoggedIn()) {
@@ -184,6 +187,7 @@ Page({
   onPullDownRefresh() {
     this.checkFeatures();
     this.loadMatches();
+    this.checkVipStatus();
     this.loadAnnouncements().finally(() => {
       wx.stopPullDownRefresh();
     });
