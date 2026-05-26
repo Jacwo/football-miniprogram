@@ -15,8 +15,7 @@ Component({
 
   data: {
     nodes: [],
-    parsedNodes: [],
-    copiedIndex: -1
+    parsedNodes: []
   },
 
   observers: {
@@ -62,16 +61,11 @@ Component({
         wx.setClipboardData({
           data: node.content,
           success: () => {
-            this.setData({ copiedIndex: index })
             wx.showToast({
               title: '已复制',
               icon: 'success',
               duration: 1500
             })
-            // 1.5 秒后恢复
-            setTimeout(() => {
-              this.setData({ copiedIndex: -1 })
-            }, 1500)
           }
         })
       }

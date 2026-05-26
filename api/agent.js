@@ -1,5 +1,5 @@
 // api/agent.js - 智能体相关接口
-const { get, post, put } = require('./index')
+const { get, post, put, del } = require('./index')
 
 /**
  * 获取用户的智能体列表
@@ -101,10 +101,37 @@ function deleteCustomFactor(data) {
   return post(`/api/agent/factor/deleteCustom/${userId}/${factorCode}`, { _t: Date.now() }, { showLoading: true })
 }
 
+/**
+ * 更新智能体信息
+ * @param {Object} data
+ * @param {string} data.userId 用户ID
+ * @param {string} data.agentId 智能体ID
+ * @param {string} data.agentName 智能体名称
+ * @param {string} data.description 智能体描述
+ * @returns {Promise<Object>}
+ */
+function updateAgent(data) {
+  return post('/api/agent/update', { ...data, _t: Date.now() }, { showLoading: true })
+}
+
+/**
+ * 删除智能体
+ * @param {Object} data
+ * @param {string} data.userId 用户ID
+ * @param {string} data.agentId 智能体ID
+ * @returns {Promise<Object>}
+ */
+function deleteAgent(data) {
+  const { userId, agentId } = data
+  return post(`/api/agent/delete/${userId}/${agentId}`, { _t: Date.now() }, { showLoading: true })
+}
+
 module.exports = {
   getAgentList,
   getAgentDetail,
   createAgent,
+  updateAgent,
+  deleteAgent,
   saveFactor,
   batchSaveFactors,
   createCustomFactor,

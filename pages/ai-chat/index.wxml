@@ -183,6 +183,15 @@
         <text class="close-icon">×</text>
       </view>
       <text class="detail-title">智能体详情</text>
+      <!-- 非系统智能体：编辑/删除按钮 -->
+      <view class="detail-actions" wx:if="{{agentDetail && !agentDetail.isSystem}}">
+        <view class="detail-action-btn edit" catchtap="onShowEditAgent">
+          <text>编辑</text>
+        </view>
+        <view class="detail-action-btn delete" catchtap="onDeleteAgent">
+          <text>删除</text>
+        </view>
+      </view>
     </view>
 
     <!-- 加载中 -->
@@ -427,6 +436,54 @@
   </view>
 </view>
 
+<!-- 编辑智能体弹窗 -->
+<view class="agent-detail-mask" wx:if="{{showEditAgent}}" catchtap="onCloseEditAgent">
+  <view class="agent-detail-popup create-popup" catchtap="preventTap">
+    <view class="detail-header">
+      <view class="detail-close" catchtap="onCloseEditAgent">
+        <text class="close-icon">×</text>
+      </view>
+      <text class="detail-title">编辑智能体</text>
+    </view>
+    <scroll-view class="detail-scroll create-form-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+      <view class="create-form">
+        <view class="create-form-item">
+          <view class="create-form-label">
+            <text class="create-label-text">智能体名称</text>
+            <text class="create-label-required">*</text>
+          </view>
+          <input
+            class="create-input"
+            placeholder="输入智能体名称"
+            placeholder-class="create-placeholder"
+            value="{{editAgentName}}"
+            bindinput="onEditNameInput"
+            maxlength="20"
+          />
+        </view>
+        <view class="create-form-item">
+          <view class="create-form-label">
+            <text class="create-label-text">智能体描述</text>
+          </view>
+          <textarea
+            class="create-textarea"
+            placeholder="描述智能体的用途和特点"
+            placeholder-class="create-placeholder"
+            value="{{editAgentDesc}}"
+            bindinput="onEditDescInput"
+            maxlength="200"
+            auto-height
+          />
+        </view>
+        <view class="create-submit-btn {{editAgentLoading ? 'loading' : ''}}" bindtap="onSubmitEditAgent">
+          <text wx:if="{{!editAgentLoading}}">保存修改</text>
+          <text wx:else>保存中...</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>
+
 <!-- 比赛选择弹窗 -->
 <view class="agent-detail-mask" wx:if="{{showMatchPicker}}" catchtap="onCloseMatchPicker">
   <view class="agent-detail-popup create-popup" catchtap="preventTap">
@@ -438,11 +495,11 @@
     </view>
     <scroll-view class="detail-scroll create-form-scroll" scroll-y enhanced show-scrollbar="{{false}}">
       <!-- 加载中 -->
-      <view class="match-picker-loading" wx:if="{{matchLoading}}">
+      <view class="match-picker-loading picker-content" wx:if="{{matchLoading}}">
         <text>加载中...</text>
       </view>
       <!-- 比赛列表 -->
-      <view class="match-picker-list" wx:elif="{{matchList.length > 0}}">
+      <view class="match-picker-list picker-content" wx:elif="{{matchList.length > 0}}">
         <view
           class="match-picker-item {{selectedMatch && selectedMatch.id === item.id ? 'selected' : ''}}"
           wx:for="{{matchList}}"
@@ -468,7 +525,7 @@
         </view>
       </view>
       <!-- 空状态 -->
-      <view class="match-picker-empty" wx:else>
+      <view class="match-picker-empty picker-content" wx:else>
         <text>暂无可选比赛</text>
       </view>
     </scroll-view>

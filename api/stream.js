@@ -17,11 +17,17 @@ const app = getApp()
  * @returns {Object} 包含 abort 方法的控制器
  */
 function streamChat(options) {
-  const { message, deepThinking = false, userId, agentId, matchId, onMessage, onComplete, onError } = options
+  const { message, deepThinking = false, userId, agentId, matchId, firstMessage, onMessage, onComplete, onError } = options
 
   const token = app.globalData.token
   let buffer = ''
   let requestTask = null
+  let isCompleted = false
+
+  // 持久 TextDecoder：跨 chunk 保持解码状态，防止 iOS 上多字节 UTF-8 字符被截断导致乱码
+  const decoder = typeof TextDecoder !== 'undefined'
+    ? new TextDecoder('utf-8', { fatal: false })
+    : null
 
   requestTask = wx.request({
     url: `${app.globalData.baseUrl}/api/stream/chat`,
@@ -32,6 +38,7 @@ function streamChat(options) {
       userId,
       agentId,
       matchId,
+      firstMessage,
       stream: true
     },
     header: {
@@ -42,9 +49,17 @@ function streamChat(options) {
     enableChunked: true,
     responseType: 'text',
     success: (res) => {
-      // 处理最终响应
+      if (isCompleted) return
+      isCompleted = true
+
       if (res.statusCode === 200) {
-        // 处理剩余缓冲区
+        // 刷出 decoder 中剩余的字节
+        if (decoder) {
+          const finalText = decoder.decode()
+          if (finalText) {
+            buffer += finalText
+          }
+        }
         if (buffer) {
           processChunk(buffer)
         }
@@ -57,6 +72,8 @@ function streamChat(options) {
       }
     },
     fail: (err) => {
+      if (isCompleted) return
+      isCompleted = true
       onError && onError(err)
     }
   })
@@ -64,13 +81,15 @@ function streamChat(options) {
   // 监听分块数据
   requestTask.onChunkReceived((res) => {
     try {
-      // 将 ArrayBuffer 转为字符串
-      const text = arrayBufferToString(res.data)
+      // 用持久 decoder 流式解码，跨 chunk 保持多字节字符完整性
+      const text = decoder
+        ? decoder.decode(res.data, { stream: true })
+        : arrayBufferToString(res.data)
+
       buffer += text
 
-      // 处理缓冲区中完整的行
       const lines = buffer.split('\n')
-      buffer = lines.pop() || '' // 保留最后一个可能不完整的行
+      buffer = lines.pop() || ''
 
       for (const line of lines) {
         processChunk(line)

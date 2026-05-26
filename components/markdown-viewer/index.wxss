@@ -1,238 +1,155 @@
 /* components/markdown-viewer/index.wxss */
-
 .markdown-viewer {
   font-size: 28rpx;
-  line-height: 1.8;
-  color: #2c3e50;
+  line-height: 1.7;
+  color: #333;
   word-wrap: break-word;
-  word-break: break-word;
 }
 
-/* ========== 标题 ========== */
+/* 标题 */
 .md-heading {
-  font-weight: 700;
-  color: #1a1a2e;
-  margin: 32rpx 0 16rpx;
-  line-height: 1.35;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 24rpx 0 16rpx;
 }
 
 .md-h1 {
-  font-size: 44rpx;
-  padding-bottom: 16rpx;
-  border-bottom: 3rpx solid #e8ecf1;
-  letter-spacing: 1rpx;
+  font-size: 40rpx;
 }
 
 .md-h2 {
-  font-size: 38rpx;
-  padding-bottom: 12rpx;
-  border-bottom: 2rpx solid #eef1f5;
+  font-size: 36rpx;
 }
 
 .md-h3 {
-  font-size: 34rpx;
-  padding-left: 20rpx;
-  border-left: 6rpx solid #3b82f6;
+  font-size: 32rpx;
 }
 
-.md-h4 {
-  font-size: 30rpx;
-  color: #334155;
-}
-
+.md-h4,
 .md-h5,
 .md-h6 {
-  font-size: 28rpx;
-  color: #475569;
-  font-weight: 600;
+  font-size: 30rpx;
 }
 
-/* ========== 段落 ========== */
+/* 段落 */
 .md-paragraph {
-  margin: 12rpx 0;
-  text-align: justify;
+  margin: 16rpx 0;
+  line-height: 1.8;
 }
-
-.md-paragraph + .md-paragraph {
-  margin-top: 8rpx;
-}
-
-/* ========== 内联样式 ========== */
 
 /* 粗体 */
 .md-strong {
-  font-weight: 700;
-  color: #1a1a2e;
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
 /* 斜体 */
 .md-em {
   font-style: italic;
-  color: #475569;
 }
 
 /* 行内代码 */
 .md-code-inline {
-  background-color: #f0f0f5;
-  color: #e74c8b;
-  padding: 3rpx 10rpx;
+  background-color: #f5f5f5;
+  color: #e83e8c;
+  padding: 4rpx 12rpx;
   border-radius: 6rpx;
-  font-family: 'SF Mono', Menlo, Monaco, Consolas, 'Courier New', monospace;
-  font-size: 25rpx;
-  line-height: 1;
-  vertical-align: baseline;
-  border: 1rpx solid #e2e2ed;
+  font-family: Menlo, Monaco, Consolas, monospace;
+  font-size: 26rpx;
 }
 
-/* 链接 */
-.md-link {
-  color: #2563eb;
-  text-decoration: none;
-  border-bottom: 1rpx solid rgba(37, 99, 235, 0.35);
-  padding-bottom: 1rpx;
-  transition: all 0.15s ease;
-  word-break: break-all;
-}
-
-.md-link:active {
-  color: #1d4ed8;
-  border-bottom-color: #1d4ed8;
-  opacity: 0.8;
-}
-
-/* ========== 代码块 ========== */
+/* 代码块 */
 .md-code-block {
-  background-color: #1e1e2e;
-  border-radius: 16rpx;
-  margin: 20rpx 0;
+  background-color: #282c34;
+  border-radius: 12rpx;
+  margin: 16rpx 0;
   overflow: hidden;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.12);
 }
 
 .code-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14rpx 24rpx;
-  background-color: #181825;
-  border-bottom: 1rpx solid #313244;
+  padding: 12rpx 20rpx;
+  background-color: #21252b;
+  border-bottom: 1rpx solid #3a3f4b;
 }
 
 .code-language {
-  font-size: 22rpx;
-  color: #a6e3a1;
-  font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5rpx;
+  font-size: 24rpx;
+  color: #98c379;
 }
 
 .copy-btn {
-  padding: 6rpx 18rpx;
-  background-color: rgba(166, 227, 161, 0.1);
-  border-radius: 8rpx;
-  border: 1rpx solid rgba(166, 227, 161, 0.2);
-}
-
-.copy-btn:active {
-  background-color: rgba(166, 227, 161, 0.2);
+  padding: 4rpx 16rpx;
+  background-color: #3a3f4b;
+  border-radius: 6rpx;
 }
 
 .copy-text {
   font-size: 22rpx;
-  color: #a6e3a1;
+  color: #abb2bf;
+}
+
+.copy-btn:active {
+  opacity: 0.7;
 }
 
 .code-content {
-  padding: 24rpx;
+  padding: 20rpx;
   white-space: pre;
 }
 
 .code-text {
-  font-family: 'SF Mono', Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-family: Menlo, Monaco, Consolas, monospace;
   font-size: 24rpx;
-  color: #cdd6f4;
-  line-height: 1.7;
-  tab-size: 2;
+  color: #abb2bf;
+  line-height: 1.6;
 }
 
-/* ========== 引用块 ========== */
+/* 引用 */
 .md-blockquote {
-  margin: 20rpx 0;
-  padding: 24rpx 28rpx;
-  background-color: #f8fafc;
-  border-left: 8rpx solid #3b82f6;
-  border-radius: 0 12rpx 12rpx 0;
-  color: #475569;
-  font-size: 27rpx;
-  line-height: 1.75;
+  margin: 16rpx 0;
+  padding: 16rpx 24rpx;
+  background-color: #f6f8fa;
+  border-left: 6rpx solid #1890ff;
+  border-radius: 0 8rpx 8rpx 0;
+  color: #666;
+  font-style: italic;
 }
 
-/* ========== 列表 ========== */
+/* 列表 */
 .md-list {
   margin: 16rpx 0;
-  padding-left: 0;
+  padding-left: 8rpx;
 }
 
 .md-li {
   display: flex;
   align-items: flex-start;
   margin: 8rpx 0;
-  line-height: 1.75;
 }
 
 .li-marker {
   flex-shrink: 0;
-  width: 44rpx;
-  color: #3b82f6;
-  font-weight: 600;
-  text-align: right;
-  padding-right: 12rpx;
-  box-sizing: border-box;
+  width: 40rpx;
+  color: #1890ff;
+  font-weight: 500;
 }
 
 .li-content {
   flex: 1;
-  min-width: 0;
 }
 
-/* 无序列表圆点 */
-.md-ul .li-marker {
-  font-size: 24rpx;
-  line-height: 1.8;
+/* 链接 */
+.md-link {
+  color: #1890ff;
+  text-decoration: underline;
 }
 
-/* 有序列表数字 */
-.md-ol .li-marker {
-  font-size: 26rpx;
-}
-
-/* ========== 分隔线 ========== */
+/* 分隔线 */
 .md-hr {
-  margin: 36rpx 0;
+  margin: 32rpx 0;
   border: none;
-  height: 2rpx;
-  background: linear-gradient(90deg, transparent, #cbd5e1 20%, #cbd5e1 80%, transparent);
-}
-
-/* ========== 间距优化 ========== */
-
-/* 标题后的第一个段落不需要上边距 */
-.md-heading + .md-paragraph {
-  margin-top: 4rpx;
-}
-
-/* 代码块后的段落 */
-.md-code-block + .md-paragraph {
-  margin-top: 20rpx;
-}
-
-/* 引用块后的段落 */
-.md-blockquote + .md-paragraph {
-  margin-top: 16rpx;
-}
-
-/* 列表后的段落 */
-.md-list + .md-paragraph {
-  margin-top: 16rpx;
+  border-top: 2rpx solid #e8e8e8;
 }

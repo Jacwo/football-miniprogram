@@ -41,6 +41,11 @@ Page({
     createAgentDesc: '',
     createAgentCopySystem: true,
     createAgentLoading: false,
+    // 编辑智能体弹窗
+    showEditAgent: false,
+    editAgentName: '',
+    editAgentDesc: '',
+    editAgentLoading: false,
     // 新增/编辑因素抽屉
     showFactorDrawer: false,
     factorDrawerMode: 'add', // 'add' | 'edit'
@@ -489,6 +494,135 @@ Page({
       wx.showToast({ title: e.message || '创建失败', icon: 'none' })
       this.setData({ createAgentLoading: false })
     }
+  },
+
+  // ========== 编辑智能体 ==========
+
+  // 显示编辑智能体弹窗
+  onShowEditAgent() {
+    const { agentDetail } = this.data
+    if (!agentDetail) return
+
+    this.setData({
+      showEditAgent: true,
+      editAgentName: agentDetail.agentName || '',
+      editAgentDesc: agentDetail.description || '',
+      editAgentLoading: false
+    })
+  },
+
+  // 关闭编辑智能体弹窗
+  onCloseEditAgent() {
+    this.setData({ showEditAgent: false })
+  },
+
+  // 编辑智能体 - 名称输入
+  onEditNameInput(e) {
+    this.setData({ editAgentName: e.detail.value })
+  },
+
+  // 编辑智能体 - 描述输入
+  onEditDescInput(e) {
+    this.setData({ editAgentDesc: e.detail.value })
+  },
+
+  // 提交编辑智能体
+  async onSubmitEditAgent() {
+    const { editAgentName, editAgentDesc, editAgentLoading, agentDetail } = this.data
+
+    if (editAgentLoading || !agentDetail) return
+
+    const name = editAgentName.trim()
+    if (!name) {
+      wx.showToast({ title: '请输入智能体名称', icon: 'none' })
+      return
+    }
+
+    const userInfo = userStore.getUserInfo()
+    if (!userInfo || !userInfo.id) {
+      wx.showToast({ title: '请先登录', icon: 'none' })
+      return
+    }
+
+    this.setData({ editAgentLoading: true })
+
+    try {
+      await agentApi.updateAgent({
+        userId: userInfo.id,
+        agentId: agentDetail.id,
+        agentName: name,
+        description: editAgentDesc.trim()
+      })
+
+      wx.showToast({ title: '更新成功', icon: 'success' })
+
+      this.setData({
+        showEditAgent: false,
+        editAgentLoading: false
+      })
+
+      // 刷新详情和列表
+      this.loadAgentList()
+      this.onAgentSelect({
+        currentTarget: { dataset: { agent: { id: agentDetail.id } } }
+      })
+
+      // 如果当前选中的是这个智能体，同步更新
+      const { selectedAgent } = this.data
+      if (selectedAgent && selectedAgent.id === agentDetail.id) {
+        this.setData({
+          selectedAgent: {
+            ...selectedAgent,
+            agentName: name,
+            description: editAgentDesc.trim()
+          }
+        })
+      }
+    } catch (e) {
+      console.error('更新智能体失败:', e)
+      wx.showToast({ title: e.message || '更新失败', icon: 'none' })
+      this.setData({ editAgentLoading: false })
+    }
+  },
+
+  // 删除智能体
+  onDeleteAgent() {
+    const { agentDetail } = this.data
+    if (!agentDetail) return
+
+    wx.showModal({
+      title: '确认删除',
+      content: `确定要删除智能体「${agentDetail.agentName}」吗？此操作不可撤销。`,
+      confirmColor: '#ef4444',
+      success: async (res) => {
+        if (!res.confirm) return
+
+        const userInfo = userStore.getUserInfo()
+        if (!userInfo || !userInfo.id) return
+
+        try {
+          await agentApi.deleteAgent({
+            userId: userInfo.id,
+            agentId: agentDetail.id
+          })
+
+          wx.showToast({ title: '删除成功', icon: 'success' })
+
+          // 如果当前选中的是这个智能体，取消选中
+          const { selectedAgent } = this.data
+          if (selectedAgent && selectedAgent.id === agentDetail.id) {
+            this.setData({ selectedAgent: null })
+          }
+
+          // 关闭详情弹窗，刷新列表
+          this.setData({ showAgentDetail: false })
+          this.loadAgentList()
+        } catch (e) {
+          console.error('删除智能体失败:', e)
+          wx.showToast({ title: e.message || '删除失败', icon: 'none' })
+        }
+      }
+    })
   },
 
   // 切换因素启用状态（非系统智能体）
