@@ -56,8 +56,9 @@ function parseDate(date) {
     return new Date(date)
   }
   if (typeof date === 'string') {
-    // 兼容 ISO 格式和其他格式
-    return new Date(date.replace(/-/g, '/'))
+    // 兼容 ISO 格式 (2026-05-26T20:08:34) 和其他格式
+    const normalized = date.replace(/-/g, '/').replace(/T/, ' ')
+    return new Date(normalized)
   }
   return new Date()
 }

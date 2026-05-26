@@ -14,8 +14,15 @@
 
     <!-- AI 消息：支持 Markdown 和打字效果 -->
     <block wx:else>
+      <!-- 等待首段文本时显示 loading 动效 -->
+      <view class="thinking-dots" wx:if="{{typing && !content}}">
+        <view class="dot"></view>
+        <view class="dot"></view>
+        <view class="dot"></view>
+      </view>
+
       <!-- Markdown 渲染 -->
-      <block wx:if="{{markdown && !typing}}">
+      <block wx:elif="{{markdown && !typing}}">
         <markdown-viewer content="{{content}}" />
       </block>
 

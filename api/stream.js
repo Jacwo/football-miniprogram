@@ -11,13 +11,14 @@ const app = getApp()
  * @param {string} options.userId 用户ID
  * @param {string} options.agentId 智能体ID
  * @param {string} options.matchId 比赛ID
+ * @param {string} options.sessionId 会话ID
  * @param {Function} options.onMessage 收到消息回调
  * @param {Function} options.onComplete 完成回调
  * @param {Function} options.onError 错误回调
  * @returns {Object} 包含 abort 方法的控制器
  */
 function streamChat(options) {
-  const { message, deepThinking = false, userId, agentId, matchId, firstMessage, onMessage, onComplete, onError } = options
+  const { message, deepThinking = false, userId, agentId, matchId, sessionId, onMessage, onComplete, onError } = options
 
   const token = app.globalData.token
   let requestTask = null
@@ -37,7 +38,7 @@ function streamChat(options) {
       userId,
       agentId,
       matchId,
-      firstMessage,
+      sessionId,
       stream: true
     },
     header: {
@@ -174,10 +175,10 @@ function streamChat(options) {
  * @param {Object} options 配置项
  */
 function streamChatPolling(options) {
-  const { message, deepThinking = false, userId, agentId, matchId, onMessage, onComplete, onError } = options
+  const { message, deepThinking = false, userId, agentId, matchId, sessionId, onMessage, onComplete, onError } = options
 
   const token = app.globalData.token
-  let sessionId = null
+  let pollingSessionId = null
   let isAborted = false
   let pollTimer = null
 
@@ -190,7 +191,8 @@ function streamChatPolling(options) {
       deepThinking,
       userId,
       agentId,
-      matchId
+      matchId,
+      sessionId
     },
     header: {
       'Content-Type': 'application/json',
@@ -198,7 +200,7 @@ function streamChatPolling(options) {
     },
     success: (res) => {
       if (res.statusCode === 200 && res.data.code === 0) {
-        sessionId = res.data.data.sessionId
+        pollingSessionId = res.data.data.sessionId
         startPolling()
       } else {
         onError && onError(new Error((res.data && res.data.message) || '启动对话失败'))
@@ -220,12 +222,12 @@ function streamChatPolling(options) {
    * 单次轮询
    */
   function poll() {
-    if (isAborted || !sessionId) return
+    if (isAborted || !pollingSessionId) return
 
     wx.request({
       url: `${app.globalData.baseUrl}/api/stream/chat/next`,
       method: 'GET',
-      data: { sessionId },
+      data: { sessionId: pollingSessionId },
       header: {
         'Authorization': token ? `Bearer ${token}` : ''
       },

@@ -3,6 +3,8 @@ const streamApi = require('../../api/stream')
 const userStore = require('../../store/user')
 const agentApi = require('../../api/agent')
 const matchApi = require('../../api/match')
+const chatApi = require('../../api/chat')
+const dateUtils = require('../../utils/date')
 
 // 因素分组显示名映射
 const GROUP_DISPLAY_MAP = {
@@ -29,6 +31,7 @@ Page({
     matchLoading: false, // 比赛列表加载中
     // 智能体
     selectedAgent: null, // 当前选中的智能体
+    showAgentPicker: false, // 智能体选择弹窗（从已有对话中重新选择智能体）
     agentList: [], // 智能体列表
     agentLoading: true, // 智能体列表加载中
     showAgentDetail: false, // 是否显示智能体详情弹窗
@@ -54,7 +57,13 @@ Page({
     factorFormPrompt: '',
     editingFactorCode: null, // 编辑时的 factorCode
     savingFactor: false,
-    savingFactorId: null
+    savingFactorId: null,
+    // 左侧栏
+    showSidebar: false,
+    sessionList: [], // 保留兼容旧逻辑
+    sessionGroups: [], // [{ label: '今天', sessions: [...] }]
+    sessionLoading: false,
+    currentSessionId: null
   },
 
   // 流式请求控制器
@@ -149,8 +158,8 @@ Page({
   // 保存消息到本地
   saveMessages() {
     try {
-      // 只保存最近 50 条消息
-      const messages = this.data.messages.slice(-50)
+      // 只保存最近 5 条消息
+      const messages = this.data.messages.slice(-5)
       wx.setStorageSync('ai-chat-messages', messages)
     } catch (e) {
       console.error('保存消息失败:', e)
@@ -182,7 +191,7 @@ Page({
 
   // 发送消息
   async onSend() {
-    const { inputText, sending, messages, selectedMatch, selectedAgent } = this.data
+    const { inputText, sending, messages, selectedMatch, selectedAgent, currentSessionId } = this.data
 
     if (sending || !inputText.trim()) return
 
@@ -202,6 +211,21 @@ Page({
     if (!selectedAgent) {
       wx.showToast({ title: '请先选择智能体', icon: 'none' })
       return
+    }
+
+    // 如果没有会话，先创建会话
+    let sessionId = currentSessionId
+    if (!sessionId) {
+      try {
+        const userInfo = userStore.getUserInfo()
+        const session = await chatApi.createSession(selectedMatch.id, userInfo.id)
+        sessionId = session.sessionId
+        this.setData({ currentSessionId: sessionId })
+      } catch (e) {
+        console.error('创建会话失败:', e)
+        wx.showToast({ title: '创建会话失败', icon: 'none' })
+        return
+      }
     }
 
     const userMessage = {
@@ -230,11 +254,11 @@ Page({
     this.scrollToBottom()
 
     // 开始流式请求
-    this.startStream(userMessage.content, assistantMessage.id)
+    this.startStream(userMessage.content, assistantMessage.id, sessionId)
   },
 
   // 开始流式请求
-  startStream(message, messageId) {
+  startStream(message, messageId, sessionId) {
     const { deepThinking, selectedMatch, selectedAgent } = this.data
     const userInfo = userStore.getUserInfo()
 
@@ -244,6 +268,7 @@ Page({
       userId: userInfo.id,
       agentId: selectedAgent.id,
       matchId: selectedMatch.id,
+      sessionId,
       onMessage: (text) => {
         this.appendMessage(messageId, text)
       },
@@ -854,16 +879,29 @@ Page({
     this.setData({
       selectedMatch: match,
       showMatchPicker: false,
-      // 清空之前的对话
+      // 清空之前的对话，切换比赛需要创建新会话
       messages: [],
-      inputText: ''
+      inputText: '',
+      currentSessionId: null
     })
     wx.removeStorageSync('ai-chat-messages')
   },
 
   // 切换智能体 — 返回到智能体列表
   onSwitchAgent() {
-    this.setData({ selectedAgent: null })
+    const { selectedAgent, messages } = this.data
+    if (selectedAgent) {
+      this.setData({ selectedAgent: null })
+    }
+    // 如果已经有消息，显示弹窗选择智能体
+    if (messages.length > 0) {
+      this.setData({ showAgentPicker: true })
+    }
+  },
+
+  // 关闭智能体选择弹窗
+  onCloseAgentPicker() {
+    this.setData({ showAgentPicker: false })
   },
 
   // 重新选择智能体 — 点击已选智能体打开详情
@@ -894,7 +932,8 @@ Page({
         isDefault: agentDetail.isDefault,
         isSystem: agentDetail.isSystem
       },
-      showAgentDetail: false
+      showAgentDetail: false,
+      showAgentPicker: false
     })
   },
 
@@ -905,7 +944,7 @@ Page({
       content: '确定要清空所有对话记录吗？',
       success: (res) => {
         if (res.confirm) {
-          this.setData({ messages: [] })
+          this.setData({ messages: [], currentSessionId: null })
           wx.removeStorageSync('ai-chat-messages')
 
           wx.showToast({
@@ -915,6 +954,152 @@ Page({
         }
       }
     })
+  },
+
+  // ========== 左侧栏：聊天记录 ==========
+
+  // 切换左侧栏
+  onToggleSidebar() {
+    const show = !this.data.showSidebar
+    this.setData({ showSidebar: show })
+
+    if (show && this.data.sessionGroups.length === 0) {
+      this.loadSessions()
+    }
+  },
+
+  // 关闭左侧栏
+  onCloseSidebar() {
+    this.setData({ showSidebar: false })
+  },
+
+  // 加载会话列表
+  async loadSessions() {
+    const userInfo = userStore.getUserInfo()
+    if (!userInfo || !userInfo.id) return
+
+    this.setData({ sessionLoading: true })
+
+    try {
+      const list = await chatApi.getSessions(userInfo.id)
+
+      // 格式化每个会话的时间并注入 timeDisplay
+      const enhanced = (list || []).map(session => {
+        let timeDisplay = ''
+        if (session.lastChatTime) {
+          try {
+            const d = dateUtils.parseDate(session.lastChatTime)
+            const hours = String(d.getHours()).padStart(2, '0')
+            const minutes = String(d.getMinutes()).padStart(2, '0')
+            timeDisplay = `${hours}:${minutes}`
+          } catch {
+            timeDisplay = ''
+          }
+        }
+        return { ...session, timeDisplay }
+      })
+
+      // 分组：今天 / 昨天 / MM-DD
+      const groups = []
+      const groupMap = {}
+
+      enhanced.forEach(session => {
+        const rawTime = session.lastChatTime
+        let label
+
+        if (rawTime && dateUtils.isToday(rawTime)) {
+          label = '今天'
+        } else if (rawTime && dateUtils.isYesterday(rawTime)) {
+          label = '昨天'
+        } else if (rawTime) {
+          label = dateUtils.formatShortDateTime(rawTime).split(' ')[0] // MM-DD
+        } else {
+          label = '未知'
+        }
+
+        if (!groupMap[label]) {
+          groupMap[label] = { label, sessions: [] }
+          groups.push(groupMap[label])
+        }
+        groupMap[label].sessions.push(session)
+      })
+
+      this.setData({
+        sessionList: enhanced,
+        sessionGroups: groups,
+        sessionLoading: false
+      })
+    } catch (e) {
+      console.error('加载会话列表失败:', e)
+      this.setData({
+        sessionList: [],
+        sessionGroups: [],
+        sessionLoading: false
+      })
+    }
+  },
+
+  // 选择会话
+  async onSelectSession(e) {
+    const { session } = e.currentTarget.dataset
+    if (!session) return
+
+    const { currentSessionId } = this.data
+
+    // 点击的是当前会话，不做处理
+    if (currentSessionId === session.sessionId) {
+      this.setData({ showSidebar: false })
+      return
+    }
+
+    // 切换比赛上下文
+    const matchContext = {
+      id: session.matchId,
+      homeTeam: session.matchName ? session.matchName.split(' vs ')[0] : '',
+      awayTeam: session.matchName ? session.matchName.split(' vs ')[1] : '',
+      league: session.leagueName || '',
+      matchTime: session.matchTime || ''
+    }
+
+    // 恢复会话中使用的智能体
+    const sessionAgent = session.agentId ? {
+      id: session.agentId,
+      agentName: session.agentName || ''
+    } : null
+
+    this.setData({
+      currentSessionId: session.sessionId,
+      showSidebar: false,
+      selectedMatch: matchContext,
+      selectedAgent: sessionAgent,
+      messages: [],
+      inputText: '',
+      typing: false,
+      sending: false
+    })
+
+    wx.removeStorageSync('ai-chat-messages')
+
+    // 加载该会话的历史聊天记录
+    try {
+      const records = await chatApi.getSessionHistory(session.sessionId)
+      if (records && records.length > 0) {
+        // 按 messageIndex 排序
+        const sorted = [...records].sort((a, b) => (a.messageIndex || 0) - (b.messageIndex || 0))
+        // 转换为消息格式
+        const messages = sorted.map((r, i) => ({
+          id: `${session.sessionId}_${r.messageIndex || i}`,
+          role: r.role === 'AI' ? 'assistant' : (r.role === 'USER' ? 'user' : 'assistant'),
+          content: r.content || '',
+          timestamp: ''
+        }))
+        this.setData({ messages })
+        this.scrollToBottom()
+      }
+    } catch (e) {
+      console.error('加载历史聊天记录失败:', e)
+      wx.showToast({ title: '加载失败', icon: 'none' })
+    }
   },
 
   // 滚动到底部
