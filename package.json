@@ -1,0 +1,27 @@
+{
+  "name": "football-miniprogram",
+  "version": "1.0.0",
+  "description": "足球赛事分析小程序",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "miniprogram",
+    "football"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
+  },
+  "dependencies": {
+    "marked": "^2.1.3"
+  }
+}

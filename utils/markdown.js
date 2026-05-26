@@ -1,299 +1,251 @@
-// utils/markdown.js - Markdown 解析工具
-// 将 Markdown 转换为小程序可渲染的节点结构
+// utils/markdown.js - Markdown 解析工具（基于 marked）
+// 需要在微信开发者工具中执行"工具 → 构建 npm"后方可使用
+let marked
+
+function getMarked() {
+  if (!marked) {
+    marked = require('marked')
+  }
+  return marked
+}
 
 /**
- * 解析 Markdown 文本为节点数组
+ * 解析 Markdown 文本为自定义节点数组
  * @param {string} markdown Markdown 文本
  * @returns {Array} 节点数组
  */
 function parseMarkdown(markdown) {
   if (!markdown) return []
 
-  // 预处理：智能分段（只在需要时处理）
-  let text = markdown
+  try {
+    const tokens = getMarked().lexer(markdown)
+    return convertBlockTokens(tokens)
+  } catch (e) {
+    console.error('Markdown 解析失败:', e)
+    // 降级为纯文本段落
+    return [{ type: 'paragraph', children: [{ type: 'text', text: markdown }] }]
+  }
+}
 
-  const lines = text.split('\n')
+/**
+ * 将 marked 的顶层 tokens 转换为自定义节点
+ */
+function convertBlockTokens(tokens) {
   const nodes = []
-  let i = 0
 
-  while (i < lines.length) {
-    const line = lines[i]
+  for (const token of tokens) {
+    switch (token.type) {
+      case 'heading':
+        nodes.push({
+          type: 'heading',
+          level: token.depth,
+          children: convertInlineTokens(token.tokens)
+        })
+        break
 
-    // 代码块
-    if (line.startsWith('```')) {
-      const codeBlock = parseCodeBlock(lines, i)
-      nodes.push(codeBlock.node)
-      i = codeBlock.endIndex + 1
-      continue
+      case 'paragraph':
+        nodes.push({
+          type: 'paragraph',
+          children: convertInlineTokens(token.tokens)
+        })
+        break
+
+      case 'code':
+        nodes.push({
+          type: 'code',
+          language: token.lang || '',
+          content: token.text
+        })
+        break
+
+      case 'blockquote':
+        nodes.push({
+          type: 'blockquote',
+          children: flattenBlockquoteTokens(token.tokens)
+        })
+        break
+
+      case 'list':
+        nodes.push(convertListToken(token))
+        break
+
+      case 'hr':
+        nodes.push({ type: 'hr' })
+        break
+
+      case 'table':
+        // 表格降级为纯文本段落
+        nodes.push({
+          type: 'paragraph',
+          children: [{ type: 'text', text: token.raw }]
+        })
+        break
+
+      case 'html':
+        if (token.raw && token.raw.trim()) {
+          nodes.push({
+            type: 'paragraph',
+            children: [{ type: 'text', text: token.raw }]
+          })
+        }
+        break
+
+      case 'space':
+        // 跳过空白
+        break
+
+      default:
+        // 兜底：未知类型当作段落
+        if (token.raw && token.raw.trim()) {
+          nodes.push({
+            type: 'paragraph',
+            children: [{ type: 'text', text: token.raw }]
+          })
+        }
     }
-
-    // 标题
-    if (line.startsWith('#')) {
-      nodes.push(parseHeading(line))
-      i++
-      continue
-    }
-
-    // 引用
-    if (line.startsWith('>')) {
-      nodes.push(parseBlockquote(line))
-      i++
-      continue
-    }
-
-    // 无序列表（支持 - 后面有空格或直接跟 ** 的情况）
-    if (line.match(/^\s*[-*+]\s/) || line.match(/^\s*-\*\*/)) {
-      const listResult = parseList(lines, i, 'ul')
-      nodes.push(listResult.node)
-      i = listResult.endIndex + 1
-      continue
-    }
-
-    // 有序列表
-    if (line.match(/^\s*\d+\.\s/) || line.match(/^\s*\d+\.\*\*/)) {
-      const listResult = parseList(lines, i, 'ol')
-      nodes.push(listResult.node)
-      i = listResult.endIndex + 1
-      continue
-    }
-
-    // 分隔线
-    if (line.match(/^[-*_]{3,}\s*$/)) {
-      nodes.push({ type: 'hr' })
-      i++
-      continue
-    }
-
-    // 空行
-    if (!line.trim()) {
-      i++
-      continue
-    }
-
-    // 普通段落
-    nodes.push(parseParagraph(line))
-    i++
   }
 
   return nodes
 }
 
 /**
- * 解析标题
+ * 将 marked 的行内 tokens 转换为自定义格式
  */
-function parseHeading(line) {
-  // 先匹配连续的 # 号
-  const hashMatch = line.match(/^(#{1,6})/)
-  if (!hashMatch) {
-    return parseParagraph(line)
+function convertInlineTokens(tokens) {
+  if (!tokens || !tokens.length) {
+    return [{ type: 'text', text: '' }]
   }
 
-  const level = hashMatch[1].length
-  // 获取 # 后面的内容（去掉开头的空格）
-  let text = line.substring(level).replace(/^\s*/, '')
+  const children = []
 
-  // 处理标题内的 **xxx** 格式，去掉外层的 **
-  if (text.startsWith('**') && text.includes('**', 2)) {
-    const endIndex = text.indexOf('**', 2)
-    if (endIndex === text.length - 2) {
-      // 整个标题被 ** 包裹，去掉它们
-      text = text.substring(2, text.length - 2)
+  for (const token of tokens) {
+    switch (token.type) {
+      case 'text':
+        children.push({ type: 'text', text: token.text })
+        break
+
+      case 'strong':
+        children.push({ type: 'strong', text: token.text })
+        break
+
+      case 'em':
+        children.push({ type: 'em', text: token.text })
+        break
+
+      case 'codespan':
+        children.push({ type: 'code-inline', text: token.text })
+        break
+
+      case 'link':
+        children.push({ type: 'link', text: token.text, url: token.href })
+        break
+
+      case 'image':
+        children.push({ type: 'text', text: token.title || token.text || '[图片]' })
+        break
+
+      case 'br':
+        children.push({ type: 'text', text: '\n' })
+        break
+
+      case 'del':
+        children.push({ type: 'text', text: token.text })
+        break
+
+      default:
+        if (token.raw) {
+          children.push({ type: 'text', text: token.raw })
+        }
     }
   }
 
-  if (!text) {
-    return parseParagraph(line)
+  return children
+}
+
+/**
+ * 展平 blockquote 内的 block tokens 为行内节点
+ */
+function flattenBlockquoteTokens(tokens) {
+  if (!tokens || !tokens.length) {
+    return [{ type: 'text', text: '' }]
   }
 
+  const children = []
+
+  for (const token of tokens) {
+    switch (token.type) {
+      case 'text':
+      case 'paragraph':
+        if (token.tokens) {
+          children.push(...convertInlineTokens(token.tokens))
+        } else {
+          children.push({ type: 'text', text: token.text || token.raw || '' })
+        }
+        break
+      default:
+        if (token.raw) {
+          children.push({ type: 'text', text: token.raw })
+        }
+    }
+  }
+
+  return children.length ? children : [{ type: 'text', text: '' }]
+}
+
+/**
+ * 转换列表 token
+ */
+function convertListToken(token) {
+  const items = token.items.map(item => ({
+    type: 'li',
+    children: flattenListItemTokens(item.tokens)
+  }))
+
   return {
-    type: 'heading',
-    level,
-    children: parseInline(text)
+    type: token.ordered ? 'ol' : 'ul',
+    items
   }
 }
 
 /**
- * 解析引用块
+ * 展平列表项内的 tokens 为行内节点
  */
-function parseBlockquote(line) {
-  const text = line.replace(/^>\s*/, '')
-  return {
-    type: 'blockquote',
-    children: parseInline(text)
+function flattenListItemTokens(tokens) {
+  if (!tokens || !tokens.length) {
+    return [{ type: 'text', text: '' }]
   }
+
+  const children = []
+
+  for (const token of tokens) {
+    switch (token.type) {
+      case 'text':
+        if (token.tokens) {
+          children.push(...convertInlineTokens(token.tokens))
+        } else {
+          children.push({ type: 'text', text: token.text || token.raw || '' })
+        }
+        break
+
+      case 'paragraph':
+        if (token.tokens) {
+          children.push(...convertInlineTokens(token.tokens))
+        } else {
+          children.push({ type: 'text', text: token.text || token.raw || '' })
+        }
+        break
+
+      default:
+        if (token.raw) {
+          children.push({ type: 'text', text: token.raw })
+        }
+    }
+  }
+
+  return children.length ? children : [{ type: 'text', text: '' }]
 }
 
-/**
- * 解析代码块
- */
-function parseCodeBlock(lines, startIndex) {
-  const firstLine = lines[startIndex]
-  const language = firstLine.slice(3).trim()
-  const codeLines = []
-  let i = startIndex + 1
-
-  while (i < lines.length) {
-    if (lines[i].startsWith('```')) {
-      break
-    }
-    codeLines.push(lines[i])
-    i++
-  }
-
-  return {
-    node: {
-      type: 'code',
-      language,
-      content: codeLines.join('\n')
-    },
-    endIndex: i
-  }
-}
-
-/**
- * 解析列表
- */
-function parseList(lines, startIndex, type) {
-  const items = []
-  let i = startIndex
-  // 支持 - 后面有空格或没空格的情况
-  const regex = type === 'ul' ? /^\s*[-*+]\s*(.+)$/ : /^\s*\d+\.\s*(.+)$/
-
-  while (i < lines.length) {
-    const line = lines[i]
-    const match = line.match(regex)
-
-    if (!match) {
-      break
-    }
-
-    items.push({
-      type: 'li',
-      children: parseInline(match[1])
-    })
-    i++
-  }
-
-  return {
-    node: {
-      type,
-      items
-    },
-    endIndex: i - 1
-  }
-}
-
-/**
- * 解析段落
- */
-function parseParagraph(line) {
-  return {
-    type: 'paragraph',
-    children: parseInline(line)
-  }
-}
-
-/**
- * 解析行内元素
- */
-function parseInline(text) {
-  if (!text) return [{ type: 'text', text: '' }]
-
-  // 预处理：清理开头的 ** 如果没有配对
-  let cleanText = text.trim()
-
-  const nodes = []
-  let remaining = cleanText
-
-  while (remaining) {
-    // 粗体 **text** (完整格式)
-    let match = remaining.match(/^\*\*(.+?)\*\*(.*)$/)
-    if (match) {
-      nodes.push({
-        type: 'strong',
-        text: match[1]
-      })
-      remaining = match[2]
-      continue
-    }
-
-    // 粗体在中间 xxx**text**xxx
-    match = remaining.match(/^(.+?)\*\*(.+?)\*\*(.*)$/)
-    if (match) {
-      nodes.push({ type: 'text', text: match[1] })
-      nodes.push({
-        type: 'strong',
-        text: match[2]
-      })
-      remaining = match[3]
-      continue
-    }
-
-    // __text__ 格式
-    match = remaining.match(/^__(.+?)__(.*)$/)
-    if (match) {
-      nodes.push({
-        type: 'strong',
-        text: match[1]
-      })
-      remaining = match[2]
-      continue
-    }
-
-    // 行内代码 `code`
-    match = remaining.match(/^`([^`]+)`(.*)$/)
-    if (match) {
-      nodes.push({
-        type: 'code-inline',
-        text: match[1]
-      })
-      remaining = match[2]
-      continue
-    }
-
-    match = remaining.match(/^(.+?)`([^`]+)`(.*)$/)
-    if (match) {
-      nodes.push({ type: 'text', text: match[1] })
-      nodes.push({
-        type: 'code-inline',
-        text: match[2]
-      })
-      remaining = match[3]
-      continue
-    }
-
-    // 链接 [text](url)
-    match = remaining.match(/^\[([^\]]+)\]\(([^)]+)\)(.*)$/)
-    if (match) {
-      nodes.push({
-        type: 'link',
-        text: match[1],
-        url: match[2]
-      })
-      remaining = match[3]
-      continue
-    }
-
-    // 普通文本（清理未配对的 ** ）
-    let finalText = remaining
-    // 如果开头是未配对的 **，去掉它
-    if (finalText.startsWith('**') && !finalText.substring(2).includes('**')) {
-      finalText = finalText.substring(2)
-    }
-    // 如果结尾是未配对的 **，去掉它
-    if (finalText.endsWith('**') && !finalText.slice(0, -2).includes('**')) {
-      finalText = finalText.slice(0, -2)
-    }
-
-    nodes.push({
-      type: 'text',
-      text: finalText
-    })
-    break
-  }
-
-  return nodes
-}
+// ========== 以下为 rich-text 转换（保持不变） ==========
 
 /**
  * 将节点数组转换为 rich-text 可用的节点格式
@@ -452,7 +404,7 @@ function inlineToRichText(nodes) {
 }
 
 /**
- * 渲染 Markdown 为 rich-text 节点
+ * 渲染 Markdown 为 rich-text 节点（便捷方法）
  * @param {string} markdown
  * @returns {Array}
  */
@@ -477,6 +429,27 @@ function simpleRender(markdown) {
     .replace(/^[-*+]\s+/gm, '• ')     // 转换无序列表
     .replace(/^\d+\.\s+/gm, '')       // 简化有序列表
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // 提取链接文本
+}
+
+/**
+ * 暴露 parseInline 保持向后兼容（解析一段文本为行内节点）
+ */
+function parseInline(text) {
+  if (!text) return [{ type: 'text', text: '' }]
+  try {
+    const tokens = getMarked().lexer(text)
+    if (tokens.length === 1 && tokens[0].type === 'paragraph') {
+      return convertInlineTokens(tokens[0].tokens)
+    }
+    for (const token of tokens) {
+      if (token.type === 'paragraph' && token.tokens) {
+        return convertInlineTokens(token.tokens)
+      }
+    }
+    return convertInlineTokens(tokens)
+  } catch (e) {
+    return [{ type: 'text', text }]
+  }
 }
 
 module.exports = {

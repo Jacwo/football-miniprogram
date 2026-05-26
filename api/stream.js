@@ -20,14 +20,13 @@ function streamChat(options) {
   const { message, deepThinking = false, userId, agentId, matchId, firstMessage, onMessage, onComplete, onError } = options
 
   const token = app.globalData.token
-  let buffer = ''
   let requestTask = null
   let isCompleted = false
 
-  // 持久 TextDecoder：跨 chunk 保持解码状态，防止 iOS 上多字节 UTF-8 字符被截断导致乱码
-  const decoder = typeof TextDecoder !== 'undefined'
-    ? new TextDecoder('utf-8', { fatal: false })
-    : null
+  // 积累原始 ArrayBuffer 分片
+  const rawChunks = []
+  // 已处理的行数，用于增量推送（实现打字机效果）
+  let processedLineCount = 0
 
   requestTask = wx.request({
     url: `${app.globalData.baseUrl}/api/stream/chat`,
@@ -53,16 +52,8 @@ function streamChat(options) {
       isCompleted = true
 
       if (res.statusCode === 200) {
-        // 刷出 decoder 中剩余的字节
-        if (decoder) {
-          const finalText = decoder.decode()
-          if (finalText) {
-            buffer += finalText
-          }
-        }
-        if (buffer) {
-          processChunk(buffer)
-        }
+        // 只处理之前保留的最后一行（最多一行），避免批量倾倒
+        flushReservedLine()
         onComplete && onComplete()
       } else if (res.statusCode === 401) {
         app.clearLoginState()
@@ -78,53 +69,90 @@ function streamChat(options) {
     }
   })
 
-  // 监听分块数据
+  // 每个分块到达时，用全新 Decoder 解码全部累积字节，只推送新增行
+  // 避开了 iOS 上持久 TextDecoder.decode(buf, {stream:true}) 的状态错乱问题
   requestTask.onChunkReceived((res) => {
-    try {
-      // 用持久 decoder 流式解码，跨 chunk 保持多字节字符完整性
-      const text = decoder
-        ? decoder.decode(res.data, { stream: true })
-        : arrayBufferToString(res.data)
-
-      buffer += text
-
-      const lines = buffer.split('\n')
-      buffer = lines.pop() || ''
-
-      for (const line of lines) {
-        processChunk(line)
-      }
-    } catch (e) {
-      console.error('处理分块数据错误:', e)
+    if (isCompleted) return
+    // 用 Object.prototype.toString 代替 instanceof，
+    // 避免 iOS 上跨执行上下文导致 instanceof ArrayBuffer 返回 false
+    if (res.data && Object.prototype.toString.call(res.data) === '[object ArrayBuffer]') {
+      rawChunks.push(new Uint8Array(res.data))
+      flushNewLines()
     }
   })
 
   /**
-   * 处理单行数据
+   * 将当前累积字节一次性解码，提取还未处理的新行并推送
+   * 每次用纯 JS 解码，无状态累积，不会产生 iOS 乱码
+   * 总是保留最后一行（可能被截断的 SSE 行），由 flushReservedLine 兜底
    */
-  function processChunk(line) {
-    const trimmedLine = line.trim()
+  function flushNewLines() {
+    const fullText = concatAndDecode(rawChunks)
+    const allLines = fullText.split('\n')
 
-    if (!trimmedLine) return
+    // 只处理新增的行，保留最后一行
+    const newLines = allLines.slice(processedLineCount)
+    if (newLines.length <= 1) return
 
-    // SSE 格式: data: xxx
-    if (trimmedLine.startsWith('data:')) {
-      // 兼容 "data:" 和 "data: " 两种格式
-      let dataStr = trimmedLine.slice(5)
-      if (dataStr.startsWith(' ')) {
-        dataStr = dataStr.slice(1)
+    const linesToProcess = newLines.slice(0, -1)
+    processedLineCount += linesToProcess.length
+
+    for (const line of linesToProcess) {
+      processLine(line)
+    }
+  }
+
+  /**
+   * 刷出被保留的最后一行（在 success 中调用）
+   * 只处理一行，不会批量倾倒
+   */
+  function flushReservedLine() {
+    const fullText = concatAndDecode(rawChunks)
+    const allLines = fullText.split('\n')
+    // 只取被保留的那一行（processedLineCount 位置）
+    if (processedLineCount < allLines.length) {
+      const line = allLines[processedLineCount]
+      processedLineCount++
+      processLine(line)
+    }
+  }
+
+  /**
+   * 处理单行 SSE 数据
+   * 对标: line.startsWith('data: ') → JSON.parse(line.slice(6))
+   */
+  function processLine(line) {
+    if (!line) return
+
+    // 匹配 "data: " (6字符) 或 "data:" (5字符)
+    let dataStr = ''
+    if (line.startsWith('data: ')) {
+      dataStr = line.slice(6)
+    } else if (line.startsWith('data:')) {
+      dataStr = line.slice(5)
+    } else {
+      return
+    }
+
+    // 跳过空数据或结束标记
+    if (!dataStr || dataStr === '[DONE]') return
+
+    // JSON 格式: DeepSeek / OpenAI 兼容
+    if (dataStr.startsWith('{')) {
+      try {
+        const data = JSON.parse(dataStr)
+        const delta = (data.choices && data.choices[0] && data.choices[0].delta) || {}
+        // 使用 != null 避免 0/false 等 falsy 值被吞掉
+        const content = delta.reasoning_content != null ? String(delta.reasoning_content) :
+                        delta.content != null ? String(delta.content) : ''
+        if (content) {
+          onMessage && onMessage(content)
+        }
+      } catch (e) {
+        // JSON 解析失败（截断 chunk），忽略
       }
-      dataStr = dataStr.trim()
-
-      // 跳过空数据
-      if (!dataStr) return
-
-      // 检查是否结束
-      if (dataStr === '[DONE]') {
-        return
-      }
-
-      // 直接传递纯文本内容
+    } else {
+      // 纯文本透传（向后兼容）
       onMessage && onMessage(dataStr)
     }
   }
@@ -240,27 +268,96 @@ function streamChatPolling(options) {
 }
 
 /**
- * ArrayBuffer 转字符串
- * @param {ArrayBuffer} buffer
+ * 拼接多个 Uint8Array 并一次性 UTF-8 解码
+ * 纯 JS 实现，不依赖 TextDecoder（iOS 微信 JSCore 不支持）
  */
-function arrayBufferToString(buffer) {
-  // 使用 TextDecoder 解码 UTF-8
-  if (typeof TextDecoder !== 'undefined') {
-    return new TextDecoder('utf-8').decode(buffer)
+function concatAndDecode(chunks) {
+  if (!chunks || chunks.length === 0) return ''
+
+  // 计算总字节数
+  let totalLen = 0
+  for (const c of chunks) {
+    totalLen += c.length
   }
 
-  // 降级方案
-  const uint8Array = new Uint8Array(buffer)
-  let str = ''
-  for (let i = 0; i < uint8Array.length; i++) {
-    str += String.fromCharCode(uint8Array[i])
+  // 拼接到一个 Uint8Array
+  const combined = new Uint8Array(totalLen)
+  let offset = 0
+  for (const c of chunks) {
+    combined.set(c, offset)
+    offset += c.length
   }
-  // 处理中文编码
-  try {
-    return decodeURIComponent(escape(str))
-  } catch (e) {
-    return str
+
+  return utf8Decode(combined)
+}
+
+/**
+ * 纯 JS UTF-8 解码（兼容 iOS 微信 JSCore）
+ * 非法字节序列用 U+FFFD 替代，对标 TextDecoder fatal: false
+ */
+function utf8Decode(bytes) {
+  let result = ''
+  let i = 0
+  const len = bytes.length
+
+  while (i < len) {
+    const b0 = bytes[i]
+
+    // 1-byte: 0xxxxxxx
+    if (b0 < 0x80) {
+      result += String.fromCharCode(b0)
+      i += 1
+      continue
+    }
+
+    // 2-byte: 110xxxxx 10xxxxxx
+    if (b0 >= 0xC0 && b0 < 0xE0) {
+      if (i + 1 >= len) { result += '\uFFFD'; break }
+      const b1 = bytes[i + 1]
+      if ((b1 & 0xC0) !== 0x80) { result += '\uFFFD'; i += 1; continue }
+      const cp = ((b0 & 0x1F) << 6) | (b1 & 0x3F)
+      result += String.fromCharCode(cp)
+      i += 2
+      continue
+    }
+
+    // 3-byte: 1110xxxx 10xxxxxx 10xxxxxx
+    if (b0 >= 0xE0 && b0 < 0xF0) {
+      if (i + 2 >= len) { result += '\uFFFD'; break }
+      const b1 = bytes[i + 1]
+      const b2 = bytes[i + 2]
+      if ((b1 & 0xC0) !== 0x80 || (b2 & 0xC0) !== 0x80) { result += '\uFFFD'; i += 1; continue }
+      const cp = ((b0 & 0x0F) << 12) | ((b1 & 0x3F) << 6) | (b2 & 0x3F)
+      result += String.fromCharCode(cp)
+      i += 3
+      continue
+    }
+
+    // 4-byte: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx (surrogate pairs)
+    if (b0 >= 0xF0 && b0 < 0xF8) {
+      if (i + 3 >= len) { result += '\uFFFD'; break }
+      const b1 = bytes[i + 1]
+      const b2 = bytes[i + 2]
+      const b3 = bytes[i + 3]
+      if ((b1 & 0xC0) !== 0x80 || (b2 & 0xC0) !== 0x80 || (b3 & 0xC0) !== 0x80) { result += '\uFFFD'; i += 1; continue }
+      let cp = ((b0 & 0x07) << 18) | ((b1 & 0x3F) << 12) | ((b2 & 0x3F) << 6) | (b3 & 0x3F)
+      // 超出 BMP，用 surrogate pair 表示
+      if (cp > 0xFFFF) {
+        cp -= 0x10000
+        result += String.fromCharCode((cp >>> 10) + 0xD800, (cp & 0x3FF) + 0xDC00)
+      } else {
+        result += String.fromCharCode(cp)
+      }
+      i += 4
+      continue
+    }
+
+    // 非法字节
+    result += '\uFFFD'
+    i += 1
   }
+
+  return result
 }
 
 /**
