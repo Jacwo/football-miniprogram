@@ -10,6 +10,34 @@ function getMarked() {
 }
 
 /**
+ * 预处理 Markdown —— 修复 AI 流式输出缺少换行的问题
+ * AI 输出常把多个 block 元素挤在同一行，导致 marked 无法识别：
+ *   "文本。---###1.标题* **子标题**: 内容"
+ * 预处理将其还原为标准的多行格式
+ */
+function preprocessMarkdown(md) {
+  if (!md) return ''
+
+  let text = md
+
+  // 1) 连续三个 - 当作分隔线：前后补换行
+  text = text.replace(/([^\n])---/g, '$1\n\n---\n\n')
+  text = text.replace(/^---/gm, '\n---\n')
+
+  // 2) ### 后紧跟数字（###1. / ###2. 等）→ 补空间并确保在新行起头
+  text = text.replace(/([^\n])###(\d+[.．、])/g, '$1\n\n### $2')
+  text = text.replace(/^###(\d+[.．、])/gm, '### $1')
+
+  // 3) * 或 - 开头的列表项紧跟标题或段落尾部 → 补换行
+  text = text.replace(/([^\n])(\*|-) \*\*/g, '$1\n$2 **')
+
+  // 4) 清理多余空行（超过2个连续空行合并为2个）
+  text = text.replace(/\n{3,}/g, '\n\n')
+
+  return text
+}
+
+/**
  * 解析 Markdown 文本为自定义节点数组
  * @param {string} markdown Markdown 文本
  * @returns {Array} 节点数组
@@ -18,7 +46,8 @@ function parseMarkdown(markdown) {
   if (!markdown) return []
 
   try {
-    const tokens = getMarked().lexer(markdown)
+    const preprocessed = preprocessMarkdown(markdown)
+    const tokens = getMarked().lexer(preprocessed)
     return convertBlockTokens(tokens)
   } catch (e) {
     console.error('Markdown 解析失败:', e)

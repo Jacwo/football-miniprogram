@@ -1,10 +1,15 @@
 /* components/typing-text/index.wxss */
 .typing-text {
   display: inline;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .text-content {
-  line-height: 1.7;
+  line-height: 1.75;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .cursor {

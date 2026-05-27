@@ -4,10 +4,10 @@
     <!-- 标题 -->
     <view wx:if="{{item.type === 'heading'}}" class="md-heading md-h{{item.level}}">
       <block wx:for="{{item.children}}" wx:for-item="child" wx:key="index">
-        <text wx:if="{{child.type === 'text'}}">{{child.text}}</text>
-        <text wx:elif="{{child.type === 'strong'}}" class="md-strong">{{child.text}}</text>
-        <text wx:elif="{{child.type === 'em'}}" class="md-em">{{child.text}}</text>
-        <text wx:elif="{{child.type === 'code-inline'}}" class="md-code-inline">{{child.text}}</text>
+        <text wx:if="{{child.type === 'text'}}" selectable="{{selectable}}">{{child.text}}</text>
+        <text wx:elif="{{child.type === 'strong'}}" class="md-strong" selectable="{{selectable}}">{{child.text}}</text>
+        <text wx:elif="{{child.type === 'em'}}" class="md-em" selectable="{{selectable}}">{{child.text}}</text>
+        <text wx:elif="{{child.type === 'code-inline'}}" class="md-code-inline" selectable="{{selectable}}">{{child.text}}</text>
       </block>
     </view>
 
@@ -40,6 +40,9 @@
       <block wx:for="{{item.children}}" wx:for-item="child" wx:key="index">
         <text wx:if="{{child.type === 'text'}}" selectable="{{selectable}}">{{child.text}}</text>
         <text wx:elif="{{child.type === 'strong'}}" class="md-strong" selectable="{{selectable}}">{{child.text}}</text>
+        <text wx:elif="{{child.type === 'em'}}" class="md-em" selectable="{{selectable}}">{{child.text}}</text>
+        <text wx:elif="{{child.type === 'code-inline'}}" class="md-code-inline" selectable="{{selectable}}">{{child.text}}</text>
+        <text wx:elif="{{child.type === 'link'}}" class="md-link" data-url="{{child.url}}" bindtap="onLinkTap">{{child.text}}</text>
       </block>
     </view>
 
@@ -51,7 +54,9 @@
           <block wx:for="{{li.children}}" wx:for-item="child" wx:key="index">
             <text wx:if="{{child.type === 'text'}}" selectable="{{selectable}}">{{child.text}}</text>
             <text wx:elif="{{child.type === 'strong'}}" class="md-strong" selectable="{{selectable}}">{{child.text}}</text>
+            <text wx:elif="{{child.type === 'em'}}" class="md-em" selectable="{{selectable}}">{{child.text}}</text>
             <text wx:elif="{{child.type === 'code-inline'}}" class="md-code-inline" selectable="{{selectable}}">{{child.text}}</text>
+            <text wx:elif="{{child.type === 'link'}}" class="md-link" data-url="{{child.url}}" bindtap="onLinkTap">{{child.text}}</text>
           </block>
         </view>
       </view>
@@ -65,7 +70,9 @@
           <block wx:for="{{li.children}}" wx:for-item="child" wx:key="index">
             <text wx:if="{{child.type === 'text'}}" selectable="{{selectable}}">{{child.text}}</text>
             <text wx:elif="{{child.type === 'strong'}}" class="md-strong" selectable="{{selectable}}">{{child.text}}</text>
+            <text wx:elif="{{child.type === 'em'}}" class="md-em" selectable="{{selectable}}">{{child.text}}</text>
             <text wx:elif="{{child.type === 'code-inline'}}" class="md-code-inline" selectable="{{selectable}}">{{child.text}}</text>
+            <text wx:elif="{{child.type === 'link'}}" class="md-link" data-url="{{child.url}}" bindtap="onLinkTap">{{child.text}}</text>
           </block>
         </view>
       </view>

@@ -118,6 +118,16 @@ Page({
   onUnload() {
     // 停止流式请求
     this.abortStream()
+    // 清理定时器
+    if (this._appendTimer) {
+      clearTimeout(this._appendTimer)
+      this._appendTimer = null
+    }
+    if (this._scrollTimer) {
+      clearTimeout(this._scrollTimer)
+      this._scrollTimer = null
+    }
+    this._streamBuffer = null
     // 保存消息
     this.saveMessages()
   },
@@ -288,21 +298,48 @@ Page({
     })
   },
 
-  // 追加消息内容
+  // 追加消息内容（缓冲区 + 批量 setData，避免高频刷屏导致渲染错乱）
   appendMessage(messageId, text) {
+    // 累积到本地缓冲区，不在每个 token 上都 setData
+    if (!this._streamBuffer) this._streamBuffer = {}
+    if (!this._streamBuffer[messageId]) this._streamBuffer[messageId] = ''
+    this._streamBuffer[messageId] += text
+
+    // 已有定时器则无需重复创建（前端节流）
+    if (this._appendTimer) return
+
+    this._appendTimer = setTimeout(() => {
+      this._flushAppendBuffer()
+    }, 80)
+
+    this.throttleScrollToBottom()
+  },
+
+  // 刷出缓冲区 — 原子化更新，不 mutate this.data
+  _flushAppendBuffer() {
+    this._appendTimer = null
+    if (!this._streamBuffer) return
+
+    const buffers = this._streamBuffer
+    this._streamBuffer = {}
+
     const { messages } = this.data
-    const index = messages.findIndex(m => m.id === messageId)
+    const updates = {}
 
-    if (index !== -1) {
-      const message = messages[index]
-      message.content += text
+    Object.keys(buffers).forEach(mid => {
+      const delta = buffers[mid]
+      if (!delta) return
+      const index = messages.findIndex(m => m.id === mid)
+      if (index !== -1) {
+        // 从 data 取最新 content，安全拼接
+        updates[`messages[${index}].content`] = (messages[index].content || '') + delta
+      }
+    })
 
-      this.setData({
-        [`messages[${index}].content`]: message.content
-      })
-
-      // 节流滚动，避免频繁调用
-      this.throttleScrollToBottom()
+    if (Object.keys(updates).length > 0) {
+      // 同时触发 scroll-into-view，确保流式输出时自动追底
+      updates.scrollToView = `msg-${messages.length - 1}`
+      this.setData(updates)
     }
   },
 
@@ -317,6 +354,13 @@ Page({
 
   // 完成消息
   finishMessage(messageId) {
+    // 先刷出缓冲区中的残留内容
+    if (this._appendTimer) {
+      clearTimeout(this._appendTimer)
+      this._appendTimer = null
+    }
+    this._flushAppendBuffer()
+
     const { messages } = this.data
     const index = messages.findIndex(m => m.id === messageId)
 
@@ -334,6 +378,9 @@ Page({
 
   // 处理流式错误
   handleStreamError(messageId, err) {
+    // 先刷出缓冲区残留内容
+    this._flushAppendBuffer()
+
     const { messages } = this.data
     const index = messages.findIndex(m => m.id === messageId)
 
@@ -366,6 +413,9 @@ Page({
   // 停止生成
   onStopGenerate() {
     this.abortStream()
+
+    // 刷出残留缓冲区
+    this._flushAppendBuffer()
 
     const { messages } = this.data
     const lastIndex = messages.length - 1
