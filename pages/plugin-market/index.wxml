@@ -1,0 +1,94 @@
+<!-- pages/plugin-market/index.wxml - 因素插件市场 -->
+<view class="page-wrapper">
+  <!-- 顶部搜索区 -->
+  <view class="search-bar">
+    <view class="search-input-wrap">
+      <text class="search-icon">🔍</text>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="搜索插件名称、描述..."
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        confirm-type="search"
+        placeholder-class="search-placeholder"
+      />
+      <text class="search-clear" wx:if="{{searchKeyword}}" catchtap="onClearSearch">✕</text>
+    </view>
+    <view class="search-stats" wx:if="{{searchKeyword}}">
+      <text class="stats-text">找到 {{filteredPlugins.length}} 个匹配结果</text>
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading-wrap" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">正在加载插件...</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-wrap" wx:elif="{{filteredPlugins.length === 0 && !loading}}">
+    <text class="empty-icon">📦</text>
+    <text class="empty-title">暂无可用插件</text>
+    <text class="empty-desc">{{searchKeyword ? '未找到匹配的插件，换个关键词试试' : '插件市场暂时没有可用的因素插件'}}</text>
+  </view>
+
+  <!-- 插件列表 -->
+  <scroll-view
+    wx:else
+    class="plugin-scroll"
+    scroll-y
+    enhanced
+    show-scrollbar="{{true}}"
+    lower-threshold="80"
+  >
+    <view class="plugin-list">
+      <view
+        class="plugin-card {{item.selected ? 'selected' : ''}}"
+        wx:for="{{filteredPlugins}}"
+        wx:key="factorCode"
+        wx:for-item="item"
+        wx:for-index="idx"
+        data-index="{{idx}}"
+        catchtap="onToggleSelect"
+      >
+        <view class="plugin-card-left">
+          <view class="plugin-checkbox {{item.selected ? 'checked' : ''}}">
+            <text wx:if="{{item.selected}}">✓</text>
+          </view>
+        </view>
+        <view class="plugin-card-body">
+          <view class="plugin-card-head">
+            <text class="plugin-card-name">{{item.factorName}}</text>
+            <view class="plugin-card-badge" wx:if="{{item.category}}">{{item.category}}</view>
+          </view>
+          <text class="plugin-card-desc" wx:if="{{item.description}}">{{item.description}}</text>
+          <view class="plugin-card-prompt" wx:if="{{item.promptTemplate}}">
+            <text class="prompt-label">提示词模版</text>
+            <text class="prompt-text">{{item.promptTemplate}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部安全区 -->
+    <view class="scroll-bottom-safe"></view>
+  </scroll-view>
+
+  <!-- 底部批量操作栏 -->
+  <view class="bottom-bar" wx:if="{{selectedCount > 0}}">
+    <view class="bottom-bar-left">
+      <view class="select-all-btn {{allSelected ? 'active' : ''}}" catchtap="onToggleSelectAll">
+        <view class="select-all-checkbox {{allSelected ? 'checked' : ''}}">
+          <text wx:if="{{allSelected}}">✓</text>
+        </view>
+        <text class="select-all-text">{{allSelected ? '取消全选' : '全选'}}</text>
+      </view>
+      <text class="bottom-bar-count">已选 <text class="count-num">{{selectedCount}}</text> 个插件</text>
+    </view>
+    <view class="bottom-bar-btn {{importing ? 'loading' : ''}}" catchtap="onBatchImport">
+      <text wx:if="{{!importing}}">批量引入</text>
+      <text wx:else>引入中...</text>
+    </view>
+  </view>
+</view>

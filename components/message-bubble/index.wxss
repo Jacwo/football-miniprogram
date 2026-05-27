@@ -1,8 +1,9 @@
 /* components/message-bubble/index.wxss */
 .message-bubble {
   display: flex;
-  padding: 16rpx 24rpx;
+  padding: 14rpx 24rpx;
   gap: 16rpx;
+  align-items: flex-start;
 }
 
 /* 用户消息 - 右对齐 */
@@ -18,51 +19,56 @@
 /* 头像 */
 .avatar-wrapper {
   flex-shrink: 0;
+  padding-top: 4rpx;
 }
 
 .avatar {
   width: 72rpx;
   height: 72rpx;
   border-radius: 50%;
-  background-color: #f0f0f0;
+  background-color: #f1f5f9;
+  border: 2rpx solid #e2e8f0;
 }
 
 /* 气泡内容 */
 .bubble-content {
-  max-width: calc(100% - 120rpx);
-  padding: 20rpx 24rpx;
-  border-radius: 16rpx;
+  max-width: calc(100% - 130rpx);
+  padding: 22rpx 26rpx;
+  border-radius: 18rpx;
   word-wrap: break-word;
   word-break: break-all;
+  position: relative;
 }
 
 /* 用户消息样式 */
 .message-bubble.user .bubble-content {
-  background: linear-gradient(135deg, #1890ff, #36cfc9);
+  background: linear-gradient(135deg, #2563eb 0%, #6366f1 100%);
   color: #ffffff;
-  border-top-right-radius: 4rpx;
+  border-top-right-radius: 6rpx;
+  box-shadow: 0 4rpx 14rpx rgba(37, 99, 235, 0.25);
 }
 
 /* AI 消息样式 */
 .message-bubble.assistant .bubble-content {
   background-color: #ffffff;
-  color: #333333;
-  border-top-left-radius: 4rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  color: #1e293b;
+  border-top-left-radius: 6rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+  border: 1rpx solid #f1f5f9;
 }
 
 /* 文本内容 */
 .text-content {
   font-size: 28rpx;
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
 /* ========== 思考中 loading 动效 ========== */
 .thinking-dots {
   display: flex;
   align-items: center;
-  gap: 8rpx;
-  padding: 12rpx 8rpx;
+  gap: 10rpx;
+  padding: 14rpx 8rpx;
   min-height: 48rpx;
 }
 
@@ -98,5 +104,5 @@
 
 .time-text {
   font-size: 22rpx;
-  color: #999;
+  color: #94a3b8;
 }

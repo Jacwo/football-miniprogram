@@ -58,12 +58,6 @@ Page({
     editingFactorCode: null, // 编辑时的 factorCode
     savingFactor: false,
     savingFactorId: null,
-    // 因素插件市场
-    showPluginMarket: false,
-    pluginFactors: [],
-    pluginFactorsLoading: false,
-    pluginSelectedCount: 0,
-    pluginImporting: false,
     // 左侧栏
     showSidebar: false,
     sessionList: [], // 保留兼容旧逻辑
@@ -112,6 +106,12 @@ Page({
     if (userInfo && userInfo.id) {
       this.loadAgentList()
       this.loadMatchList()
+    }
+
+    // 从插件市场返回后刷新智能体详情
+    if (this._needRefreshAgentDetail && this.data.agentDetail && this.data.agentDetail.id) {
+      this._needRefreshAgentDetail = false
+      this.loadAgentDetail(this.data.agentDetail.id)
     }
   },
 
@@ -398,6 +398,7 @@ Page({
 
     this.setData({
       showAgentDetail: true,
+      showAgentPicker: false,
       agentDetailLoading: true,
       agentDetail: null,
       factorGroups: []
@@ -446,9 +447,7 @@ Page({
   // 关闭智能体详情弹窗
   onCloseAgentDetail() {
     this.setData({
-      showAgentDetail: false,
-      showPluginMarket: false,
-      pluginSelectedCount: 0
+      showAgentDetail: false
     })
   },
 
@@ -773,109 +772,26 @@ Page({
   },
 
   // ========== 因素插件市场 ==========
-  // 切换插件市场
-  async onTogglePluginMarket() {
-    const { showPluginMarket, pluginFactors } = this.data
-    if (showPluginMarket) {
-      this.setData({ showPluginMarket: false, pluginSelectedCount: 0 })
-      return
-    }
-
-    // 已加载过就不再请求
-    if (pluginFactors.length > 0) {
-      this.setData({ showPluginMarket: true, pluginSelectedCount: 0 })
-      return
-    }
-
-    this.setData({ showPluginMarket: true, pluginFactorsLoading: true, pluginSelectedCount: 0 })
-
-    try {
-      const list = await agentApi.getPluginFactors()
-      this.setData({
-        pluginFactors: (list || []).map(item => ({ ...item, selected: false })),
-        pluginFactorsLoading: false
-      })
-    } catch (e) {
-      console.error('加载插件因素失败:', e)
-      wx.showToast({ title: '加载失败', icon: 'none' })
-      this.setData({ pluginFactorsLoading: false, showPluginMarket: false })
-    }
-  },
-
-  // 切换插件因素选中状态（多选）
-  onTogglePluginSelect(e) {
-    const { index } = e.currentTarget.dataset
-    const key = `pluginFactors[${index}].selected`
-    const item = this.data.pluginFactors[index]
-    if (!item) return
-
-    this.setData({
-      [key]: !item.selected,
-      pluginSelectedCount: this.data.pluginSelectedCount + (item.selected ? -1 : 1)
-    })
-  },
-
-  // 批量引入选中的插件因素
-  async onBatchImportPlugins() {
-    const { pluginFactors, pluginSelectedCount, agentDetail, pluginImporting } = this.data
-    if (pluginImporting || pluginSelectedCount === 0) return
-
-    const userInfo = userStore.getUserInfo()
-    if (!userInfo || !userInfo.id) return
+  // 打开插件市场页面
+  onOpenPluginMarket() {
+    const { agentDetail } = this.data
     if (!agentDetail || !agentDetail.id) {
       wx.showToast({ title: '请先选择智能体', icon: 'none' })
       return
     }
 
-    const selectedFactors = pluginFactors.filter(f => f.selected)
-    if (selectedFactors.length === 0) return
+    this._needRefreshAgentDetail = true
 
-    this.setData({ pluginImporting: true })
-
-    try {
-      await agentApi.batchSaveFactors({
-        userId: userInfo.id,
-        agentId: agentDetail.id,
-        configs: selectedFactors.map(f => ({
-          factorCode: f.factorCode,
-          isEnabled: true,
-          weight: 1
-        }))
-      })
-
-      wx.showToast({ title: `已引入 ${selectedFactors.length} 个因素`, icon: 'success' })
-
-      // 重置选中状态
-      this.setData({
-        pluginImporting: false,
-        pluginSelectedCount: 0,
-        showPluginMarket: false,
-        pluginFactors: pluginFactors.map(f => ({ ...f, selected: false }))
-      })
-
-      // 刷新智能体详情
-      if (agentDetail.id) {
-        await this.loadAgentDetail(agentDetail.id)
+    wx.navigateTo({
+      url: `/pages/plugin-market/index?agentId=${agentDetail.id}`,
+      events: {
+        pluginsImported: (_data) => {
+          // 引入成功后刷新智能体详情
+          if (agentDetail.id) {
+            this.loadAgentDetail(agentDetail.id)
+          }
+        }
       }
-    } catch (e) {
-      console.error('批量引入因素失败:', e)
-      wx.showToast({ title: '引入失败，请重试', icon: 'none' })
-      this.setData({ pluginImporting: false })
-    }
-  },
-
-  // 选中插件因素，预填表单（保留单点快速填入）
-  onSelectPluginFactor(e) {
-    const { index } = e.currentTarget.dataset
-    const factor = this.data.pluginFactors[index]
-    if (!factor) return
-
-    this.setData({
-      factorFormName: factor.factorName || '',
-      factorFormDesc: factor.description || '',
-      factorFormPrompt: factor.promptTemplate || '',
-      showPluginMarket: false,
-      pluginSelectedCount: 0
     })
   },
 
@@ -1037,15 +953,25 @@ Page({
     wx.removeStorageSync('ai-chat-messages')
   },
 
-  // 切换智能体 — 返回到智能体列表
+  // 切换智能体 — 返回到智能体列表/显示底部弹窗
   onSwitchAgent() {
     const { selectedAgent, messages } = this.data
+
+    // 如果已有选中的智能体，先取消选中
     if (selectedAgent) {
       this.setData({ selectedAgent: null })
     }
-    // 如果已经有消息，显示弹窗选择智能体
+
+    // 有消息时显示底部弹窗选择智能体
     if (messages.length > 0) {
-      this.setData({ showAgentPicker: true })
+      // 如果智能体列表为空，先刷新
+      if (this.data.agentList.length === 0) {
+        this.loadAgentList().then(() => {
+          this.setData({ showAgentPicker: true })
+        })
+      } else {
+        this.setData({ showAgentPicker: true })
+      }
     }
   },
 

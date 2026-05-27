@@ -162,48 +162,6 @@
       </view>
     </view>
 
-    <!-- 智能体选择弹窗（已有消息时弹出） -->
-    <view class="agent-picker-mask {{showAgentPicker ? 'visible' : ''}}" catchtap="onCloseAgentPicker"></view>
-    <view class="agent-picker-panel {{showAgentPicker ? 'open' : ''}}">
-      <view class="agent-picker-header">
-        <text class="agent-picker-title">选择智能体</text>
-        <view class="agent-picker-close" catchtap="onCloseAgentPicker">
-          <text class="agent-picker-close-icon">×</text>
-        </view>
-      </view>
-      <scroll-view class="agent-picker-body" scroll-y enhanced show-scrollbar="{{false}}">
-        <view class="agent-grid">
-          <view
-            class="agent-card {{item.isDefault ? 'agent-default' : ''}}"
-            wx:for="{{agentList}}"
-            wx:key="id"
-            data-agent="{{item}}"
-            bindtap="onAgentSelect"
-          >
-            <image class="agent-avatar" src="{{item.avatar || '/images/icons/user-avatar.png'}}" mode="aspectFill" />
-            <view class="agent-info">
-              <view class="agent-name-row">
-                <text class="agent-name">{{item.agentName}}</text>
-                <view class="agent-default-tag" wx:if="{{item.isDefault}}">
-                  <text>默认</text>
-                </view>
-              </view>
-              <text class="agent-desc">{{item.description || '暂无描述'}}</text>
-              <text class="agent-factor" wx:if="{{item.factorCount}}">已配置 {{item.factorCount}} 个因素</text>
-            </view>
-            <text class="agent-arrow">›</text>
-          </view>
-        </view>
-        <view class="agent-empty" wx:if="{{agentList.length === 0}}">
-          <text class="agent-empty-text">暂无可用智能体</text>
-        </view>
-        <view class="create-agent-btn" bindtap="onShowCreateAgent">
-          <text class="create-agent-icon">＋</text>
-          <text class="create-agent-text">新建专属智能体</text>
-        </view>
-      </scroll-view>
-    </view>
-
     <!-- 消息气泡 -->
     <view
       class="message-item"
@@ -283,6 +241,48 @@
       </view>
     </view>
   </view>
+</view>
+
+<!-- 智能体选择弹窗（已有消息时弹出，从底部滑入） -->
+<view class="agent-picker-mask {{showAgentPicker ? 'visible' : ''}}" catchtap="onCloseAgentPicker"></view>
+<view class="agent-picker-panel {{showAgentPicker ? 'open' : ''}}">
+  <view class="agent-picker-header">
+    <text class="agent-picker-title">选择智能体</text>
+    <view class="agent-picker-close" catchtap="onCloseAgentPicker">
+      <text class="agent-picker-close-icon">×</text>
+    </view>
+  </view>
+  <scroll-view class="agent-picker-body" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="agent-grid">
+      <view
+        class="agent-card {{item.isDefault ? 'agent-default' : ''}}"
+        wx:for="{{agentList}}"
+        wx:key="id"
+        data-agent="{{item}}"
+        bindtap="onAgentSelect"
+      >
+        <image class="agent-avatar" src="{{item.avatar || '/images/icons/user-avatar.png'}}" mode="aspectFill" />
+        <view class="agent-info">
+          <view class="agent-name-row">
+            <text class="agent-name">{{item.agentName}}</text>
+            <view class="agent-default-tag" wx:if="{{item.isDefault}}">
+              <text>默认</text>
+            </view>
+          </view>
+          <text class="agent-desc">{{item.description || '暂无描述'}}</text>
+          <text class="agent-factor" wx:if="{{item.factorCount}}">已配置 {{item.factorCount}} 个因素</text>
+        </view>
+        <text class="agent-arrow">›</text>
+      </view>
+    </view>
+    <view class="agent-empty" wx:if="{{agentList.length === 0}}">
+      <text class="agent-empty-text">暂无可用智能体</text>
+    </view>
+    <view class="create-agent-btn" bindtap="onShowCreateAgent">
+      <text class="create-agent-icon">＋</text>
+      <text class="create-agent-text">新建专属智能体</text>
+    </view>
+  </scroll-view>
 </view>
 
 <!-- 智能体详情弹窗 -->
@@ -402,52 +402,10 @@
 
           <!-- 因素插件市场（仅非系统智能体） -->
           <block wx:if="{{!agentDetail.isSystem}}">
-            <view class="plugin-market-entry" catchtap="onTogglePluginMarket">
+            <view class="plugin-market-entry" catchtap="onOpenPluginMarket">
               <text class="plugin-market-icon">🧩</text>
               <text class="plugin-market-label">因素插件市场</text>
-              <text class="plugin-market-arrow">{{showPluginMarket ? '⌃' : '›'}}</text>
-            </view>
-
-            <!-- 插件因素列表（支持滚动多选 + 批量引入） -->
-            <view class="plugin-market-wrap" wx:if="{{showPluginMarket}}">
-              <view class="plugin-loading" wx:if="{{pluginFactorsLoading}}">
-                <text>加载中...</text>
-              </view>
-              <view class="plugin-empty" wx:elif="{{pluginFactors.length === 0}}">
-                <text>暂无可用插件</text>
-              </view>
-              <block wx:else>
-                <scroll-view class="plugin-scroll" scroll-y enhanced show-scrollbar="{{true}}">
-                  <view
-                    class="plugin-card {{item.selected ? 'selected' : ''}}"
-                    wx:for="{{pluginFactors}}"
-                    wx:key="factorCode"
-                    wx:for-index="idx"
-                    data-index="{{idx}}"
-                    catchtap="onTogglePluginSelect"
-                  >
-                    <view class="plugin-card-left">
-                      <view class="plugin-checkbox {{item.selected ? 'checked' : ''}}">
-                        <text wx:if="{{item.selected}}">✓</text>
-                      </view>
-                    </view>
-                    <view class="plugin-card-body">
-                      <view class="plugin-card-head">
-                        <text class="plugin-card-name">{{item.factorName}}</text>
-                      </view>
-                      <text class="plugin-card-desc" wx:if="{{item.description}}">{{item.description}}</text>
-                      <text class="plugin-card-prompt" wx:if="{{item.promptTemplate}}">提示：{{item.promptTemplate}}</text>
-                    </view>
-                  </view>
-                </scroll-view>
-                <view class="plugin-batch-bar" wx:if="{{pluginSelectedCount > 0}}">
-                  <text class="plugin-batch-count">已选 {{pluginSelectedCount}} 个</text>
-                  <view class="plugin-batch-btn {{pluginImporting ? 'loading' : ''}}" catchtap="onBatchImportPlugins">
-                    <text wx:if="{{!pluginImporting}}">批量引入</text>
-                    <text wx:else>引入中...</text>
-                  </view>
-                </view>
-              </block>
+              <text class="plugin-market-arrow">›</text>
             </view>
           </block>
 

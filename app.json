@@ -21,7 +21,8 @@
     "pages/credits/index",
     "pages/vip/index",
     "pages/topic/index",
-    "pages/topic-detail/index"
+    "pages/topic-detail/index",
+    "pages/plugin-market/index"
   ],
   "window": {
     "navigationBarTextStyle": "black",
