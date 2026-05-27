@@ -394,12 +394,62 @@
                 </view>
                 <text class="factor-desc" wx:if="{{factor.description}}">{{factor.description}}</text>
                 <view class="factor-prompt" wx:if="{{factor.promptTemplate}}">
-                  <text class="factor-prompt-label">Prompt模板</text>
                   <text class="factor-prompt-text">{{factor.promptTemplate}}</text>
                 </view>
               </view>
             </view>
           </view>
+
+          <!-- 因素插件市场（仅非系统智能体） -->
+          <block wx:if="{{!agentDetail.isSystem}}">
+            <view class="plugin-market-entry" catchtap="onTogglePluginMarket">
+              <text class="plugin-market-icon">🧩</text>
+              <text class="plugin-market-label">因素插件市场</text>
+              <text class="plugin-market-arrow">{{showPluginMarket ? '⌃' : '›'}}</text>
+            </view>
+
+            <!-- 插件因素列表（支持滚动多选 + 批量引入） -->
+            <view class="plugin-market-wrap" wx:if="{{showPluginMarket}}">
+              <view class="plugin-loading" wx:if="{{pluginFactorsLoading}}">
+                <text>加载中...</text>
+              </view>
+              <view class="plugin-empty" wx:elif="{{pluginFactors.length === 0}}">
+                <text>暂无可用插件</text>
+              </view>
+              <block wx:else>
+                <scroll-view class="plugin-scroll" scroll-y enhanced show-scrollbar="{{true}}">
+                  <view
+                    class="plugin-card {{item.selected ? 'selected' : ''}}"
+                    wx:for="{{pluginFactors}}"
+                    wx:key="factorCode"
+                    wx:for-index="idx"
+                    data-index="{{idx}}"
+                    catchtap="onTogglePluginSelect"
+                  >
+                    <view class="plugin-card-left">
+                      <view class="plugin-checkbox {{item.selected ? 'checked' : ''}}">
+                        <text wx:if="{{item.selected}}">✓</text>
+                      </view>
+                    </view>
+                    <view class="plugin-card-body">
+                      <view class="plugin-card-head">
+                        <text class="plugin-card-name">{{item.factorName}}</text>
+                      </view>
+                      <text class="plugin-card-desc" wx:if="{{item.description}}">{{item.description}}</text>
+                      <text class="plugin-card-prompt" wx:if="{{item.promptTemplate}}">提示：{{item.promptTemplate}}</text>
+                    </view>
+                  </view>
+                </scroll-view>
+                <view class="plugin-batch-bar" wx:if="{{pluginSelectedCount > 0}}">
+                  <text class="plugin-batch-count">已选 {{pluginSelectedCount}} 个</text>
+                  <view class="plugin-batch-btn {{pluginImporting ? 'loading' : ''}}" catchtap="onBatchImportPlugins">
+                    <text wx:if="{{!pluginImporting}}">批量引入</text>
+                    <text wx:else>引入中...</text>
+                  </view>
+                </view>
+              </block>
+            </view>
+          </block>
 
           <!-- 非系统智能体：新增因素按钮 -->
           <view class="add-factor-btn" wx:if="{{!agentDetail.isSystem}}" bindtap="onShowAddFactor">
@@ -443,7 +493,7 @@
         <view class="drawer-field">
           <text class="drawer-label">因素描述</text>
           <textarea
-            class="drawer-textarea"
+            class="drawer-textarea drawer-textarea-sm"
             placeholder="描述该因素的作用"
             placeholder-class="create-placeholder"
             value="{{factorFormDesc}}"
@@ -453,10 +503,10 @@
           />
         </view>
         <view class="drawer-field">
-          <text class="drawer-label">Prompt模板</text>
+          <text class="drawer-label">提示话术</text>
           <textarea
-            class="drawer-textarea"
-            placeholder="使用 {value} 作为占位符，例如：请分析球队的 {value}"
+            class="drawer-textarea drawer-textarea-lg"
+            placeholder="请输入提示话术，可参考：赔率结构动力学分析、基本面量化验证模型、冷门预警"
             placeholder-class="create-placeholder"
             value="{{factorFormPrompt}}"
             bindinput="onFactorFormPromptInput"
@@ -464,6 +514,7 @@
             auto-height
           />
         </view>
+
       </view>
     </scroll-view>
     <view class="drawer-footer">
@@ -475,7 +526,7 @@
         <text wx:else>保存中...</text>
       </view>
     </view>
-  </view>
+    </view>
 </view>
 
 <!-- 新建智能体弹窗 -->

@@ -58,6 +58,12 @@ Page({
     editingFactorCode: null, // 编辑时的 factorCode
     savingFactor: false,
     savingFactorId: null,
+    // 因素插件市场
+    showPluginMarket: false,
+    pluginFactors: [],
+    pluginFactorsLoading: false,
+    pluginSelectedCount: 0,
+    pluginImporting: false,
     // 左侧栏
     showSidebar: false,
     sessionList: [], // 保留兼容旧逻辑
@@ -439,7 +445,44 @@ Page({
 
   // 关闭智能体详情弹窗
   onCloseAgentDetail() {
-    this.setData({ showAgentDetail: false })
+    this.setData({
+      showAgentDetail: false,
+      showPluginMarket: false,
+      pluginSelectedCount: 0
+    })
+  },
+
+  // 刷新智能体详情（批量引入后使用）
+  async loadAgentDetail(agentId) {
+    const userInfo = userStore.getUserInfo()
+    if (!userInfo || !userInfo.id || !agentId) return
+
+    try {
+      const detail = await agentApi.getAgentDetail(userInfo.id, agentId)
+      const groupMap = {}
+      const factorConfigs = detail.factorConfigs || []
+      factorConfigs.forEach(item => {
+        const group = item.factorGroup || '其他'
+        if (!groupMap[group]) {
+          groupMap[group] = {
+            groupName: group,
+            groupDisplayName: GROUP_DISPLAY_MAP[group] || group,
+            items: []
+          }
+        }
+        item.isCustom = item.factorGroup === 'CUSTOM'
+        groupMap[group].items.push(item)
+      })
+      const factorGroups = Object.values(groupMap).sort((a, b) => {
+        if (a.groupName === 'BASIC') return -1
+        if (b.groupName === 'BASIC') return 1
+        return 0
+      })
+
+      this.setData({ agentDetail: detail, factorGroups })
+    } catch (e) {
+      console.error('刷新智能体详情失败:', e)
+    }
   },
 
   // 阻止事件冒泡
@@ -727,6 +770,113 @@ Page({
   // 关闭因素抽屉
   onCloseFactorDrawer() {
     this.setData({ showFactorDrawer: false })
+  },
+
+  // ========== 因素插件市场 ==========
+  // 切换插件市场
+  async onTogglePluginMarket() {
+    const { showPluginMarket, pluginFactors } = this.data
+    if (showPluginMarket) {
+      this.setData({ showPluginMarket: false, pluginSelectedCount: 0 })
+      return
+    }
+
+    // 已加载过就不再请求
+    if (pluginFactors.length > 0) {
+      this.setData({ showPluginMarket: true, pluginSelectedCount: 0 })
+      return
+    }
+
+    this.setData({ showPluginMarket: true, pluginFactorsLoading: true, pluginSelectedCount: 0 })
+
+    try {
+      const list = await agentApi.getPluginFactors()
+      this.setData({
+        pluginFactors: (list || []).map(item => ({ ...item, selected: false })),
+        pluginFactorsLoading: false
+      })
+    } catch (e) {
+      console.error('加载插件因素失败:', e)
+      wx.showToast({ title: '加载失败', icon: 'none' })
+      this.setData({ pluginFactorsLoading: false, showPluginMarket: false })
+    }
+  },
+
+  // 切换插件因素选中状态（多选）
+  onTogglePluginSelect(e) {
+    const { index } = e.currentTarget.dataset
+    const key = `pluginFactors[${index}].selected`
+    const item = this.data.pluginFactors[index]
+    if (!item) return
+
+    this.setData({
+      [key]: !item.selected,
+      pluginSelectedCount: this.data.pluginSelectedCount + (item.selected ? -1 : 1)
+    })
+  },
+
+  // 批量引入选中的插件因素
+  async onBatchImportPlugins() {
+    const { pluginFactors, pluginSelectedCount, agentDetail, pluginImporting } = this.data
+    if (pluginImporting || pluginSelectedCount === 0) return
+
+    const userInfo = userStore.getUserInfo()
+    if (!userInfo || !userInfo.id) return
+    if (!agentDetail || !agentDetail.id) {
+      wx.showToast({ title: '请先选择智能体', icon: 'none' })
+      return
+    }
+
+    const selectedFactors = pluginFactors.filter(f => f.selected)
+    if (selectedFactors.length === 0) return
+
+    this.setData({ pluginImporting: true })
+
+    try {
+      await agentApi.batchSaveFactors({
+        userId: userInfo.id,
+        agentId: agentDetail.id,
+        configs: selectedFactors.map(f => ({
+          factorCode: f.factorCode,
+          isEnabled: true,
+          weight: 1
+        }))
+      })
+
+      wx.showToast({ title: `已引入 ${selectedFactors.length} 个因素`, icon: 'success' })
+
+      // 重置选中状态
+      this.setData({
+        pluginImporting: false,
+        pluginSelectedCount: 0,
+        showPluginMarket: false,
+        pluginFactors: pluginFactors.map(f => ({ ...f, selected: false }))
+      })
+
+      // 刷新智能体详情
+      if (agentDetail.id) {
+        await this.loadAgentDetail(agentDetail.id)
+      }
+    } catch (e) {
+      console.error('批量引入因素失败:', e)
+      wx.showToast({ title: '引入失败，请重试', icon: 'none' })
+      this.setData({ pluginImporting: false })
+    }
+  },
+
+  // 选中插件因素，预填表单（保留单点快速填入）
+  onSelectPluginFactor(e) {
+    const { index } = e.currentTarget.dataset
+    const factor = this.data.pluginFactors[index]
+    if (!factor) return
+
+    this.setData({
+      factorFormName: factor.factorName || '',
+      factorFormDesc: factor.description || '',
+      factorFormPrompt: factor.promptTemplate || '',
+      showPluginMarket: false,
+      pluginSelectedCount: 0
+    })
   },
 
   // 抽屉表单项输入

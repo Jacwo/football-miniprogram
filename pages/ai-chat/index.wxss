@@ -1392,7 +1392,7 @@
 
 .drawer-popup {
   width: 100%;
-  max-height: 70vh;
+  max-height: 88vh;
   background: #ffffff;
   border-radius: 32rpx 32rpx 0 0;
   display: flex;
@@ -1430,14 +1430,15 @@
 
 .drawer-scroll {
   flex: 1;
-  max-height: 46vh;
-  padding: 24rpx 32rpx;
+  min-height: 0;
+  box-sizing: border-box;
 }
 
 .drawer-form {
   display: flex;
   flex-direction: column;
   gap: 24rpx;
+  padding: 24rpx 32rpx;
 }
 
 .drawer-field {
@@ -1490,6 +1491,14 @@
   background: #ffffff;
 }
 
+.drawer-textarea-sm {
+  min-height: 80rpx;
+}
+
+.drawer-textarea-lg {
+  min-height: 200rpx;
+}
+
 .drawer-footer {
   display: flex;
   gap: 20rpx;
@@ -1538,6 +1547,184 @@
 
 .drawer-submit.loading {
   opacity: 0.7;
+  pointer-events: none;
+}
+
+/* ========== 因素插件市场 ========== */
+.plugin-market-entry {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 22rpx 24rpx;
+  background: linear-gradient(135deg, #f0f4ff 0%, #ede9fe 100%);
+  border-radius: 14rpx;
+  border: 2rpx solid #ddd6fe;
+}
+
+.plugin-market-entry:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+}
+
+.plugin-market-icon {
+  font-size: 36rpx;
+  line-height: 1;
+}
+
+.plugin-market-label {
+  flex: 1;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #5b21b6;
+}
+
+.plugin-market-arrow {
+  font-size: 36rpx;
+  color: #a78bfa;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* 插件市场包裹容器 */
+.plugin-market-wrap {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20rpx;
+  overflow: hidden;
+}
+
+/* 可滚动列表区域 */
+.plugin-scroll {
+  height: 400rpx;
+  padding-right: 8rpx;
+}
+
+.plugin-loading,
+.plugin-empty {
+  text-align: center;
+  padding: 60rpx 0;
+  font-size: 28rpx;
+  color: #94a3b8;
+}
+
+.plugin-card {
+  padding: 20rpx 16rpx;
+  background: #f8fafc;
+  border-radius: 14rpx;
+  border: 2rpx solid #f1f5f9;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.plugin-card:active {
+  background: #eff6ff;
+  border-color: #bae6fd;
+}
+
+.plugin-card.selected {
+  background: #eff6ff;
+  border-color: #3b82f6;
+}
+
+/* 左侧复选框 */
+.plugin-card-left {
+  flex-shrink: 0;
+  padding-top: 4rpx;
+}
+
+.plugin-checkbox {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 8rpx;
+  border: 2rpx solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: transparent;
+  background: #fff;
+  transition: all 0.15s ease;
+}
+
+.plugin-checkbox.checked {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
+}
+
+/* 卡片主体 */
+.plugin-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.plugin-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.plugin-card-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.plugin-card-desc {
+  font-size: 24rpx;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.plugin-card-prompt {
+  font-size: 22rpx;
+  color: #8b5cf6;
+  line-height: 1.5;
+  padding: 10rpx 14rpx;
+  background: #f5f3ff;
+  border-radius: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 批量引入栏 */
+.plugin-batch-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0 0;
+  border-top: 1rpx solid #f1f5f9;
+  gap: 16rpx;
+}
+
+.plugin-batch-count {
+  font-size: 26rpx;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.plugin-batch-btn {
+  padding: 14rpx 36rpx;
+  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  border-radius: 12rpx;
+  color: #fff;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.plugin-batch-btn:active {
+  opacity: 0.85;
+}
+
+.plugin-batch-btn.loading {
+  opacity: 0.6;
   pointer-events: none;
 }
 

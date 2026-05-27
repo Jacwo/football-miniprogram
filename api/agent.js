@@ -86,7 +86,7 @@ function createCustomFactor(data) {
  */
 function updateCustomFactor(data) {
   const { userId, factorCode, ...body } = data
-  return put(`/api/agent/factor/updateCustom/${userId}/${factorCode}`, { ...body, _t: Date.now() }, { showLoading: true })
+  return post(`/api/agent/factor/updateCustom/${userId}/${factorCode}`, { ...body, _t: Date.now() }, { showLoading: true })
 }
 
 /**
@@ -126,6 +126,14 @@ function deleteAgent(data) {
   return post(`/api/agent/delete/${userId}/${agentId}`, { _t: Date.now() }, { showLoading: true })
 }
 
+/**
+ * 获取因素插件市场列表
+ * @returns {Promise<Array>} 插件因素列表
+ */
+function getPluginFactors() {
+  return get(`/api/agent/factor/custom/1`, { _t: Date.now() }, { showLoading: false, showError: false })
+}
+
 module.exports = {
   getAgentList,
   getAgentDetail,
@@ -136,5 +144,6 @@ module.exports = {
   batchSaveFactors,
   createCustomFactor,
   updateCustomFactor,
-  deleteCustomFactor
+  deleteCustomFactor,
+  getPluginFactors
 }
