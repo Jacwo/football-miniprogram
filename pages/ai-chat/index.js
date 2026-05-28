@@ -1,6 +1,7 @@
 // pages/ai-chat/index.js - AI 对话页面（核心功能）
 const streamApi = require('../../api/stream')
 const userStore = require('../../store/user')
+const userApi = require('../../api/user')
 const agentApi = require('../../api/agent')
 const matchApi = require('../../api/match')
 const chatApi = require('../../api/chat')
@@ -101,11 +102,20 @@ Page({
       this.getTabBar().setData({ selected: 1 })
     }
 
-    // 刷新智能体列表和比赛列表（如果已登录）
+    // 刷新用户信息（确保 VIP 状态为最新）
     const userInfo = userStore.getUserInfo()
     if (userInfo && userInfo.id) {
       this.loadAgentList()
       this.loadMatchList()
+      // 静默刷新 VIP 状态
+      userApi.checkVip(userInfo.id).then(res => {
+        if (res && typeof res.isVip !== 'undefined') {
+          const app = getApp()
+          if (app && app.globalData && app.globalData.userInfo) {
+            app.globalData.userInfo.isVip = res.isVip
+          }
+        }
+      }).catch(() => {})
     }
 
     // 从插件市场返回后刷新智能体详情
@@ -229,11 +239,27 @@ Page({
       return
     }
 
+    // 检查 VIP 状态
+    const userInfo = userStore.getUserInfo()
+    if (!userInfo.isVip) {
+      wx.showModal({
+        title: '会员专属功能',
+        content: 'AI 智能分析为 VIP 会员专属功能，开通会员即可畅享专业足球赛事分析。',
+        confirmText: '开通会员',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: '/pages/vip/index' })
+          }
+        }
+      })
+      return
+    }
+
     // 如果没有会话，先创建会话
     let sessionId = currentSessionId
     if (!sessionId) {
       try {
-        const userInfo = userStore.getUserInfo()
         const session = await chatApi.createSession(selectedMatch.id, userInfo.id)
         sessionId = session.sessionId
         this.setData({ currentSessionId: sessionId })

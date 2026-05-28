@@ -107,7 +107,7 @@
     </view>
 
     <!-- 龙虾 AI智能问答 -->
-    <view class="lobster-card" wx:if="{{isLoggedIn && userInfo}}" bindtap="onLobsterChat">
+    <view class="lobster-card" wx:if="{{isLoggedIn && userInfo && showAIChat}}" bindtap="onLobsterChat">
       <view class="lobster-card-left">
         <view class="lobster-icon-wrapper">
           <text>🦞</text>
@@ -118,7 +118,7 @@
         </view>
       </view>
       <view class="lobster-card-right">
-        <view class="lobster-tag">免费</view>
+        <view class="lobster-tag">限时免费</view>
         <text class="lobster-card-arrow">›</text>
       </view>
     </view>

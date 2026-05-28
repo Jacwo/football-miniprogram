@@ -56,8 +56,9 @@ Page({
     showMedalPopup: false,
     // VIP到期时间格式化
     vipExpireTimeStr: "",
-    // 会员入口显示
+    // 功能开关显示
     showVipButton: false,
+    showAIChat: false,
   },
 
   onLoad() {
@@ -82,11 +83,13 @@ Page({
       const showFeatures = result === true;
       this.setData({
         showVipButton: showFeatures,
+        showAIChat: showFeatures,
       });
     } catch (error) {
       console.error("检查功能开关失败:", error);
       this.setData({
         showVipButton: false,
+        showAIChat: false,
       });
     }
   },
