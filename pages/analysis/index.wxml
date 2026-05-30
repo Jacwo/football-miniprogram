@@ -462,7 +462,7 @@
                   </view>
                   <view class="bifa-card-stat" wx:if="{{bifaSummaryCards.draw.ratio}}">
                     <text class="bifa-card-label">比例</text>
-                    <text class="bifa-card-val">{{bifaSummaryCards.draw.ratio}}%</text>
+                    <text class="bifa-card-val">{{bifaSummaryCards.draw.ratio}}</text>
                   </view>
                   <view class="bifa-card-stat" wx:if="{{bifaSummaryCards.draw.profitLoss}}">
                     <text class="bifa-card-label">盈亏</text>
