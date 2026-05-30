@@ -26,7 +26,7 @@ Page({
     calculatorX: 500,
     calculatorY: 120,
     // 功能开关
-    showCalculator: false, // 是否显示足球计算器按钮
+    showCalculator: false, // 足球计算器 & 龙虾AI共用此开关
     // 公告
     announcements: [],
   },
@@ -228,7 +228,9 @@ Page({
     try {
       const result = await matchApi.checkFeatures();
       console.log(result);
-      const showCalculator = result === true;
+      const showCalculator = typeof result === 'object' && result !== null
+        ? !!result.showCalculator
+        : result === true;
       this.setData({ showCalculator });
     } catch (error) {
       console.error("检查功能开关失败:", error);
@@ -434,6 +436,13 @@ Page({
   onCalculatorMove(e) {
     // 记录最新位置，防止tap事件被误触
     this._lastMoveTime = Date.now();
+  },
+
+  // 龙虾AI智能问答入口
+  onLobsterAI() {
+    wx.navigateTo({
+      url: "/pages/ai-chat/index",
+    });
   },
 
   // 重试加载

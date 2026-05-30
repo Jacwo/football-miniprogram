@@ -8,10 +8,6 @@
         <view class="title-section">
           <text class="page-title">大厅</text>
         </view>
-        <button class="header-share-btn" open-type="share">
-          <text>📤</text>
-          <text>分享</text>
-        </button>
       </view>
     </view>
     <!-- Tab 切换 -->

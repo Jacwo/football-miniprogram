@@ -57,6 +57,30 @@ function getRecentMatches(matchId) {
   return post(`/api/match/history/${matchId}`, {}, { showLoading: false })
 }
 
+/**
+ * 获取必发交易汇总
+ * @param {string|number} matchId 比赛ID
+ */
+function getBifaSummary(matchId) {
+  return post(`/api/bifa/summary/latest/${matchId}`, {}, { showLoading: false })
+}
+
+/**
+ * 获取必发大额明细
+ * @param {string|number} matchId 比赛ID
+ */
+function getBifaDetail(matchId) {
+  return post(`/api/bifa/detail/latest/${matchId}`, {}, { showLoading: false })
+}
+
+/**
+ * 获取必发走势数据
+ * @param {string|number} matchId 比赛ID
+ */
+function getBifaTrend(matchId) {
+  return post(`/api/bifa/trend/latest/${matchId}`, {}, { showLoading: false })
+}
+
 module.exports = {
   getHistoryData,
   getXgData,
@@ -64,5 +88,8 @@ module.exports = {
   getOddsData,
   getInformationData,
   deleteAnalysis,
-  getRecentMatches
+  getRecentMatches,
+  getBifaSummary,
+  getBifaDetail,
+  getBifaTrend
 }

@@ -48,8 +48,13 @@
           <text class="section-bar-title">赛程</text>
           <text class="section-bar-extra">{{timelineMatches.length}}场</text>
         </view>
-        <view class="view-groups-btn" bindtap="onViewGroups">
-          <text>小组积分榜</text>
+        <view class="section-bar-actions">
+          <view class="view-groups-btn" bindtap="onViewGroups">
+            <text>小组积分榜</text>
+          </view>
+          <view class="view-teams-btn" bindtap="onViewTeams">
+            <text>球队信息</text>
+          </view>
         </view>
       </view>
     </view>
@@ -177,4 +182,6 @@
       </block>
     </view>
   </view>
+
+
 </view>

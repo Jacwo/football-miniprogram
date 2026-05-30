@@ -151,33 +151,26 @@
   border-radius: 16rpx;
   margin-bottom: 16rpx;
   overflow: hidden;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.result-item:active {
-  transform: translateY(2rpx);
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1rpx 8rpx rgba(0, 0, 0, 0.04);
 }
 
 /* 状态指示条 */
 .result-status-bar {
-  height: 4rpx;
+  height: 3rpx;
   width: 100%;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: #d9d9d9;
 }
 
 .result-item.finished .result-status-bar {
-  background: linear-gradient(90deg, #52c41a 0%, #85ce61 100%);
+  background: #389e0d;
 }
 
 .result-item.ongoing .result-status-bar {
-  background: linear-gradient(90deg, #ff9800 0%, #ffb84d 100%);
+  background: #ff9800;
 }
 
 .result-item.upcoming .result-status-bar {
-  background: linear-gradient(90deg, #d9d9d9 0%, #e8e8e8 100%);
+  background: #e0e0e0;
 }
 
 /* 头部信息 */
@@ -185,8 +178,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12rpx 20rpx;
-  border-bottom: 1rpx solid #f0f0f0;
+  padding: 16rpx 20rpx 12rpx;
 }
 
 .league-info {
@@ -194,12 +186,6 @@
   align-items: center;
   gap: 12rpx;
   flex: 1;
-}
-
-.league-name {
-  font-size: 22rpx;
-  color: #ff9800;
-  font-weight: 600;
 }
 
 .league-tag {
@@ -211,39 +197,34 @@
 }
 
 .status-badge {
-  font-size: 16rpx;
-  padding: 3rpx 8rpx;
-  border-radius: 4rpx;
-  background: #f0f0f0;
-  color: #999;
-  font-weight: 500;
+  font-size: 20rpx;
+  color: #bbb;
+  font-weight: 400;
 }
 
 .status-badge.finished {
-  background: rgba(82, 196, 26, 0.15);
-  color: #52c41a;
+  color: #389e0d;
 }
 
 .status-badge.ongoing {
-  background: rgba(255, 152, 0, 0.15);
   color: #ff9800;
 }
 
 .status-badge.upcoming {
-  background: rgba(200, 200, 200, 0.2);
-  color: #999;
+  color: #bbb;
 }
 
 .time-info {
   display: flex;
   align-items: center;
   gap: 8rpx;
-  font-size: 18rpx;
-  color: #ccc;
+  font-size: 22rpx;
+  color: #888;
+  flex-shrink: 0;
 }
 
 .date {
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .time {
@@ -255,30 +236,23 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20rpx;
-  gap: 12rpx;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.match-section:active {
-  background: #f8f9fb;
+  padding: 16rpx 20rpx 20rpx;
+  gap: 8rpx;
 }
 
 .vs-info {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   flex: 1;
-  gap: 12rpx;
+  gap: 16rpx;
 }
 
 .team-name {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #333;
   font-weight: 600;
   flex: 1;
-  text-align: center;
   line-height: 1.3;
   word-break: break-all;
 }
@@ -296,19 +270,21 @@
   align-items: center;
   justify-content: center;
   min-width: 120rpx;
-  background: linear-gradient(135deg, #fff0f0 0%, #fff5f5 100%);
-  border: 2rpx solid #ffe8e8;
-  border-radius: 12rpx;
-  padding: 16rpx 20rpx;
+  padding: 12rpx 0;
+  flex-shrink: 0;
 }
 
 .score {
-  font-size: 30rpx;
+  font-size: 28rpx;
   font-weight: 700;
-  font-family: 'Arial', 'Courier New', monospace;
-  letter-spacing: 3rpx;
-  color: #ff3b30;
+  font-family: 'Arial', 'DIN', monospace;
+  letter-spacing: 4rpx;
+  color: #ccc;
   line-height: 1;
+}
+
+.score.has-result {
+  color: #ff3b30;
 }
 
 /* 展开按钮 */
@@ -316,21 +292,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44rpx;
-  height: 44rpx;
-  cursor: pointer;
+  width: 40rpx;
+  height: 40rpx;
+  flex-shrink: 0;
 }
 
 .expand-icon {
-  font-size: 20rpx;
-  color: #999;
+  font-size: 18rpx;
+  color: #ccc;
   transition: transform 0.3s ease;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .expand-icon.expanded {
   transform: rotate(180deg);
-  color: #667eea;
+  color: #999;
 }
 
 /* 结果行 */
@@ -466,7 +442,8 @@
   border-radius: 16rpx;
   margin-bottom: 16rpx;
   overflow: hidden;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+  border: 1rpx solid #f0f0f0;
 }
 
 .live-header {
@@ -474,7 +451,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 16rpx 20rpx;
-  border-bottom: 1rpx solid #f0f0f0;
+  background: linear-gradient(180deg, #fafbfc 0%, #fff 100%);
+  border-bottom: 1rpx solid #eef1f5;
 }
 
 .live-league {
@@ -486,30 +464,40 @@
 .league-tag {
   font-size: 20rpx;
   color: #fff;
-  padding: 4rpx 12rpx;
+  padding: 4rpx 14rpx;
   border-radius: 6rpx;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.5rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
 }
 
 .live-status {
   font-size: 20rpx;
   color: #52c41a;
-  font-weight: 500;
+  font-weight: 600;
+  background: rgba(82, 196, 26, 0.08);
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
 }
 
 .live-time {
   display: flex;
   align-items: center;
   gap: 8rpx;
-  font-size: 20rpx;
-  color: #999;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.live-clock.upcoming {
+  color: #ff9800;
+  font-weight: 600;
 }
 
 /* 比分区域 */
 .live-score-section {
   display: flex;
   align-items: center;
-  padding: 24rpx 20rpx;
+  padding: 28rpx 20rpx;
 }
 
 .live-team {
@@ -528,6 +516,7 @@
   font-size: 28rpx;
   color: #333;
   font-weight: 600;
+  line-height: 1.4;
 }
 
 .live-score-box {
@@ -535,94 +524,204 @@
   flex-direction: column;
   align-items: center;
   min-width: 140rpx;
-  padding: 0 20rpx;
+  padding: 0 16rpx;
 }
 
 .live-score {
-  font-size: 48rpx;
+  font-size: 52rpx;
   font-weight: 800;
   color: #ff3b30;
-  font-family: 'Arial', monospace;
-  letter-spacing: 2rpx;
+  font-family: 'Arial', 'DIN', monospace;
+  letter-spacing: 6rpx;
+  text-shadow: 0 2rpx 8rpx rgba(255, 59, 48, 0.15);
+}
+
+.live-score.upcoming {
+  font-size: 28rpx;
+  color: #999;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-shadow: none;
 }
 
 .live-half-score {
   font-size: 20rpx;
-  color: #999;
-  margin-top: 4rpx;
+  color: #bbb;
+  margin-top: 6rpx;
 }
 
 .live-minute {
-  font-size: 22rpx;
-  color: #52c41a;
-  font-weight: 600;
-  margin-top: 4rpx;
-  background: rgba(82, 196, 26, 0.1);
-  padding: 2rpx 12rpx;
+  font-size: 24rpx;
+  color: #fff;
+  font-weight: 800;
+  margin-top: 6rpx;
+  background: #52c41a;
+  padding: 6rpx 16rpx;
   border-radius: 10rpx;
+  letter-spacing: 1rpx;
+}
+
+.live-minute.upcoming {
+  color: #fff;
+  background: #ff9800;
+  font-weight: 800;
 }
 
 /* 事件时间线 */
 .live-events {
-  padding: 16rpx 20rpx;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.03) 100%);
-  border-top: 1rpx solid #f0f0f0;
+  padding: 20rpx 24rpx 24rpx;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.04) 0%, rgba(118, 75, 162, 0.02) 100%);
+  border-top: 1rpx solid #eee;
 }
 
 .events-title {
-  font-size: 22rpx;
-  color: #999;
-  font-weight: 500;
-  margin-bottom: 12rpx;
-}
-
-.event-item {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  padding: 10rpx 0;
-  border-bottom: 1rpx dashed #f0f0f0;
-}
-
-.event-item:last-child {
-  border-bottom: none;
-}
-
-.event-item.home {
-  flex-direction: row;
-}
-
-.event-item.away {
-  flex-direction: row-reverse;
-}
-
-.event-time {
-  font-size: 22rpx;
-  color: #667eea;
+  font-size: 24rpx;
+  color: #888;
   font-weight: 600;
-  min-width: 50rpx;
+  margin-bottom: 20rpx;
   text-align: center;
 }
 
-.event-icon {
-  font-size: 28rpx;
+/* 时间线包裹 */
+.timeline-wrap {
+  position: relative;
 }
 
+/* 竖向时间线——居中 */
+.timeline-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 4rpx;
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  transform: translateX(-50%);
+}
+
+/* 中场分隔线——上下半场之间的短横线 */
+.half-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20rpx;
+  position: relative;
+  z-index: 2;
+}
+
+.half-separator-line {
+  width: 60rpx;
+  height: 4rpx;
+  border-radius: 2rpx;
+  background: #d0d0d0;
+}
+
+/* 每一行：左侧 | 圆点 | 右侧 */
+.event-item {
+  display: flex;
+  align-items: center;
+  min-height: 56rpx;
+  position: relative;
+}
+
+.event-item + .event-item {
+  margin-top: 4rpx;
+}
+
+/* 两侧内容区——现在是横向排列，内部放 event-info + event-mark */
+.event-side {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12rpx;
+  padding: 8rpx 0;
+}
+
+/* 主队——内容靠右，贴近中线但仍在左半区 */
+.event-side.home {
+  justify-content: flex-end;
+  padding-right: 32rpx;
+}
+
+.event-side.home .event-info {
+  align-items: flex-end;
+}
+
+/* 客队——内容靠左，贴近中线但仍在右半区 */
+.event-side.away {
+  justify-content: flex-start;
+  padding-left: 32rpx;
+}
+
+.event-side.away .event-info {
+  align-items: flex-start;
+}
+
+.event-side.placeholder {
+  visibility: hidden;
+}
+
+/* 球员信息——纵向排列 */
 .event-info {
   display: flex;
   flex-direction: column;
   gap: 2rpx;
-  flex: 1;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
-.event-item.away .event-info {
-  text-align: right;
+/* 事件图标——在竖线旁 */
+.event-icon {
+  flex-shrink: 0;
+  font-size: 32rpx;
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+/* 图标+时间——靠在竖线左右两侧，由父级 event-side 控制位置 */
+.event-mark {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  z-index: 2;
+}
+
+/* 点球——黑白色 */
+.event-icon.penalty {
+  filter: grayscale(100%);
+}
+
+.event-icon.dot {
+  font-size: 18rpx;
+  color: #667eea;
+}
+
+.event-time {
+  font-size: 24rpx;
+  color: #fff;
+  font-weight: 800;
+  line-height: 1;
+  background: #52c41a;
+  padding: 4rpx 6rpx;
+  border-radius: 8rpx;
+  min-width: 52rpx;
+  text-align: center;
 }
 
 .event-player {
   font-size: 24rpx;
   color: #333;
   font-weight: 500;
+  max-width: 160rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .event-type {

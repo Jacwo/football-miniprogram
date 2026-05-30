@@ -74,7 +74,8 @@
             </view>
             <view class="live-time">
               <text class="live-date">{{item.displayDate}}</text>
-              <text class="live-clock">{{item.displayTime}}</text>
+              <text class="live-clock" wx:if="{{item.matchStatus !== 0}}">{{item.displayTime}}</text>
+              <text class="live-clock upcoming" wx:else>未开赛</text>
             </view>
           </view>
 
@@ -84,9 +85,11 @@
               <text class="live-team-name">{{item.homeTeamAbbName}}</text>
             </view>
             <view class="live-score-box">
-              <text class="live-score">{{item.sectionsNo999 || '-'}}</text>
+              <text class="live-score upcoming" wx:if="{{item.matchStatus === 0}}">未开赛</text>
+              <text class="live-score" wx:else>{{item.sectionsNo999 || '-'}}</text>
               <text class="live-half-score" wx:if="{{item.sectionsNo1}}">半场 {{item.sectionsNo1}}</text>
-              <text class="live-minute" wx:if="{{item.matchMinute}}">{{item.matchMinute}}'</text>
+              <text class="live-minute" wx:if="{{item.matchMinute && item.matchMinute !== '0' && item.matchMinute !== 0}}">{{item.matchMinute}}'</text>
+              <text class="live-minute upcoming" wx:if="{{!item.matchMinute || item.matchMinute === '0' || item.matchMinute === 0}}">未开赛</text>
             </view>
             <view class="live-team away">
               <text class="live-team-name">{{item.awayTeamAbbName}}</text>
@@ -96,19 +99,50 @@
           <!-- 事件时间线 -->
           <view class="live-events" wx:if="{{item.events.length > 0}}">
             <view class="events-title">比赛事件</view>
-            <view class="event-item {{event.isHome ? 'home' : 'away'}}" wx:for="{{item.events}}" wx:for-item="event" wx:key="index">
-              <view class="event-time">{{event.matchMinute}}'</view>
-              <view class="event-icon">
-                <text wx:if="{{event.eventCode === 'G' || event.eventCode === 'PG'}}">⚽</text>
-                <text wx:elif="{{event.eventCode === 'OG'}}">🔴</text>
-                <text wx:elif="{{event.eventCode === 'Y'}}">🟨</text>
-                <text wx:elif="{{event.eventCode === 'R'}}">🟥</text>
-                <text wx:else>📌</text>
-              </view>
-              <view class="event-info">
-                <text class="event-player">{{event.personEnName}}</text>
-                <text class="event-type">{{event.eventName}}</text>
-              </view>
+            <view class="timeline-wrap">
+              <view class="timeline-line"></view>
+              <block wx:for="{{item.events}}" wx:for-item="event" wx:key="index">
+                <!-- 中场分隔线 -->
+                <view class="half-separator" wx:if="{{event._showHalfLine}}">
+                  <view class="half-separator-line"></view>
+                </view>
+                <view class="event-item {{event.isHome ? 'home' : 'away'}}">
+                  <!-- 主队：球员信息 + 图标时间 都在线左侧 -->
+                  <block wx:if="{{event.isHome}}">
+                    <view class="event-side home">
+                      <view class="event-info">
+                        <text class="event-player">{{event.personEnName}}</text>
+                      </view>
+                      <view class="event-mark">
+                        <text class="event-icon {{event.eventCode === 'PG' ? 'penalty' : ''}}" wx:if="{{event.eventCode === 'G' || event.eventCode === 'PG'}}">⚽</text>
+                        <text class="event-icon" wx:elif="{{event.eventCode === 'OG'}}">🔴</text>
+                        <text class="event-icon" wx:elif="{{event.eventCode === 'Y'}}">🟨</text>
+                        <text class="event-icon" wx:elif="{{event.eventCode === 'R'}}">🟥</text>
+                        <text class="event-icon dot" wx:else>●</text>
+                        <text class="event-time">{{event._displayMinute}}'</text>
+                      </view>
+                    </view>
+                    <view class="event-side placeholder"></view>
+                  </block>
+                  <!-- 客队：图标时间 + 球员信息 都在线右侧 -->
+                  <block wx:else>
+                    <view class="event-side placeholder"></view>
+                    <view class="event-side away">
+                      <view class="event-mark">
+                        <text class="event-time">{{event._displayMinute}}'</text>
+                        <text class="event-icon {{event.eventCode === 'PG' ? 'penalty' : ''}}" wx:if="{{event.eventCode === 'G' || event.eventCode === 'PG'}}">⚽</text>
+                        <text class="event-icon" wx:elif="{{event.eventCode === 'OG'}}">🔴</text>
+                        <text class="event-icon" wx:elif="{{event.eventCode === 'Y'}}">🟨</text>
+                        <text class="event-icon" wx:elif="{{event.eventCode === 'R'}}">🟥</text>
+                        <text class="event-icon dot" wx:else>●</text>
+                      </view>
+                      <view class="event-info">
+                        <text class="event-player">{{event.personEnName}}</text>
+                      </view>
+                    </view>
+                  </block>
+                </view>
+              </block>
             </view>
           </view>
         </view>

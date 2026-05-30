@@ -158,7 +158,7 @@ Page({
 
     wx.showModal({
       title: "解锁AI分析",
-      content: `本次分析将消耗 ${pointsNeeded} 积分，是否继续？\n\n提示：开通会员可免费查看所有分析`,
+      content: `本次分析将消耗 ${pointsNeeded} 积分，是否继续？\n提示：开通会员可查看所有分析`,
       confirmText: "确认",
       cancelText: "取消",
       success: async (res) => {

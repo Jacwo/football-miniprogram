@@ -1254,6 +1254,61 @@ Page({
     }
   },
 
+  // 长按会话弹出删除选项
+  onLongPressSession(e) {
+    const { session } = e.currentTarget.dataset
+    if (!session) return
+
+    wx.showActionSheet({
+      itemList: ['删除会话'],
+      itemColor: '#ef4444',
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          this.confirmDeleteSession(session)
+        }
+      }
+    })
+  },
+
+  // 确认删除会话
+  confirmDeleteSession(session) {
+    wx.showModal({
+      title: '删除会话',
+      content: `确定删除「${session.matchName || '未命名对话'}」吗？删除后无法恢复。`,
+      confirmText: '删除',
+      confirmColor: '#ef4444',
+      success: async (res) => {
+        if (!res.confirm) return
+
+        try {
+          await chatApi.deleteSession(session.sessionId)
+
+          wx.showToast({ title: '已删除', icon: 'success', duration: 1500 })
+
+          // 如果删除的是当前会话，清空聊天区
+          if (this.data.currentSessionId === session.sessionId) {
+            this.setData({
+              currentSessionId: null,
+              selectedMatch: null,
+              selectedAgent: null,
+              messages: [],
+              inputText: '',
+              typing: false,
+              sending: false
+            })
+            wx.removeStorageSync('ai-chat-messages')
+          }
+
+          // 刷新会话列表
+          this.loadSessions()
+        } catch (e) {
+          console.error('删除会话失败:', e)
+          wx.showToast({ title: '删除失败，请重试', icon: 'none' })
+        }
+      }
+    })
+  },
+
   // 滚动到底部
   scrollToBottom() {
     setTimeout(() => {

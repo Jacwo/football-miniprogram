@@ -20,6 +20,7 @@ Page({
     countdownSecs: 0,
     // 是否是世界杯专题
     isWorldCup: false,
+
   },
 
   onLoad(options) {
@@ -235,4 +236,12 @@ Page({
     const index = e.currentTarget.dataset.index;
     this.setData({ selectedGroupIndex: index });
   },
+
+  // 查看球队信息
+  onViewTeams() {
+    wx.navigateTo({
+      url: '/pages/team-info/index',
+    });
+  },
+
 });

@@ -192,6 +192,58 @@
 .weekday-right {
   display: flex;
   align-items: center;
+  gap: 36rpx;
+}
+
+/* 龙虾AI问答按钮 - 在第一个分组标题栏靠右 */
+.lobster-ai-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 10rpx 8rpx 18rpx;
+  background: linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%);
+  border: 2rpx solid #ffc069;
+  border-radius: 28rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.12), inset 0 1rpx 0 rgba(255, 255, 255, 0.9);
+  transition: all 0.2s;
+}
+
+.lobster-ai-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.1), inset 0 1rpx 0 rgba(255, 255, 255, 0.9);
+}
+
+.lobster-ai-icon {
+  font-size: 26rpx;
+}
+
+.lobster-ai-text {
+  font-size: 24rpx;
+  color: #5c3d1e;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+}
+
+.ai-vip-tag {
+  padding: 4rpx 14rpx;
+  font-size: 18rpx;
+  color: #fff;
+  font-weight: 800;
+  background: linear-gradient(135deg, #d4a843 0%, #b8860b 100%);
+  border-radius: 20rpx;
+  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.2);
+  letter-spacing: 2rpx;
+}
+
+.lobster-ai-icon {
+  font-size: 24rpx;
+}
+
+.lobster-ai-text {
+  font-size: 23rpx;
+  color: #613400;
+  font-weight: 700;
 }
 
 .toggle-icon {

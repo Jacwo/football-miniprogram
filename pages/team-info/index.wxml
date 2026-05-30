@@ -1,0 +1,137 @@
+<!-- pages/team-info/index.wxml - 球队信息页 -->
+<wxs module="utils">
+function isNameFit(name) {
+  if (!name) return true;
+  return name.length <= 7;
+}
+module.exports = {
+  isNameFit: isNameFit
+}
+</wxs>
+
+<view class="team-info-page">
+  <!-- 加载状态 -->
+  <view class="loading-wrapper" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 主内容 -->
+  <block wx:elif="{{groupNames.length > 0}}">
+    <!-- 分组Tab -->
+    <scroll-view class="tabs-scroll" scroll-x scroll-with-animation scroll-into-view="tab{{selectedGroupIndex}}">
+      <view class="tabs-wrapper">
+        <view
+          class="tab-btn {{selectedGroupIndex === index ? 'active' : ''}}"
+          wx:for="{{groupNames}}"
+          wx:key="index"
+          id="tab{{index}}"
+          data-index="{{index}}"
+          bindtap="onTabTap"
+        >{{item}}组</view>
+      </view>
+    </scroll-view>
+
+    <!-- 球队列表 Swiper -->
+    <swiper
+      class="teams-swiper"
+      style="height: {{swiperHeight}}px"
+      current="{{selectedGroupIndex}}"
+      bindchange="onSwiperChange"
+    >
+      <swiper-item wx:for="{{groupNames}}" wx:key="item">
+        <scroll-view class="teams-scroll" scroll-y>
+          <view class="teams-list">
+            <!-- 球队卡片 -->
+            <view
+              class="team-card"
+              wx:for="{{groupList[item]}}"
+              wx:for-item="team"
+              wx:for-index="teamIdx"
+              wx:key="id"
+            >
+              <!-- 球队基本信息 -->
+              <view class="team-card-main" data-group-index="{{selectedGroupIndex}}" data-team-index="{{teamIdx}}" bindtap="onTogglePlayers">
+                <view class="team-card-top">
+                  <image class="team-logo" src="{{team.logo}}" mode="aspectFit" wx:if="{{team.logo}}"/>
+                  <view class="team-logo-placeholder" wx:else>⚽</view>
+                  <view class="team-info-block">
+                    <view class="team-name-row">
+                      <text class="team-info-name">{{team.name}}</text>
+                      <text class="team-fifa-rank" wx:if="{{team.fifaRank}}">FIFA #{{team.fifaRank}}</text>
+                    </view>
+                    <view class="team-meta-row">
+                      <text class="team-meta" wx:if="{{team.coach}}">{{team.coach}}</text>
+                      <text class="team-meta" wx:if="{{team.continent}}">{{team.continent}}</text>
+                      <text class="team-meta" wx:if="{{team.bestResult}}">{{team.bestResult}}</text>
+                    </view>
+                  </view>
+                  <view class="team-card-arrow">
+                    <text class="arrow-icon {{team._playersExpanded ? 'expanded' : ''}}">▶</text>
+                  </view>
+                </view>
+
+                <view class="team-card-bottom" wx:if="{{team.playerCount || team.remark}}">
+                  <text class="team-player-count" wx:if="{{team.playerCount}}">球员 {{team.playerCount}}人</text>
+                  <text class="team-remark" wx:if="{{team.remark}}">{{team.remark}}</text>
+                </view>
+              </view>
+
+              <!-- 球员列表（可折叠）- 按位置分组 -->
+              <view class="team-players-panel" wx:if="{{team._playersExpanded && team._playerSections && team._playerSections.length > 0}}">
+                <view class="players-section" wx:for="{{team._playerSections}}" wx:for-item="section" wx:key="label">
+                  <view class="section-header">
+                    <text class="section-label">{{section.label}}</text>
+                    <text class="section-count">{{section.players.length}}人</text>
+                  </view>
+                  <view class="players-grid">
+                    <view class="player-item" wx:for="{{section.players}}" wx:for-item="player" wx:key="id">
+                      <image class="player-avatar" src="{{player.headImg}}" mode="aspectFill" wx:if="{{player.headImg}}"/>
+                      <view class="player-avatar-placeholder" wx:else>
+                        <text>{{player.position === 'GK' ? '🧤' : '👤'}}</text>
+                      </view>
+                      <view class="player-info">
+                        <text class="player-number" wx:if="{{player.number}}">{{player.number}}</text>
+                        <!-- 长名字：轮播滚动 -->
+                        <view class="player-name-marquee" wx:if="{{!utils.isNameFit(player.name)}}">
+                          <view class="marquee-inner">
+                            <text>{{player.name}}</text>
+                            <text>{{player.name}}</text>
+                          </view>
+                        </view>
+                        <!-- 短名字：静态显示 -->
+                        <text class="player-name" wx:else>{{player.name}}</text>
+                      </view>
+                      <view class="player-tags">
+                        <text class="player-position">{{player.position || '-'}}</text>
+                        <text class="player-score" wx:if="{{player.score}}">{{player.score}}</text>
+                      </view>
+                    </view>
+                  </view>
+                </view>
+              </view>
+              <view class="team-players-panel empty" wx:elif="{{team._playersExpanded}}">
+                <text class="no-players">暂无球员数据</text>
+              </view>
+            </view>
+          </view>
+          <view class="bottom-space"></view>
+        </scroll-view>
+      </swiper-item>
+    </swiper>
+
+    <!-- 底部指示器 -->
+    <view class="indicator-bar" wx:if="{{groupNames.length > 1}}">
+      <view
+        class="indicator-dot {{selectedGroupIndex === index ? 'active' : ''}}"
+        wx:for="{{groupNames}}"
+        wx:key="index"
+      ></view>
+    </view>
+  </block>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:else>
+    <text class="empty-text">暂无球队数据</text>
+  </view>
+</view>

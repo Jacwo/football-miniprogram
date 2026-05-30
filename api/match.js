@@ -143,7 +143,11 @@ function checkFeatures(forceRefresh = false) {
     _featuresCacheTime = now;
     // 同步写入 globalData，供 tabbar 等组件同步读取
     const app = getApp();
-    app.globalData.showHistory = result === true;
+    const enabled = typeof result === 'object' && result !== null
+      ? !!result.showCalculator
+      : result === true;
+    app.globalData.showHistory = enabled;
+    app.globalData.showCalculator = enabled;
     return result;
   });
 }

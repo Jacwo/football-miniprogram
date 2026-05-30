@@ -1,0 +1,410 @@
+/* pages/team-info/index.wxss - 球队信息页样式 */
+
+.team-info-page {
+  height: 100vh;
+  background: linear-gradient(180deg, #f0f4f8 0%, #e8eef3 100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ---- 加载 ---- */
+.loading-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 200rpx 0;
+}
+
+.loading-spinner {
+  width: 56rpx;
+  height: 56rpx;
+  border: 4rpx solid #f0f0f0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: #8c8c8c;
+}
+
+/* ---- 空状态 ---- */
+.empty-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* ---- 分组Tab ---- */
+.tabs-scroll {
+  padding: 20rpx 24rpx;
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.tabs-wrapper {
+  display: flex;
+  gap: 16rpx;
+  width: max-content;
+  padding-right: 24rpx;
+}
+
+.tab-btn {
+  padding: 12rpx 28rpx;
+  background: #f5f5f5;
+  border-radius: 24rpx;
+  font-size: 27rpx;
+  color: #666;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+}
+
+/* ---- Swiper ---- */
+.teams-swiper {
+  width: 100%;
+}
+
+.teams-scroll {
+  height: 100%;
+  padding: 20rpx 24rpx;
+  box-sizing: border-box;
+}
+
+.teams-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.bottom-space {
+  height: 40rpx;
+}
+
+/* ---- 球队卡片 ---- */
+.team-card {
+  background: #fff;
+  border-radius: 16rpx;
+  border: 1rpx solid #f0f0f0;
+  overflow: hidden;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.03);
+}
+
+.team-card-main {
+  padding: 20rpx;
+}
+
+.team-card-main:active {
+  background: #f9f9f9;
+}
+
+.team-card-top {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.team-logo {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #f5f5f5;
+}
+
+.team-logo-placeholder {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+}
+
+.team-info-block {
+  flex: 1;
+  min-width: 0;
+}
+
+.team-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 8rpx;
+  flex-wrap: wrap;
+}
+
+.team-info-name {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.team-fifa-rank {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border-radius: 8rpx;
+  font-weight: 600;
+}
+
+.team-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+
+.team-meta {
+  font-size: 22rpx;
+  color: #888;
+  padding: 4rpx 12rpx;
+  background: #f5f5f5;
+  border-radius: 6rpx;
+}
+
+.team-card-arrow {
+  flex-shrink: 0;
+  width: 36rpx;
+  height: 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow-icon {
+  font-size: 22rpx;
+  color: #ccc;
+  transition: transform 0.3s;
+}
+
+.arrow-icon.expanded {
+  transform: rotate(90deg);
+  color: #667eea;
+}
+
+/* 球队卡片底部信息 */
+.team-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14rpx;
+  padding-top: 14rpx;
+  border-top: 1rpx dashed #eee;
+}
+
+.team-player-count {
+  font-size: 22rpx;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.team-remark {
+  font-size: 22rpx;
+  color: #ff8c00;
+  font-weight: 500;
+}
+
+/* ---- 球员列表 ---- */
+.team-players-panel {
+  background: #f8f9fc;
+  padding: 16rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.team-players-panel.empty {
+  padding: 30rpx;
+  text-align: center;
+}
+
+.no-players {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12rpx;
+}
+
+/* 位置分区 */
+.players-section {
+  margin-bottom: 20rpx;
+}
+
+.players-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 0 10rpx;
+  margin-bottom: 8rpx;
+  border-bottom: 2rpx solid #e8e8e8;
+}
+
+.section-label {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #333;
+}
+
+.section-count {
+  font-size: 20rpx;
+  color: #999;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 10rpx;
+  background: #fff;
+  border-radius: 10rpx;
+  overflow: hidden;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.player-avatar {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #eee;
+}
+
+.player-avatar-placeholder {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+}
+
+.player-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  overflow: hidden;
+}
+
+.player-number {
+  font-size: 20rpx;
+  color: #667eea;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.player-name {
+  font-size: 22rpx;
+  color: #333;
+  font-weight: 500;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 长名字轮播 */
+.player-name-marquee {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.marquee-inner {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marquee-scroll 4s linear infinite;
+  font-size: 22rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.player-tags {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  flex-shrink: 0;
+}
+
+.player-position {
+  font-size: 18rpx;
+  color: #fff;
+  background: #667eea;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.player-score {
+  font-size: 18rpx;
+  color: #ff8c00;
+  font-weight: 600;
+}
+
+/* ---- 底部指示器 ---- */
+.indicator-bar {
+  display: flex;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 30rpx 0 50rpx;
+  padding-bottom: calc(50rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(50rpx + env(safe-area-inset-bottom));
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.indicator-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #ddd;
+  transition: all 0.3s;
+}
+
+.indicator-dot.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  width: 24rpx;
+  border-radius: 6rpx;
+}

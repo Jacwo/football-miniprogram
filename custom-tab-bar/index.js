@@ -80,7 +80,11 @@ Component({
     async refreshFeaturesCache() {
       try {
         const result = await matchApi.checkFeatures();
-        const showHistory = result === true;
+        const app = getApp();
+        const showHistory = typeof result === 'object' && result !== null
+          ? !!result.showHistory
+          : result === true;
+        app.globalData.showHistory = showHistory;
         this.setData({ showHistory });
       } catch (error) {
         console.error('检查功能开关失败:', error);

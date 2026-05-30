@@ -1,5 +1,5 @@
 // api/chat.js - 聊天会话相关接口
-const { get, request } = require('./index')
+const { get, request, delete: del } = require('./index')
 
 /**
  * 获取用户的所有聊天会话
@@ -33,8 +33,18 @@ function getSessionHistory(sessionId) {
   return get(`/api/chat/history/session/${sessionId}`, { _t: Date.now() }, { showLoading: true })
 }
 
+/**
+ * 删除会话
+ * @param {string} sessionId 会话ID
+ * @returns {Promise<Object>}
+ */
+function deleteSession(sessionId) {
+  return del(`/api/chat/session/${sessionId}`, {}, { showLoading: false })
+}
+
 module.exports = {
   getSessions,
   createSession,
-  getSessionHistory
+  getSessionHistory,
+  deleteSession
 }

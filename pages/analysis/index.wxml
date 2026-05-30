@@ -410,6 +410,171 @@
           </view>
         </view>
       </view>
+
+      <!-- 必发 -->
+      <view class="tab-panel" wx:elif="{{activeTab === 'betfair'}}">
+        <view class="loading-tip" wx:if="{{tabLoading.betfair}}">
+          <view class="loading-spinner small"></view>
+          <text>加载中...</text>
+        </view>
+        <view class="empty-tip" wx:elif="{{bifaSummary.length === 0 && bifaDetail.length === 0 && bifaTrend.length === 0}}">
+          <text>暂无必发数据</text>
+        </view>
+        <view class="betfair-content" wx:else>
+
+          <!-- 1. 交易汇总卡片 -->
+          <view class="bifa-section" wx:if="{{bifaSummaryCards}}">
+            <view class="bifa-section-title">交易汇总</view>
+            <view class="bifa-summary-cards">
+              <!-- 主胜卡片 -->
+              <view class="bifa-summary-card home">
+                <view class="bifa-card-head">主胜</view>
+                <view class="bifa-card-stats">
+                  <view class="bifa-card-stat" wx:if="{{bifaSummaryCards.home.odds}}">
+                    <text class="bifa-card-label">赔率</text>
+                    <text class="bifa-card-val odds">{{bifaSummaryCards.home.odds}}</text>
+                  </view>
+                  <view class="bifa-card-stat" wx:if="{{bifaSummaryCards.home.volume}}">
+                    <text class="bifa-card-label">交易量</text>
+                    <text class="bifa-card-val">{{bifaSummaryCards.home.volume}}</text>
+                  </view>
+                  <view class="bifa-card-stat" wx:if="{{bifaSummaryCards.home.ratio}}">
+                    <text class="bifa-card-label">比例</text>
+                    <text class="bifa-card-val">{{bifaSummaryCards.home.ratio}}</text>
+                  </view>
+                  <view class="bifa-card-stat" wx:if="{{bifaSummaryCards.home.profitLoss}}">
+                    <text class="bifa-card-label">盈亏</text>
+                    <text class="bifa-card-val">{{bifaSummaryCards.home.profitLoss}}</text>
+                  </view>
+                </view>
+              </view>
+              <!-- 平局卡片 -->
+              <view class="bifa-summary-card draw">
+                <view class="bifa-card-head">平局</view>
+                <view class="bifa-card-stats">
+                  <view class="bifa-card-stat" wx:if="{{bifaSummaryCards.draw.odds}}">
+                    <text class="bifa-card-label">赔率</text>
+                    <text class="bifa-card-val odds">{{bifaSummaryCards.draw.odds}}</text>
+                  </view>
+                  <view class="bifa-card-stat" wx:if="{{bifaSummaryCards.draw.volume}}">
+                    <text class="bifa-card-label">交易量</text>
+                    <text class="bifa-card-val">{{bifaSummaryCards.draw.volume}}</text>
+                  </view>
+                  <view class="bifa-card-stat" wx:if="{{bifaSummaryCards.draw.ratio}}">
+                    <text class="bifa-card-label">比例</text>
+                    <text class="bifa-card-val">{{bifaSummaryCards.draw.ratio}}%</text>
+                  </view>
+                  <view class="bifa-card-stat" wx:if="{{bifaSummaryCards.draw.profitLoss}}">
+                    <text class="bifa-card-label">盈亏</text>
+                    <text class="bifa-card-val">{{bifaSummaryCards.draw.profitLoss}}</text>
+                  </view>
+                </view>
+              </view>
+              <!-- 客胜卡片 -->
+              <view class="bifa-summary-card away">
+                <view class="bifa-card-head">客胜</view>
+                <view class="bifa-card-stats">
+                  <view class="bifa-card-stat" wx:if="{{bifaSummaryCards.away.odds}}">
+                    <text class="bifa-card-label">赔率</text>
+                    <text class="bifa-card-val odds">{{bifaSummaryCards.away.odds}}</text>
+                  </view>
+                  <view class="bifa-card-stat" wx:if="{{bifaSummaryCards.away.volume}}">
+                    <text class="bifa-card-label">交易量</text>
+                    <text class="bifa-card-val">{{bifaSummaryCards.away.volume}}</text>
+                  </view>
+                  <view class="bifa-card-stat" wx:if="{{bifaSummaryCards.away.ratio}}">
+                    <text class="bifa-card-label">比例</text>
+                    <text class="bifa-card-val">{{bifaSummaryCards.away.ratio}}</text>
+                  </view>
+                  <view class="bifa-card-stat" wx:if="{{bifaSummaryCards.away.profitLoss}}">
+                    <text class="bifa-card-label">盈亏</text>
+                    <text class="bifa-card-val">{{bifaSummaryCards.away.profitLoss}}</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+
+            <!-- 冷热指数行 -->
+            <view class="bifa-hot-row" wx:if="{{bifaSummaryCards.home.hotIndex || bifaSummaryCards.draw.hotIndex || bifaSummaryCards.away.hotIndex}}">
+              <view class="bifa-hot-item">
+                <text class="bifa-hot-label">主胜冷热</text>
+                <text class="bifa-hot-val {{bifaSummaryCards.home.hotIndex > 0 ? 'hot' : 'cold'}}">{{bifaSummaryCards.home.hotIndex || 0}}</text>
+              </view>
+              <view class="bifa-hot-item">
+                <text class="bifa-hot-label">平局冷热</text>
+                <text class="bifa-hot-val {{bifaSummaryCards.draw.hotIndex > 0 ? 'hot' : 'cold'}}">{{bifaSummaryCards.draw.hotIndex || 0}}</text>
+              </view>
+              <view class="bifa-hot-item">
+                <text class="bifa-hot-label">客胜冷热</text>
+                <text class="bifa-hot-val {{bifaSummaryCards.away.hotIndex > 0 ? 'hot' : 'cold'}}">{{bifaSummaryCards.away.hotIndex || 0}}</text>
+              </view>
+            </view>
+
+            <!-- 盈亏指数行 -->
+            <view class="bifa-pl-row" wx:if="{{bifaSummaryCards.home.plIndex || bifaSummaryCards.draw.plIndex || bifaSummaryCards.away.plIndex}}">
+              <view class="bifa-pl-item">
+                <text class="bifa-pl-label">主胜盈亏指数</text>
+                <text class="bifa-pl-val">{{bifaSummaryCards.home.plIndex || '-'}}</text>
+              </view>
+              <view class="bifa-pl-item">
+                <text class="bifa-pl-label">平局盈亏指数</text>
+                <text class="bifa-pl-val">{{bifaSummaryCards.draw.plIndex || '-'}}</text>
+              </view>
+              <view class="bifa-pl-item">
+                <text class="bifa-pl-label">客胜盈亏指数</text>
+                <text class="bifa-pl-val">{{bifaSummaryCards.away.plIndex || '-'}}</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 2. 大额明细 -->
+          <view class="bifa-section" wx:if="{{bifaDetail.length > 0}}">
+            <view class="bifa-section-title">大额明细</view>
+            <view class="bifa-detail-table">
+              <view class="bifa-table-hd">
+                <text class="bifa-th side">方向</text>
+                <text class="bifa-th odds">赔率</text>
+                <text class="bifa-th amount">金额</text>
+                <text class="bifa-th per">占比</text>
+                <text class="bifa-th time">时间</text>
+              </view>
+              <view class="bifa-table-bd">
+                <view class="bifa-tr" wx:for="{{bifaDetail}}" wx:key="id">
+                  <view class="bifa-td side">
+                    <text class="bifa-side-tag {{item.side === '主' || item.side === 'home' ? 'home' : item.side === '和' || item.side === 'draw' ? 'draw' : 'away'}}">{{item.side === '主' || item.side === 'home' ? '主' : item.side === '和' || item.side === 'draw' ? '平' : '客'}}</text>
+                  </view>
+                  <text class="bifa-td odds">{{item.odds || '-'}}</text>
+                  <text class="bifa-td amount">{{item.amount || '-'}}</text>
+                  <text class="bifa-td per">{{item.per ? item.per + '' : '-'}}</text>
+                  <text class="bifa-td time">{{item._dataTime || '-'}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+
+          <!-- 3. 走势数据 -->
+          <view class="bifa-section" wx:if="{{bifaTrendGrouped.length > 0}}">
+            <view class="bifa-section-title">走势数据</view>
+            <view class="bifa-trend-table">
+              <view class="bifa-table-hd">
+                <text class="bifa-th time">时间</text>
+                <text class="bifa-th amount">主胜金额</text>
+                <text class="bifa-th amount">平局金额</text>
+                <text class="bifa-th amount">客胜金额</text>
+              </view>
+              <view class="bifa-table-bd">
+                <view class="bifa-tr" wx:for="{{bifaTrendGrouped}}" wx:key="dataTime">
+                  <text class="bifa-td time">{{item.dataTime || '-'}}</text>
+                  <text class="bifa-td amount">{{item.homeAmount || '-'}}</text>
+                  <text class="bifa-td amount">{{item.drawAmount || '-'}}</text>
+                  <text class="bifa-td amount">{{item.awayAmount || '-'}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+
+        </view>
+      </view>
     </view>
   </block>
 

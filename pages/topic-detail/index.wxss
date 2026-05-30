@@ -400,6 +400,12 @@
 }
 
 /* ---- 查看分组按钮 ---- */
+.section-bar-actions {
+  display: flex;
+  gap: 16rpx;
+  align-items: center;
+}
+
 .view-groups-btn {
   padding: 12rpx 28rpx;
   background: linear-gradient(135deg, #ffd700, #ffb700);
@@ -411,6 +417,21 @@
 }
 
 .view-groups-btn:active {
+  opacity: 0.85;
+  transform: scale(0.96);
+}
+
+.view-teams-btn {
+  padding: 12rpx 28rpx;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 28rpx;
+  font-size: 24rpx;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.4);
+}
+
+.view-teams-btn:active {
   opacity: 0.85;
   transform: scale(0.96);
 }
@@ -873,3 +894,5 @@
   width: 24rpx;
   border-radius: 6rpx;
 }
+
+

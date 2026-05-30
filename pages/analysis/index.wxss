@@ -1021,3 +1021,270 @@
   font-weight: 600;
   color: #ff6b6b;
 }
+
+/* ========== 必发 ========== */
+.betfair-content {
+  display: flex;
+  flex-direction: column;
+  gap: 32rpx;
+}
+
+/* 必发分区 */
+.bifa-section {
+  background: #f8f9fc;
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+
+.bifa-section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 20rpx;
+  padding-left: 16rpx;
+  border-left: 6rpx solid #667eea;
+  line-height: 1.2;
+}
+
+/* ===== 交易汇总卡片 ===== */
+.bifa-summary-cards {
+  display: flex;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+
+.bifa-summary-card {
+  flex: 1;
+  border-radius: 14rpx;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.04);
+}
+
+.bifa-card-head {
+  text-align: center;
+  padding: 14rpx 0;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #fff;
+}
+
+.bifa-summary-card.home .bifa-card-head {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+}
+
+.bifa-summary-card.draw .bifa-card-head {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.bifa-summary-card.away .bifa-card-head {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.bifa-card-stats {
+  padding: 16rpx 14rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.bifa-card-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bifa-card-label {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.bifa-card-val {
+  font-size: 24rpx;
+  color: #333;
+  font-weight: 600;
+}
+
+.bifa-card-val.odds {
+  color: #667eea;
+}
+
+/* 冷热指数 */
+.bifa-hot-row {
+  display: flex;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.bifa-hot-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  padding: 16rpx;
+  background: #fff;
+  border-radius: 10rpx;
+}
+
+.bifa-hot-label {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.bifa-hot-val {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.bifa-hot-val.hot {
+  color: #ff6b6b;
+}
+
+.bifa-hot-val.cold {
+  color: #4facfe;
+}
+
+/* 盈亏指数 */
+.bifa-pl-row {
+  display: flex;
+  gap: 12rpx;
+}
+
+.bifa-pl-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  padding: 14rpx;
+  background: #fff;
+  border-radius: 10rpx;
+}
+
+.bifa-pl-label {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.bifa-pl-val {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 600;
+}
+
+/* ===== 大额明细 / 走势表格通用 ===== */
+.bifa-detail-table,
+.bifa-trend-table {
+  border-radius: 12rpx;
+  overflow: hidden;
+  background: #fff;
+}
+
+.bifa-table-hd {
+  display: flex;
+  background: #eef1f8;
+  padding: 16rpx 12rpx;
+}
+
+.bifa-th {
+  flex: 1;
+  text-align: center;
+  font-size: 22rpx;
+  color: #888;
+  font-weight: 600;
+}
+
+.bifa-th.side {
+  flex: 0.8;
+}
+
+.bifa-th.time {
+  flex: 1.4;
+}
+
+.bifa-th.amount {
+  flex: 1.2;
+}
+
+.bifa-th.odds,
+.bifa-th.per {
+  flex: 0.9;
+}
+
+.bifa-table-bd {
+  display: flex;
+  flex-direction: column;
+}
+
+.bifa-tr {
+  display: flex;
+  align-items: center;
+  padding: 14rpx 12rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.bifa-tr:last-child {
+  border-bottom: none;
+}
+
+.bifa-td {
+  flex: 1;
+  text-align: center;
+  font-size: 24rpx;
+  color: #333;
+}
+
+.bifa-td.side {
+  flex: 0.8;
+  display: flex;
+  justify-content: center;
+}
+
+.bifa-td.time {
+  flex: 1.4;
+  font-size: 22rpx;
+  color: #999;
+}
+
+.bifa-td.amount {
+  flex: 1.2;
+  font-weight: 500;
+}
+
+.bifa-td.odds {
+  flex: 0.9;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.bifa-td.per {
+  flex: 0.9;
+  color: #666;
+}
+
+/* 方向标签 */
+.bifa-side-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 10rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #fff;
+}
+
+.bifa-side-tag.home {
+  background: #ff6b6b;
+}
+
+.bifa-side-tag.draw {
+  background: #4facfe;
+}
+
+.bifa-side-tag.away {
+  background: #43e97b;
+  color: #333;
+}

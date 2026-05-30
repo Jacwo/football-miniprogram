@@ -57,6 +57,11 @@
           <text class="match-count">{{item.matches.length}}场</text>
         </view>
         <view class="weekday-right">
+          <view class="lobster-ai-btn" wx:if="{{showCalculator && groupIndex === 0}}" catchtap="onLobsterAI">
+            <text class="lobster-ai-icon">👑</text>
+            <text class="lobster-ai-text">AI问答</text>
+            <view class="ai-vip-tag">VIP</view>
+          </view>
           <text class="toggle-icon {{collapsedGroups[groupIndex] ? 'collapsed' : ''}}"></text>
         </view>
       </view>

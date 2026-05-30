@@ -15,7 +15,15 @@ function getWorldCupGroups() {
   return get('/api/worldcup/groups', {}, { showLoading: false })
 }
 
+/**
+ * 获取世界杯球队及球员信息
+ */
+function getWorldCupTeams() {
+  return get('/api/worldcup/team/groups', {}, { showLoading: false })
+}
+
 module.exports = {
   getWorldCupMatches,
   getWorldCupGroups,
+  getWorldCupTeams,
 };

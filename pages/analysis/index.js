@@ -23,7 +23,8 @@ Page({
       { key: 'information', name: '情报' },
       { key: 'xg', name: 'XG' },
       { key: 'similar', name: '同赔' },
-      { key: 'odds', name: '指数' }
+      { key: 'odds', name: '指数' },
+      { key: 'betfair', name: '必发' }
     ],
     activeTab: 'recent',
     loadedTabs: {},
@@ -36,6 +37,11 @@ Page({
     informationData: null,
     similarData: [],
     oddsData: [],
+    bifaSummary: [],
+    bifaDetail: [],
+    bifaTrend: [],
+    bifaSummaryCards: null,
+    bifaTrendGrouped: [],
     // 各标签页加载状态
     tabLoading: {},
     // 情报解锁相关
@@ -219,6 +225,27 @@ Page({
           const oddsResult = await analysisApi.getOddsData(matchId)
           this.setData({ oddsData: (oddsResult && oddsResult.history) || oddsResult || [] })
           break
+
+        case 'betfair':
+          const [summaryRes, detailRes, trendRes] = await Promise.all([
+            analysisApi.getBifaSummary(matchId),
+            analysisApi.getBifaDetail(matchId),
+            analysisApi.getBifaTrend(matchId)
+          ])
+          const summaryList = summaryRes || []
+          const detailList = (detailRes || []).map(item => ({
+            ...item,
+            _dataTime: this.formatBifaTime(item.dataTime)
+          }))
+          const trendList = trendRes || []
+          this.setData({
+            bifaSummary: summaryList,
+            bifaDetail: detailList,
+            bifaTrend: trendList,
+            bifaSummaryCards: this.buildBifaSummaryCards(summaryList),
+            bifaTrendGrouped: this.buildBifaTrendGrouped(trendList)
+          })
+          break
       }
 
       this.setData({
@@ -387,8 +414,8 @@ Page({
 
     // 弹窗确认解锁
     wx.showModal({
-      title: '解锁情报',
-      content: `本次解锁将消耗 ${pointsNeeded} 积分，是否继续？\n\n提示：开通会员可免费查看所有情报`,
+      title: '解锁AI分析',
+      content: `本次分析将消耗${pointsNeeded}积分是否继续？\n提示：开通会员可查看所有情报`,
       confirmText: '确认',
       cancelText: '取消',
       success: async (res) => {
@@ -442,6 +469,57 @@ Page({
         duration: 2000
       })
     }
+  },
+
+  // 构建必发汇总三卡片数据
+  buildBifaSummaryCards(list) {
+    if (!list || !list.length) return null
+    const home = list.find(item => item.itemName && (item.itemName.includes('主') || item.itemName === 'home'))
+    const draw = list.find(item => item.itemName && (item.itemName.includes('和') || item.itemName === 'draw'))
+    const away = list.find(item => item.itemName && (item.itemName.includes('客') || item.itemName === 'away'))
+    return { home: home || null, draw: draw || null, away: away || null }
+  },
+
+  // 格式化必发时间值（兼容时间戳/字符串）
+  formatBifaTime(val) {
+    if (!val && val !== 0) return '-'
+    const str = String(val)
+    // 纯数字串 → 作为毫秒时间戳解析
+    if (/^\d{10,13}$/.test(str)) {
+      const ts = Number(str)
+      const d = new Date(str.length === 10 ? ts * 1000 : ts)
+      if (!isNaN(d.getTime())) {
+        return dateUtils.formatShortDateTime(d)
+      }
+    }
+    // 非纯数字串 → 用 dateUtils 尝试解析
+    try {
+      const result = dateUtils.formatShortDateTime(str)
+      if (result && !result.includes('NaN')) return result
+    } catch (e) {}
+    return str
+  },
+
+  // 构建必发走势分组数据
+  buildBifaTrendGrouped(list) {
+    if (!list || !list.length) return []
+    const map = new Map()
+    list.forEach(item => {
+      const rawKey = item.dataTime || ''
+      const displayKey = this.formatBifaTime(rawKey)
+      if (!map.has(rawKey)) {
+        map.set(rawKey, { dataTime: displayKey, homeAmount: '-', drawAmount: '-', awayAmount: '-' })
+      }
+      const entry = map.get(rawKey)
+      if (item.side && (item.side.includes('主') || item.side === 'home')) {
+        entry.homeAmount = item.amount || '-'
+      } else if (item.side && (item.side.includes('和') || item.side === 'draw')) {
+        entry.drawAmount = item.amount || '-'
+      } else if (item.side && (item.side.includes('客') || item.side === 'away')) {
+        entry.awayAmount = item.amount || '-'
+      }
+    })
+    return Array.from(map.values())
   },
 
   // 跳转到VIP页面

@@ -14,7 +14,7 @@ Page({
     bonusRankList: [], // 中奖金额排行榜前三
     loading: true,
     error: null,
-    rankExpanded: true, // 排行榜是否展开
+    rankExpanded: false, // 排行榜默认关闭
     rankType: "winRate", // 排行榜类型：winRate（胜率）、bonus（中奖金额）
     // 浮动按钮拖动相关
     dragX: 0,

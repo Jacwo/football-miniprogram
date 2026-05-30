@@ -3,7 +3,7 @@
   <!-- 悬浮可拖动聊天记录按钮 -->
   <movable-area class="floating-btn-area">
     <movable-view class="floating-btn {{showSidebar ? 'active' : ''}}" direction="all" catchtap="onToggleSidebar">
-      <text class="chat-icon-emoji">💬</text>
+      <text class="chat-icon-emoji">☰</text>
     </movable-view>
   </movable-area>
 
@@ -47,6 +47,7 @@
           wx:for-item="session"
           data-session="{{session}}"
           bindtap="onSelectSession"
+          bindlongpress="onLongPressSession"
         >
           <view class="session-row">
             <view class="session-info">

@@ -22,6 +22,7 @@
     "pages/vip/index",
     "pages/topic/index",
     "pages/topic-detail/index",
+    "pages/team-info/index",
     "pages/plugin-market/index"
   ],
   "window": {

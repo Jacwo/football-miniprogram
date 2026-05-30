@@ -145,19 +145,45 @@ Page({
       // 缓存联赛颜色
       leagueColor.batchSetColors(matches);
 
-      const processedMatches = matches.map((item) => ({
-        ...item,
-        displayDate: this.formatDate(item.matchDate),
-        displayTime: item.matchTime ? item.matchTime.substring(0, 5) : "--:--",
-        // 优先使用接口返回的颜色，否则从缓存读取
-        displayColor: item.backColor || leagueColor.getColor(item.leagueId),
-        // 处理事件列表
-        events: (item.eventList || []).map((event) => ({
-          ...event,
-          eventName: this.getEventName(event.eventCode),
-          isHome: event.teamType === "home",
-        })),
-      }));
+      const processedMatches = matches.map((item) => {
+        // 按时间升序排列事件（先进球在上）
+        const eventList = (item.eventList || [])
+          .map((event) => {
+            const minute = parseInt(event.matchMinute, 10) || 0;
+            // 补时进球格式化：如 "45+3" → "+3'"
+            const rawMinute = event.matchMinute || '';
+            let _displayMinute = rawMinute;
+            if (rawMinute && rawMinute.includes('+')) {
+              const parts = rawMinute.split('+');
+              _displayMinute = '+' + parts[1];
+            }
+            return {
+              ...event,
+              eventName: this.getEventName(event.eventCode),
+              isHome: event.teamType === "home",
+              _sortMinute: minute,
+              _displayMinute,
+            };
+          })
+          .sort((a, b) => a._sortMinute - b._sortMinute);
+
+        // 标记下半场第一条事件（中场分隔线）
+        let halfLineInserted = false;
+        for (let i = 0; i < eventList.length; i++) {
+          if (!halfLineInserted && eventList[i]._sortMinute > 45) {
+            eventList[i]._showHalfLine = true;
+            halfLineInserted = true;
+          }
+        }
+
+        return {
+          ...item,
+          displayDate: this.formatDate(item.matchDate),
+          displayTime: item.matchTime ? item.matchTime.substring(0, 5) : "--:--",
+          displayColor: item.backColor || leagueColor.getColor(item.leagueId),
+          events: eventList,
+        };
+      });
 
       this.setData({ liveMatches: processedMatches, loading: false });
     } catch (error) {
