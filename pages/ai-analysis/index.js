@@ -220,9 +220,11 @@ Page({
     const that = this
     let fullText = ''
     const baseUrl = getApp().globalData.baseUrl || ''
+    const userInfo = userStore.getUserInfo()
+    const userId = userInfo ? (userInfo.userId || userInfo.id || '') : ''
 
     const requestTask = wx.request({
-      url: `${baseUrl}/api/match/stream/analysis/${matchId}`,
+      url: `${baseUrl}/api/match/stream/analysis/${matchId}/${userId}`,
       method: 'POST',
       enableChunked: true,
       header: {

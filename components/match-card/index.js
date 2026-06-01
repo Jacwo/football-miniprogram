@@ -35,6 +35,7 @@ Component({
     isVip: false, // 是否是VIP用户
     showTip: false, // 是否展开Tips
     isFinished: false, // 是否已完成
+    leagueColorNormalized: "667eea", // 归一化后的联赛颜色（不含#）
   },
 
   lifetimes: {
@@ -50,7 +51,16 @@ Component({
 
   observers: {
     'match, forceVipStyle': function (match, forceVipStyle) {
-      if (match && match.fullMatchTime) {
+      if (!match) return;
+
+      // 归一化联赛颜色：移除可能存在的 # 前缀，确保 template 拼接后始终为合法 CSS 颜色
+      const rawColor = match.leagueColor || '667eea';
+      const leagueColorNormalized = String(rawColor).startsWith('#') ? rawColor.substring(1) : rawColor;
+
+      // 构建一次 setData，避免多次触发渲染
+      const updateData = { leagueColorNormalized };
+
+      if (match.fullMatchTime) {
         const userInfo = userStore.getUserInfo();
         const isVip = userInfo && userInfo.isVip === true;
         // 强制VIP样式模式下，始终显示VIP样式
@@ -58,14 +68,14 @@ Component({
         // 判断是否为已完成比赛（有比分）
         const isFinished = match.isFinished || (match.homeScore !== undefined && match.awayScore !== undefined);
 
-        this.setData({
-          formattedTime: isFinished ? '已结束' : dateUtils.formatShortDateTime(match.fullMatchTime),
-          statusInfo: matchUtils.getMatchStatus(match.status),
-          isUnlocked: showAsVip || match.isUnlocked || false,
-          isVip: showAsVip,
-          isFinished: isFinished,
-        });
+        updateData.formattedTime = isFinished ? '已结束' : dateUtils.formatShortDateTime(match.fullMatchTime);
+        updateData.statusInfo = matchUtils.getMatchStatus(match.status);
+        updateData.isUnlocked = showAsVip || match.isUnlocked || false;
+        updateData.isVip = showAsVip;
+        updateData.isFinished = isFinished;
       }
+
+      this.setData(updateData);
     },
     'forceVipStyle': function (forceVipStyle) {
       // 单独监听 forceVipStyle 变化

@@ -15,15 +15,15 @@
   <!-- 主内容 -->
   <scroll-view class="topic-scroll" scroll-y enable-back-to-top="true" refresher-enabled="{{true}}" refresher-triggered="{{isRefreshing}}" bindrefresherrefresh="onScrollRefresh" wx:else>
     <!-- 轮播图 -->
-    <view class="swiper-section" wx:if="{{majorEvents.length > 0}}">
+    <view class="swiper-section" wx:if="{{carouselItems.length > 0}}">
       <swiper class="event-swiper" indicator-dots autoplay circular indicator-color="rgba(255,255,255,0.4)" indicator-active-color="#ffffff">
-        <swiper-item wx:for="{{majorEvents}}" wx:key="id">
-          <view class="swiper-item" bindtap="onEventCardTap" data-id="{{item.id}}" data-name="{{item.topicName}}" data-url="{{item.imageUrl}}">
+        <swiper-item wx:for="{{carouselItems}}" wx:key="_key">
+          <view class="swiper-item" bindtap="onEventCardTap" data-id="{{item._id}}" data-name="{{item._name}}" data-url="{{item.carouselImageUrl || item.imageUrl}}" data-jump="{{item.jump}}">
             <image class="swiper-image" src="{{item.carouselImageUrl || item.imageUrl}}" mode="aspectFill" />
             <view class="swiper-overlay"></view>
-            <view class="swiper-info" wx:if="{{item.topicName}}">
-              <text class="swiper-title">{{item.topicName}}</text>
-              <text class="swiper-desc" wx:if="{{item.topicDesc}}">{{item.topicDesc}}</text>
+            <view class="swiper-info" wx:if="{{item._name}}">
+              <text class="swiper-title">{{item._name}}</text>
+              <text class="swiper-desc" wx:if="{{item._desc}}">{{item._desc}}</text>
             </view>
           </view>
         </swiper-item>
@@ -57,92 +57,88 @@
       </view>
     </view>
 
-    <!-- 进行中的专题 -->
-    <view class="section" wx:if="{{hotTopics.length > 0}}">
+    <!-- 热门专题 -->
+    <view class="section" wx:if="{{majorEvents.length > 0}}">
       <view class="section-bar">
-        <view class="section-bar-dot hot"></view>
-        <text class="section-bar-title">进行中</text>
-        <view class="section-bar-badge hot">HOT</view>
-      </view>
-      <view class="topic-grid">
-        <view class="topic-card" wx:for="{{hotTopics}}" wx:key="id" bindtap="onTopicTap" data-id="{{item.id}}" data-name="{{item.topicName}}" data-url="{{item.imageUrl}}">
-          <view class="topic-cover">
-            <image class="topic-cover-img" src="{{item.imageUrl}}" mode="aspectFill" />
-            <view class="topic-cover-tag hot">进行中</view>
-          </view>
-          <view class="topic-body">
-            <text class="topic-name">{{item.topicName}}</text>
-            <text class="topic-desc" wx:if="{{item.topicDesc}}">{{item.topicDesc}}</text>
-            <text class="topic-date" wx:if="{{item.startDate && item.endDate}}">{{item.startDate}} - {{item.endDate}}</text>
-          </view>
+        <view class="section-bar-left">
+          <view class="section-bar-dot hot"></view>
+          <text class="section-bar-title">热门专题</text>
+          <view class="section-bar-badge hot">HOT</view>
         </view>
       </view>
-    </view>
-
-    <!-- 热门专区 - 水平展示 -->
-    <view class="section" wx:if="{{championsLeague.topicName || worldCup.topicName}}">
-      <view class="hot-zones-row">
-        <!-- 欧冠专区 -->
-        <view class="hot-zone-card" bindtap="onTopicTap" data-id="{{championsLeague.id}}" data-name="{{championsLeague.topicName}}" data-url="{{championsLeague.imageUrl}}" wx:if="{{championsLeague.topicName}}">
-          <view class="hot-zone-header">
-            <text class="hot-zone-icon">⚽</text>
-            <text class="hot-zone-title">{{championsLeague.topicName}}</text>
-            <view class="hot-zone-badge live">进行中</view>
-          </view>
-          <view class="hot-zone-matches" wx:if="{{championsLeagueMatches.length > 0}}">
-            <view class="zone-match-item" wx:for="{{championsLeagueMatches}}" wx:key="matchId">
-              <text class="zone-match-time">{{item.matchTime}}</text>
-              <text class="zone-match-teams">{{item.homeTeamAbbName}} VS {{item.awayTeamAbbName}}</text>
-              <text class="zone-match-score" wx:if="{{item.homeScore !== null}}">{{item.homeScore}}-{{item.awayScore}}</text>
-            </view>
-          </view>
-          <view class="hot-zone-matches empty" wx:else>
-            <text class="zone-empty-text">暂无进行中的比赛</text>
-          </view>
-        </view>
-
-        <!-- 世界杯专区 -->
-        <view class="hot-zone-card upcoming" bindtap="onTopicTap" data-id="{{worldCup.id}}" data-name="{{worldCup.topicName}}" data-url="{{worldCup.imageUrl}}" wx:if="{{worldCup.topicName}}">
+      <view class="event-cards">
+        <view class="hot-zone-card full-width" wx:for="{{majorEvents}}" wx:key="id" bindtap="onEventCardTap" data-id="{{item.id}}" data-name="{{item.topicName}}" data-url="{{item.imageUrl}}">
           <view class="hot-zone-header">
             <text class="hot-zone-icon">🏆</text>
-            <text class="hot-zone-title">{{worldCup.topicName}}</text>
-            <view class="hot-zone-badge">即将开赛</view>
+            <text class="hot-zone-title">{{item.topicName}}</text>
+            <view class="hot-zone-badge live" wx:if="{{item.isActive}}">进行中</view>
+            <view class="hot-zone-badge" wx:else>即将开赛</view>
           </view>
-          <view class="hot-zone-cover" wx:if="{{worldCup.imageUrl}}">
-            <image class="hot-zone-img" src="{{worldCup.imageUrl}}" mode="aspectFill" />
+          <view class="hot-zone-cover" wx:if="{{item.imageUrl}}">
+            <image class="hot-zone-img" src="{{item.imageUrl}}" mode="aspectFill" />
           </view>
           <view class="hot-zone-info">
-            <text class="zone-desc" wx:if="{{worldCup.topicDesc}}">{{worldCup.topicDesc}}</text>
-            <text class="zone-date" wx:if="{{worldCup.startDate && worldCup.endDate}}">{{worldCup.formattedDate}}</text>
+            <text class="zone-desc" wx:if="{{item.topicDesc}}">{{item.topicDesc}}</text>
+            <text class="zone-date" wx:if="{{item.showStartDate && item.showEndDate}}">{{item.showStartDate}} - {{item.showEndDate}}</text>
           </view>
         </view>
       </view>
     </view>
 
-    <!-- 进行中的专题 -->
+    <!-- 热门赛事 -->
+    <view class="section" wx:if="{{hotLeagues.length > 0}}">
+      <view class="section-bar">
+        <view class="section-bar-left">
+          <view class="section-bar-dot hot"></view>
+          <text class="section-bar-title">热门赛事</text>
+          <view class="section-bar-badge hot">HOT</view>
+        </view>
+      </view>
+      <view class="topic-grid">
+        <view class="topic-card" wx:for="{{hotLeagues}}" wx:key="leagueId" bindtap="onTopicTap" data-id="{{item.topicId}}" data-name="{{item.leagueName}}" data-url="{{item.imageUrl || item.carouselImageUrl}}">
+          <view class="topic-cover">
+            <image class="topic-cover-img" src="{{item.imageUrl || item.carouselImageUrl}}" mode="aspectFill" />
+            <view class="topic-cover-tag hot" wx:if="{{item.isActive}}">进行中</view>
+            <view class="topic-cover-tag" wx:else>即将开赛</view>
+          </view>
+          <view class="topic-body">
+            <view class="topic-title-row">
+              <text class="topic-name-inline">{{item.leagueNameShort || item.leagueName}}</text>
+              <text class="topic-date-inline" wx:if="{{item.showStartDate && item.showEndDate}}">  {{item.showStartDate}} - {{item.showEndDate}}</text>
+            </view>
+            <text class="topic-desc" wx:if="{{item.topicDesc || item.leagueDesc}}">{{item.topicDesc || item.leagueDesc}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 热门专题 -->
     <view class="section" wx:if="{{hotTopics.length > 0}}">
       <view class="section-bar">
-        <view class="section-bar-dot hot"></view>
-        <text class="section-bar-title">进行中</text>
-        <view class="section-bar-badge hot">HOT</view>
+        <view class="section-bar-left">
+          <view class="section-bar-dot hot"></view>
+          <text class="section-bar-title">热门专题</text>
+          <view class="section-bar-badge hot">HOT</view>
+        </view>
       </view>
       <view class="topic-grid">
         <view class="topic-card" wx:for="{{hotTopics}}" wx:key="id" bindtap="onTopicTap" data-id="{{item.id}}" data-name="{{item.topicName}}" data-url="{{item.imageUrl}}">
           <view class="topic-cover">
             <image class="topic-cover-img" src="{{item.imageUrl}}" mode="aspectFill" />
-            <view class="topic-cover-tag hot">进行中</view>
+            <view class="topic-cover-tag hot" wx:if="{{item.isActive}}">进行中</view>
+            <view class="topic-cover-tag" wx:else>已结束</view>
           </view>
           <view class="topic-body">
             <text class="topic-name">{{item.topicName}}</text>
             <text class="topic-desc" wx:if="{{item.topicDesc}}">{{item.topicDesc}}</text>
-            <text class="topic-date" wx:if="{{item.startDate && item.endDate}}">{{item.startDate}} - {{item.endDate}}</text>
+            <text class="topic-date" wx:if="{{item.showStartDate && item.showEndDate}}">{{item.showStartDate}} - {{item.showEndDate}}</text>
           </view>
         </view>
       </view>
     </view>
 
     <!-- 空状态 -->
-    <view class="empty-state" wx:if="{{hotMatches.length === 0 && hotTopics.length === 0 && selectTopics.length === 0 && !loading}}">
+    <view class="empty-state" wx:if="{{hotMatches.length === 0 && majorEvents.length === 0 && hotLeagues.length === 0 && hotTopics.length === 0 && selectTopics.length === 0 && !loading}}">
       <text class="empty-emoji">📋</text>
       <text class="empty-title">暂无专题内容</text>
       <text class="empty-sub">精彩内容正在筹备中</text>

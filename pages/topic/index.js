@@ -12,9 +12,7 @@ Page({
     majorEvents: [],
     hotTopics: [], // 热门专题（进行中）
     selectTopics: [], // 精选专题（未开始）
-    championsLeague: {}, // 欧冠专题
-    worldCup: {}, // 世界杯专题
-    championsLeagueMatches: [], // 欧冠相关比赛
+    hotLeagues: [], // 热门赛事
     // 功能开关
     showAiAnalysis: false, // 是否显示AI分析按钮
     isRefreshing: false, // 下拉刷新状态
@@ -271,55 +269,93 @@ Page({
       const data = await topicApi.getTopicHome();
       const majorEvents = data.majorEvents || [];
       const hotMatches = data.hotMatches || [];
+      const hotLeagues = data.hotLeagues || [];
 
-      // 按startDate分类：进行中的为热门，未开始的为精选
+      // 先给所有 majorEvents 加上根据实际日期判断的 isActive + 格式化日期
       const now = new Date();
-      const hotTopics = [];
-      const selectTopics = [];
-      const championsLeague = {};
-      const worldCup = {};
-
-      // 筛选欧冠和世界杯专题
-      majorEvents.forEach((item) => {
-        const topicName = (item.topicName || '').toLowerCase();
-        if (topicName.includes('欧冠') || topicName.includes('champions league')) {
-          Object.assign(championsLeague, item);
-        } else if (topicName.includes('世界杯') || topicName.includes('world cup')) {
-          Object.assign(worldCup, item);
-        } else {
-          const startDate = item.startDate ? new Date(item.startDate) : null;
-          if (startDate && startDate <= now) {
-            hotTopics.push(item);
-          } else {
-            selectTopics.push(item);
-          }
+      const processedMajorEvents = majorEvents.map(item => {
+        const startDate = item.startDate ? new Date(item.startDate) : null;
+        const endDate = item.endDate ? new Date(item.endDate) : null;
+        let isActive = false;
+        if (startDate && startDate <= now) {
+          // 已开始：判断是否还在进行中（未结束或无结束日期）
+          isActive = !endDate || endDate >= now;
         }
+        return {
+          ...item,
+          isActive,
+          showStartDate: this.formatShowDate(item.startDate),
+          showEndDate: this.formatShowDate(item.endDate),
+        };
       });
 
-      // 格式化世界杯日期
-      if (worldCup.startDate && worldCup.endDate) {
-        worldCup.formattedDate = this.formatDateRange(worldCup.startDate, worldCup.endDate);
-      }
+      // 按startDate分类：进行中的为热门，未开始的为精选
+      const hotTopics = [];
+      const selectTopics = [];
 
-      // 筛选欧冠相关比赛
-      const championsLeagueMatches = championsLeague.topicName 
-        ? hotMatches.filter(m => {
-            const league = (m.leagueAbbName || '').toLowerCase();
-            return league.includes('欧冠') || league.includes('champions');
-          })
-        : [];
+      processedMajorEvents.forEach((item) => {
+        const startDate = item.startDate ? new Date(item.startDate) : null;
+        if (startDate && startDate <= now) {
+          hotTopics.push(item);
+        } else {
+          selectTopics.push(item);
+        }
+      });
 
       // 转换热门比赛数据为 match-card 组件需要的格式
       const transformedHotMatches = this.transformMatchList(hotMatches);
 
+      // 处理 hotLeagues：根据实际日期判断是否已经开始 + 格式化日期
+      const processedHotLeagues = hotLeagues.map(item => {
+        const startDate = item.startDate ? new Date(item.startDate) : null;
+        const endDate = item.endDate ? new Date(item.endDate) : null;
+        let isActive = false;
+        
+        if (startDate && startDate <= now) {
+          // 已开始，如果没有结束日期或结束日期在未来，则视为进行中
+          isActive = !endDate || endDate >= now;
+        }
+        // 如果 status 字段明确为 live/ongoing，也视为进行中
+        if (!isActive && item.status && (item.status === 'live' || item.status === 'ongoing')) {
+          isActive = true;
+        }
+        
+        return {
+          ...item,
+          isActive,
+          showStartDate: this.formatShowDate(item.startDate),
+          showEndDate: this.formatShowDate(item.endDate),
+          leagueNameShort: this.truncateStr(item.leagueName, 8),
+        };
+      });
+
+      // 合并轮播图数据：majorEvents + hotLeagues中有carouselImageUrl的
+      const carouselItems = [
+        ...processedMajorEvents.map(item => ({
+          ...item,
+          _key: `event_${item.id}`,
+          _name: item.topicName,
+          _desc: item.topicDesc,
+          _id: item.id,
+        })),
+        ...processedHotLeagues
+          .filter(item => item.carouselImageUrl)
+          .map(item => ({
+            ...item,
+            _key: `league_${item.topicId || item.leagueId}`,
+            _name: item.topicName || item.leagueName,
+            _desc: item.topicDesc || item.leagueDesc,
+            _id: item.topicId,
+          })),
+      ];
+
       this.setData({
         hotMatches: transformedHotMatches,
-        majorEvents,
+        majorEvents: processedMajorEvents,
         hotTopics,
         selectTopics,
-        championsLeague,
-        worldCup,
-        championsLeagueMatches,
+        hotLeagues: processedHotLeagues,
+        carouselItems,
         loading: false,
       });
     } catch (error) {
@@ -351,10 +387,13 @@ Page({
     });
   },
 
-  // 点击专题推荐卡片，跳转到专题详情页
+  // 点击轮播图
   onEventCardTap(e) {
-    const { id, name, url } = e.currentTarget.dataset;
+    const { id, name, url, jump } = e.currentTarget.dataset;
     
+    // jump 字段为 false 时不跳转
+    if (jump === false || jump === 'false') return;
+
     // 如果有专题ID，跳转到专题详情页
     if (id) {
       wx.navigateTo({
@@ -364,8 +403,8 @@ Page({
     }
 
     // 否则预览图片
-    const { majorEvents } = this.data;
-    const urls = majorEvents.map(item => item.imageUrl);
+    const { carouselItems } = this.data;
+    const urls = carouselItems.map(item => item.carouselImageUrl || item.imageUrl).filter(Boolean);
     wx.previewImage({
       current: url,
       urls,
@@ -389,27 +428,21 @@ Page({
     });
   },
 
-  // 格式化日期范围
-  formatDateRange(startDate, endDate) {
-    if (!startDate || !endDate) return '';
+  // 截断字符串，超长尾部加...
+  truncateStr(str, maxLen) {
+    if (!str || str.length <= maxLen) return str;
+    return str.slice(0, maxLen) + '...';
+  },
 
-    const formatDate = (dateStr) => {
-      const date = new Date(dateStr);
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
-      return `${month}月${day}日`;
-    };
-
-    const start = formatDate(startDate);
-    const end = formatDate(endDate);
-
-    // 如果年份相同，只显示月日
-    const startYear = new Date(startDate).getFullYear();
-    const endYear = new Date(endDate).getFullYear();
-
-    if (startYear === endYear) {
-      return `${start} - ${end}`;
+  // 格式化展示日期：2026-06-12T03:00:00 → 2026.06.12
+  formatShowDate(dateStr) {
+    if (!dateStr) return '';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+    } catch (e) {
+      return dateStr;
     }
-    return `${startYear}${start} - ${endYear}${end}`;
   },
 });
