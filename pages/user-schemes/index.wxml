@@ -1,0 +1,149 @@
+<!-- pages/user-schemes/index.wxml -->
+<view class="user-schemes-page">
+  <!-- 加载状态 -->
+  <view class="loading-wrapper" wx:if="{{loading}}">
+    <view class="loading-ring">
+      <view class="ring-inner"></view>
+    </view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 错误状态 -->
+  <view class="error-wrapper" wx:elif="{{error}}">
+    <text class="error-icon">⚠️</text>
+    <text class="error-text">{{error}}</text>
+    <view class="retry-btn" bindtap="onRetry">重新加载</view>
+  </view>
+
+  <!-- 主内容 -->
+  <view class="main-content" wx:else>
+    <!-- 用户信息头部 -->
+    <view class="user-header">
+      <view class="avatar-ring">
+        <view class="user-avatar">
+          <image class="avatar-img" src="{{userAvatar}}" mode="aspectFill" wx:if="{{userAvatar}}"></image>
+          <view class="avatar-fallback" wx:else>{{userName[0]}}</view>
+        </view>
+      </view>
+      <view class="user-name-area">
+        <text class="user-name">{{userName}}</text>
+        <view class="level-badge">
+          <text class="level-icon">⚡</text>
+          <text class="level-text">推单人</text>
+        </view>
+      </view>
+      <text class="scheme-count-tag">{{stats.totalRecords}}条记录</text>
+    </view>
+
+    <!-- 统计卡片 -->
+    <view class="stats-section">
+      <view class="stats-main-card">
+        <view class="main-stat win-rate">
+          <text class="ms-value">{{stats.winRate}}<text class="ms-unit">%</text></text>
+          <text class="ms-label">胜率</text>
+          <view class="ms-bar-bg">
+            <view class="ms-bar-fill" style="width: {{stats.winRate}}%; max-width: 100%"></view>
+          </view>
+        </view>
+        <view class="main-stat-divider"></view>
+        <view class="main-stat bonus">
+          <text class="ms-value gold">¥{{stats.totalBonusStr}}</text>
+          <text class="ms-label">累计奖金</text>
+        </view>
+      </view>
+      <view class="stats-sub-grid">
+        <view class="sub-stat won">
+          <text class="ss-num">{{stats.winRecords}}</text>
+          <text class="ss-label">中奖</text>
+        </view>
+        <view class="sub-stat lost">
+          <text class="ss-num">{{stats.loseRecords}}</text>
+          <text class="ss-label">未中</text>
+        </view>
+        <view class="sub-stat pending">
+          <text class="ss-num">{{stats.pendingRecords}}</text>
+          <text class="ss-label">待开</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 筛选栏 -->
+    <view class="filter-bar">
+      <view class="filter-item {{statusFilter === '' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="">
+        <text>全部</text>
+      </view>
+      <view class="filter-item won {{statusFilter === 'won' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="won">
+        <text class="filter-dot won"></text>
+        <text>已中奖</text>
+      </view>
+      <view class="filter-item lost {{statusFilter === 'lost' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="lost">
+        <text class="filter-dot lost"></text>
+        <text>未中奖</text>
+      </view>
+      <view class="filter-item pending {{statusFilter === 'pending' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="pending">
+        <text class="filter-dot pending"></text>
+        <text>待开奖</text>
+      </view>
+    </view>
+
+    <!-- 方案列表 -->
+    <scroll-view class="schemes-scroll" scroll-y wx:if="{{filteredSchemes.length > 0}}">
+      <view
+        class="scheme-item {{item.status === 1 ? 'status-won' : (item.status === 2 ? 'status-lost' : 'status-pending')}}"
+        wx:for="{{filteredSchemes}}"
+        wx:key="id"
+      >
+        <!-- 左侧状态指示条 -->
+        <view class="scheme-left-accent"></view>
+
+        <view class="scheme-body">
+          <!-- 第一行：过关方式 + 状态 + 中奖金额 + 时间 -->
+          <view class="scheme-top">
+            <view class="scheme-play-tag">{{item.passTypesStr}}</view>
+            <view class="scheme-status-badge {{item.status === 1 ? 'won' : (item.status === 2 ? 'lost' : 'pending')}}">
+              <text>{{item.status === 1 ? '🎯 中奖' : (item.status === 2 ? '✗ 未中' : '⏳ 待开')}}</text>
+            </view>
+            <text wx:if="{{item.status === 1}}" class="amount-won-inline">+¥{{item.totalAmount}}</text>
+            <view class="scheme-top-spacer"></view>
+            <text class="scheme-time">{{item.createTimeStr}}</text>
+          </view>
+
+          <!-- 第二行：场次/注数·投注金额 + 查看方案 -->
+          <view class="scheme-bottom-row">
+            <view class="scheme-metas">
+              <view class="meta-chip">
+                <text class="meta-icon">⚽</text>
+                <text class="meta-text">{{item.matchCount}}场</text>
+              </view>
+              <view class="meta-chip">
+                <text class="meta-icon">🎫</text>
+                <text class="meta-text">{{item.bets}}注 · </text><text class="meta-text bet-amount">¥{{item.betAmount}}</text>
+              </view>
+            </view>
+            <view class="scheme-action" bindtap="onRecordTap" data-record="{{item}}">
+              <text>查看方案</text>
+              <text class="action-arrow">→</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="bottom-placeholder"></view>
+    </scroll-view>
+
+    <!-- 空状态：无方案 -->
+    <view class="empty-state" wx:if="{{schemes.length === 0 && !loading}}">
+      <view class="empty-card">
+        <text class="empty-icon">📭</text>
+        <text class="empty-text">该用户暂无分享方案</text>
+      </view>
+    </view>
+
+    <!-- 空状态：筛选无结果 -->
+    <view class="empty-state" wx:elif="{{filteredSchemes.length === 0 && !loading}}">
+      <view class="empty-card">
+        <text class="empty-icon">🔍</text>
+        <text class="empty-text">暂无符合条件的方案</text>
+      </view>
+    </view>
+  </view>
+</view>

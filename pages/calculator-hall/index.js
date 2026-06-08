@@ -53,8 +53,8 @@ Page({
     const windowWidth = systemInfo.windowWidth;
     const windowHeight = systemInfo.windowHeight;
     const statusBarHeight = systemInfo.statusBarHeight;
-    const btnWidth = 80; // rpx转换为px需要乘以系数，这里使用相对值
-    const btnHeight = 80;
+    const btnWidth = 122; // 对应 190rpx 宽度
+    const btnHeight = 60; // 对应 80rpx 高度
 
     this.setData({
       statusBarHeight: statusBarHeight,
@@ -577,6 +577,18 @@ Page({
     }
   },
 
+  // 点击排行榜用户，跳转推单详情页
+  onRankUserTap(e) {
+    const { userid, username, useravatar } = e.currentTarget.dataset;
+    if (!userid) return;
+
+    const userName = encodeURIComponent(username || '');
+    const userAvatar = encodeURIComponent(useravatar || '');
+    wx.navigateTo({
+      url: `/pages/user-schemes/index?userId=${userid}&userName=${userName}&userAvatar=${userAvatar}`,
+    });
+  },
+
   // 分享给好友
   onShareAppMessage() {
     return {
@@ -620,8 +632,8 @@ Page({
     const touch = e.touches[0];
     const windowWidth = wx.getSystemInfoSync().windowWidth;
     const windowHeight = wx.getSystemInfoSync().windowHeight;
-    const btnWidth = 80; // 浮动按钮宽度
-    const btnHeight = 80; // 浮动按钮高度
+    const btnWidth = 122;
+    const btnHeight = 60;
 
     let newX = touch.clientX - this.data.dragStartX;
     let newY = touch.clientY - this.data.dragStartY;

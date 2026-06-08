@@ -10,7 +10,8 @@ Page({
     error: null,
     recommending: false,
     isFromHall: false, // 是否从大厅来
-    exporting: false // 是否正在导出图片
+    exporting: false, // 是否正在导出图片
+    showConfirmPopup: false // 分享确认弹窗
   },
 
   onLoad(options) {
@@ -1354,35 +1355,34 @@ Page({
     return value
   },
 
-  // 分享方案
-  async onRecommend() {
+  // 分享方案 - 先弹出确认弹窗
+  onRecommend() {
     const { record } = this.data
     if (!record) {
-      wx.showToast({
-        title: '记录不存在',
-        icon: 'error'
-      })
+      wx.showToast({ title: '记录不存在', icon: 'error' })
       return
     }
+    this.setData({ showConfirmPopup: true })
+  },
 
-    this.setData({ recommending: true })
+  // 关闭确认弹窗
+  onCloseConfirm() {
+    this.setData({ showConfirmPopup: false })
+  },
+
+  // 确认分享
+  async onConfirmShare() {
+    const { record } = this.data
+    this.setData({ showConfirmPopup: false, recommending: true })
 
     try {
       const res = await matchApi.recommendCalculatorRecord(record.id)
       this.setData({ recommending: false })
-
-      wx.showToast({
-        title: '分享成功',
-        icon: 'success'
-      })
+      wx.showToast({ title: '分享成功', icon: 'success' })
     } catch (err) {
       console.error('分享失败:', err)
       this.setData({ recommending: false })
-
-      wx.showToast({
-        title: err.message || '分享失败',
-        icon: 'error'
-      })
+      wx.showToast({ title: err.message || '分享失败', icon: 'error' })
     }
   },
 

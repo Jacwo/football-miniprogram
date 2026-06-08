@@ -456,11 +456,12 @@ Page({
     const dateMap = {}; // 记录每个组的日期
     const groupMeta = {}; // 记录组是否属于本周
 
-    // 计算本周一和下周一的日期
+    // 计算本周一和下周一，以及今天的零点
     const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const dayOfWeek = now.getDay(); // 0(周日) ~ 6(周六)
-    const thisMonday = new Date(now);
-    thisMonday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    const thisMonday = new Date(today);
+    thisMonday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
     const nextMonday = new Date(thisMonday);
     nextMonday.setDate(thisMonday.getDate() + 7);
 
@@ -470,8 +471,9 @@ Page({
         ? match.matchNumStr.replace(/\d+/g, "")
         : "其他";
 
-      // 判断是否属于本周
-      let isCurrentWeek = true;
+      // 判断分组归属：本周 / 已过期 / 未来
+      let isCurrentWeek = false;
+      let isPast = false;
       let dateStr = "";
       if (match.matchDate) {
         const dateParts = match.matchDate.split("-");
@@ -480,18 +482,30 @@ Page({
         }
         const matchDate = new Date(match.matchDate.replace(/-/g, "/"));
         matchDate.setHours(0, 0, 0, 0);
-        // 不是本周的比赛（>= 下周一）
-        isCurrentWeek = matchDate < nextMonday;
+        // 本周：thisMonday <= matchDate < nextMonday
+        isCurrentWeek = matchDate >= thisMonday && matchDate < nextMonday;
+        // 已过期：matchDate < thisMonday（含今天零点之前）
+        isPast = matchDate < thisMonday;
+      } else {
+        // 无日期信息的匹配默认当作本周处理
+        isCurrentWeek = true;
       }
 
-      // 非本周的比赛按周几+日期分组，本周的按周几分组
-      const groupKey = isCurrentWeek ? weekday : `${weekday}·${dateStr}`;
+      // 分组 key：本周按周几，过期按「往期·周几」，未来按「周几·日期」
+      let groupKey;
+      if (isCurrentWeek) {
+        groupKey = weekday;
+      } else if (isPast) {
+        groupKey = `往期·${weekday}`;
+      } else {
+        groupKey = `${weekday}·${dateStr}`;
+      }
 
       if (!groups[groupKey]) {
         groups[groupKey] = [];
       }
       groups[groupKey].push(match);
-      groupMeta[groupKey] = { weekday, isCurrentWeek };
+      groupMeta[groupKey] = { weekday, isCurrentWeek, isPast };
 
       if (!dateMap[groupKey] && dateStr) {
         dateMap[groupKey] = dateStr;
@@ -509,27 +523,50 @@ Page({
       "其他",
     ];
 
-    // 拆分为本周组和非本周组
+    // 获取每个组的第一场比赛日期用于排序
+    const getGroupDate = (key) => {
+      const firstMatch = groups[key]?.[0];
+      return firstMatch?.matchDate || "";
+    };
+
+    // 拆分为三组：本周、往期、未来
     const currentWeekKeys = Object.keys(groups).filter(
       (k) => groupMeta[k].isCurrentWeek
     );
+    const pastKeys = Object.keys(groups).filter(
+      (k) => groupMeta[k].isPast
+    );
     const nonCurrentWeekKeys = Object.keys(groups).filter(
-      (k) => !groupMeta[k].isCurrentWeek
+      (k) => !groupMeta[k].isCurrentWeek && !groupMeta[k].isPast
     );
 
-    // 本周按周几顺序排
-    currentWeekKeys.sort(
-      (a, b) => weekOrder.indexOf(groupMeta[a].weekday) - weekOrder.indexOf(groupMeta[b].weekday)
-    );
+    // 本周按日期升序排（确保 6/8 在 6/9 前面，而不是按周几绕圈）
+    currentWeekKeys.sort((a, b) => {
+      const da = getGroupDate(a);
+      const db = getGroupDate(b);
+      if (da && db) return da.localeCompare(db);
+      // 有日期的排前面
+      if (da && !db) return -1;
+      if (!da && db) return 1;
+      // 都没日期则按周几排
+      return weekOrder.indexOf(groupMeta[a].weekday) - weekOrder.indexOf(groupMeta[b].weekday);
+    });
 
-    // 非本周按日期排
-    nonCurrentWeekKeys.sort((a, b) => {
-      const da = groups[a][0]?.matchDate || "";
-      const db = groups[b][0]?.matchDate || "";
+    // 往期按日期升序排（最远的过去排前面）
+    pastKeys.sort((a, b) => {
+      const da = getGroupDate(a);
+      const db = getGroupDate(b);
       return da.localeCompare(db);
     });
 
-    const sortedKeys = [...currentWeekKeys, ...nonCurrentWeekKeys];
+    // 未来按日期升序排
+    nonCurrentWeekKeys.sort((a, b) => {
+      const da = getGroupDate(a);
+      const db = getGroupDate(b);
+      return da.localeCompare(db);
+    });
+
+    const sortedKeys = [...pastKeys, ...currentWeekKeys, ...nonCurrentWeekKeys];
 
     return sortedKeys.map((key) => ({
       _key: key,

@@ -35,6 +35,7 @@ Page({
     maxBonus: 0,
     showMorePlays: false,
     currentMatch: null,
+    hafuNoOdds: false,
     // 记录相关
     records: [],
     recordsLoading: false,
@@ -527,7 +528,10 @@ Page({
   onMorePlays(e) {
     const match = e.currentTarget.dataset.match
     if (!match) return
-    this.setData({ showMorePlays: true, currentMatch: match })
+    // 检查半全场是否所有赔率都为空
+    const hafuFields = ['hafuHh', 'hafuHd', 'hafuHa', 'hafuDh', 'hafuDd', 'hafuDa', 'hafuAh', 'hafuAd', 'hafuAa']
+    const hafuNoOdds = hafuFields.every(f => match[f] == null || match[f] === '' || match[f] === undefined)
+    this.setData({ showMorePlays: true, currentMatch: match, hafuNoOdds })
   },
 
   onCloseMorePlays() {

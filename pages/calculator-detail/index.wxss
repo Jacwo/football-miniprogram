@@ -426,7 +426,7 @@
 /* 开奖结果 - 右侧 */
 .group-result {
   min-width: 70rpx;
-  padding: 10rpx 12rpx;
+  padding: 5rpx 12rpx 10rpx;
   border-radius: 6rpx;
   text-align: center;
   flex-shrink: 0;
@@ -498,4 +498,76 @@
   font-size: 26rpx;
   color: #fff;
   font-weight: 600;
+}
+
+/* 分享确认弹窗 */
+.confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-popup {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 40rpx 36rpx 28rpx;
+  width: 560rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+}
+
+.confirm-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.confirm-body {
+  font-size: 28rpx;
+  color: #666;
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 36rpx;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.confirm-btn {
+  flex: 1;
+  height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  padding: 0;
+  margin: 0;
+  line-height: 80rpx;
+}
+
+.confirm-btn::after {
+  border: none;
+}
+
+.confirm-btn.cancel {
+  background: #f2f3f5;
+  color: #666;
+}
+
+.confirm-btn.ok {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
 }

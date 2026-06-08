@@ -660,8 +660,9 @@
 }
 
 .play-label {
-  width: 56rpx;
+  width: 46rpx;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: 22rpx;
@@ -671,7 +672,7 @@
   flex-shrink: 0;
   text-align: center;
   line-height: 1.2;
-  writing-mode: vertical-rl;
+  /* writing-mode: vertical-rl; */
   letter-spacing: 4rpx;
 }
 
@@ -684,15 +685,15 @@
 }
 
 .crs-label {
-  background: #409eff;
+  background: #70aeec;
 }
 
 .ttg-label {
-  background: #ff6b6b;
+  background: #f88282;
 }
 
 .hafu-label {
-  background: #ffa502;
+  background: #f8cd7c;
 }
 
 .play-options {
@@ -707,7 +708,7 @@
   flex: 1;
   min-width: 0;
   padding: 8rpx 4rpx;
-  background: #f5f7fa;
+  /* background: #f5f7fa; */
   border-radius: 6rpx;
   display: flex;
   flex-direction: column;
@@ -824,7 +825,7 @@
 .crs-item {
   width: calc((100% - 16rpx) / 5);
   padding: 6rpx 2rpx;
-  background: #f5f7fa;
+  /* background: #f5f7fa; */
   border-radius: 6rpx;
   display: flex;
   flex-direction: column;
@@ -892,6 +893,27 @@
 }
 .hafu-options.single-group .opt-item.active {
   border-color: #c41d1d;
+}
+
+/* 半全场未受注 */
+.hafu-no-odds {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 4rpx;
+}
+
+.no-odds-text {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: 500;
+}
+
+/* 胜平负全部未受注 - 禁用态背景 */
+.had-disabled {
+  background: #f2f2f2;
+  border-radius: 8rpx;
 }
 
 /* 单关角标（弹窗 label 上） */

@@ -14,11 +14,17 @@
     <view class="tab-header" wx:if="{{showDragon}}">
       <view class="tab-bg" style="transform: translateX({{currentTab === 'discovery' ? '100%' : '0'}})"></view>
       <view class="tab-item {{currentTab === 'hall' ? 'active' : ''}}" data-tab="hall" bindtap="onTabChange">
-        <text class="tab-icon">🏆</text>
+        <view class="tab-icon icon-doc">
+          <view class="doc-line l1"></view>
+          <view class="doc-line l2"></view>
+          <view class="doc-line l3"></view>
+        </view>
         <text class="tab-text">分享方案</text>
       </view>
       <view class="tab-item {{currentTab === 'discovery' ? 'active' : ''}}" data-tab="discovery" bindtap="onTabChange">
-        <text class="tab-icon">📊</text>
+        <view class="tab-icon icon-trend">
+          <view class="trend-up"></view>
+        </view>
         <text class="tab-text">数据发现</text>
       </view>
     </view>
@@ -53,7 +59,7 @@
         </view>
         <!-- 胜率排行榜内容 -->
         <view class="rank-list {{rankExpanded ? '' : 'collapsed'}}" wx:if="{{rankType === 'winRate'}}">
-          <view class="rank-item" wx:for="{{rankList}}" wx:key="userName">
+          <view class="rank-item" wx:for="{{rankList}}" wx:key="userName" bindtap="onRankUserTap" data-userid="{{item.oduserId}}" data-username="{{item.userName}}" data-useravatar="{{item.avatar}}">
             <view class="rank-medal">
               <text wx:if="{{index === 0}}">🥇</text>
               <text wx:elif="{{index === 1}}">🥈</text>
@@ -82,7 +88,7 @@
         </view>
         <!-- 中奖金额排行榜内容 -->
         <view class="rank-list {{rankExpanded ? '' : 'collapsed'}}" wx:if="{{rankType === 'bonus'}}">
-          <view class="rank-item" wx:for="{{bonusRankList}}" wx:key="userName">
+          <view class="rank-item" wx:for="{{bonusRankList}}" wx:key="userName" bindtap="onRankUserTap" data-userid="{{item.oduserId}}" data-username="{{item.userName}}" data-useravatar="{{item.avatar}}">
             <view class="rank-medal">
               <text wx:if="{{index === 0}}">🥇</text>
               <text wx:elif="{{index === 1}}">🥈</text>
@@ -175,8 +181,11 @@
     <!-- 单关计划悬浮按钮 -->
     <view class="dragon-floating-btn" wx:if="{{showDragon}}" style="left: {{dragX}}px; top: {{dragY}}px;" bindtap="onDragonAnalysis" bindtouchstart="onDragonBtnTouchStart" bindtouchmove="onDragonBtnTouchMove" bindtouchend="onDragonBtnTouchEnd">
       <view class="dragon-btn-inner">
-        <text class="dragon-icon">📊</text>
-        <text class="dragon-text">单关计划</text>
+        <view class="dragon-btn-glow"></view>
+        <view class="dragon-icon-circle">
+          <text class="dragon-icon-text">⚡</text>
+        </view>
+        <text class="dragon-label">单关计划</text>
       </view>
     </view>
   </view>

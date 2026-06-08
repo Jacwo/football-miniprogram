@@ -73,7 +73,7 @@
             <view class="odds-section">
               <view class="odds-inline-row">
                 <text class="section-title">胜平负</text>
-                <view class="odds-group {{item.bettingSingle == 1 || item.bettingSingle == true ? 'single' : ''}}">
+                <view class="odds-group {{item.bettingSingle == 1 || item.bettingSingle == true ? 'single' : ''}} {{!item.hadH && !item.hadD && !item.hadA ? 'had-disabled' : ''}}">
                   <text class="single-corner" wx:if="{{item.bettingSingle == 1 || item.bettingSingle == true}}">单</text>
                   <view class="odds-item {{!item.hadH ? 'disabled' : ''}} {{selectedMap[item.matchId + '_had_H'] ? 'active' : ''}}" data-matchid="{{item.matchId}}" data-type="had" data-value="H" data-odds="{{item.hadH}}" bindtap="onSelectOption">
                     <text class="odds-label">胜</text>
@@ -228,7 +228,7 @@
         <!-- 胜平负 -->
         <view class="play-row">
           <view class="play-label had-label">0</view>
-          <view class="play-options {{currentMatch.bettingSingle == 1 || currentMatch.bettingSingle == true ? 'single-group' : ''}}">
+          <view class="play-options {{currentMatch.bettingSingle == 1 || currentMatch.bettingSingle == true ? 'single-group' : ''}} {{!currentMatch.hadH && !currentMatch.hadD && !currentMatch.hadA ? 'had-disabled' : ''}}">
             <view class="opt-item {{!currentMatch.hadH ? 'disabled' : ''}} {{selectedMap[currentMatch.matchId + '_had_H'] ? 'active' : ''}}" data-matchid="{{currentMatch.matchId}}" data-type="had" data-value="H" data-odds="{{currentMatch.hadH}}" bindtap="onSelectOption">
               <text class="single-corner" wx:if="{{currentMatch.bettingSingle == 1 || currentMatch.bettingSingle == true}}">单</text>
               <text class="opt-text">胜</text>
@@ -346,7 +346,10 @@
         <!-- 半全场 -->
         <view class="play-row">
           <view class="play-label hafu-label">半全场</view>
-          <view class="play-options hafu-options single-group">
+          <view wx:if="{{hafuNoOdds}}" class="play-options hafu-no-odds">
+            <text class="no-odds-text">未受注</text>
+          </view>
+          <view wx:else class="play-options hafu-options single-group">
             <view class="opt-item {{selectedMap[currentMatch.matchId + '_hafu_HH'] ? 'active' : ''}}" data-hafu="HH" data-odds="{{currentMatch.hafuHh}}" bindtap="onSelectHafu">
               <text class="single-corner">单</text><text class="opt-text">胜胜</text><text class="opt-odds">{{currentMatch.hafuHh}}</text>
             </view>
