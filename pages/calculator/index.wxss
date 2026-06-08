@@ -671,6 +671,8 @@
   flex-shrink: 0;
   text-align: center;
   line-height: 1.2;
+  writing-mode: vertical-rl;
+  letter-spacing: 4rpx;
 }
 
 .had-label {
