@@ -305,8 +305,9 @@
   font-size: 22rpx;
   color: #333;
   font-weight: 600;
-  min-width: 100rpx;
+  width: 100rpx;
   flex-shrink: 0;
+  text-align: left;
 }
 
 .section-title .goalline {
@@ -330,9 +331,18 @@
   border: 2rpx solid #e8e8e8;
 }
 
-/* 单关样式 - 红色边框 */
+/* 单关样式 - 每个元素独立红色边框 */
 .odds-group.single {
-  border-color: #c41d1d;
+  border: none;
+}
+
+.odds-group.single .odds-item {
+  border: 2rpx solid #c41d1d;
+  margin-right: -2rpx;
+}
+
+.odds-group.single .odds-item:last-child {
+  margin-right: 0;
 }
 
 /* 单关角标 */
@@ -350,15 +360,22 @@
   z-index: 1;
 }
 
+/* 激活态下的单关角标 - 与红色底色区分 */
+.opt-item.active .single-corner,
+.crs-item.active .single-corner {
+  background: rgba(0,0,0,0.3);
+  color: #fff;
+}
+
 .odds-item {
   flex: 1;
-  padding: 10rpx 8rpx;
+  padding: 10rpx 4rpx;
   background: #f5f7fa;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 8rpx;
+  gap: 4rpx;
   transition: all 0.2s ease;
   position: relative;
 }
@@ -378,7 +395,12 @@
 }
 
 .odds-item.disabled {
-  opacity: 0.35;
+  opacity: 0.55;
+  background: #e8e8e8;
+}
+
+.odds-item.disabled .odds-value {
+  color: #999;
 }
 
 .odds-item.disabled:active {
@@ -389,6 +411,9 @@
   font-size: 24rpx;
   color: #333;
   font-weight: 600;
+  flex-shrink: 0;
+  width: 32rpx;
+  text-align: center;
 }
 
 .odds-item.active .odds-label {
@@ -399,6 +424,9 @@
   font-size: 22rpx;
   font-weight: 500;
   color: #999;
+  min-width: 72rpx;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 .odds-item.active .odds-value {
@@ -575,7 +603,7 @@
 
 .popup-content {
   width: 100%;
-  max-height: 75vh;
+  max-height: 92vh;
   background: #fff;
   border-radius: 20rpx 20rpx 0 0;
   display: flex;
@@ -586,8 +614,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20rpx 24rpx;
+  padding: 16rpx 24rpx;
   border-bottom: 1rpx solid #f0f0f0;
+  flex-shrink: 0;
 }
 
 .popup-title {
@@ -606,111 +635,344 @@
   color: #999;
 }
 
+.popup-tip {
+  display: block;
+  text-align: center;
+  font-size: 22rpx;
+  color: #f5222d;
+  padding: 6rpx 0;
+  flex-shrink: 0;
+}
+
 .popup-body {
   flex: 1;
-  padding: 16rpx 20rpx;
-  max-height: 55vh;
+  padding: 4rpx 12rpx;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
-.play-section {
-  margin-bottom: 20rpx;
+.play-row {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 4rpx;
+  min-height: 0;
 }
 
-.play-title {
-  display: block;
-  font-size: 26rpx;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 12rpx;
-  padding-left: 10rpx;
-  border-left: 5rpx solid #667eea;
-}
-
-.score-group {
-  margin-bottom: 12rpx;
-}
-
-.group-label {
-  display: block;
+.play-label {
+  width: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 22rpx;
-  color: #666;
-  margin-bottom: 8rpx;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 6rpx 0 0 6rpx;
+  flex-shrink: 0;
+  text-align: center;
+  line-height: 1.2;
 }
 
-.score-grid, .goal-grid, .hafu-grid {
+.had-label {
+  background: #c0c4cc;
+}
+
+.hhad-label {
+  background: #f5222d;
+}
+
+.crs-label {
+  background: #409eff;
+}
+
+.ttg-label {
+  background: #ff6b6b;
+}
+
+.hafu-label {
+  background: #ffa502;
+}
+
+.play-options {
+  flex: 1;
   display: flex;
   flex-wrap: wrap;
-  gap: 8rpx;
+  gap: 4rpx;
+  padding-left: 4rpx;
 }
 
-.score-item, .goal-item, .hafu-item {
-  width: calc(25% - 6rpx);
-  padding: 12rpx 4rpx;
+.opt-item {
+  flex: 1;
+  min-width: 0;
+  padding: 8rpx 4rpx;
   background: #f5f7fa;
-  border-radius: 8rpx;
+  border-radius: 6rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4rpx;
+  gap: 2rpx;
   border: 2rpx solid #e8e8e8;
   box-sizing: border-box;
-  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.hafu-item {
-  width: calc(33.33% - 6rpx);
+.opt-item.disabled {
+  opacity: 0.55;
+  pointer-events: none;
 }
 
-.score-item:active, .goal-item:active, .hafu-item:active {
+/* 单关一体边框 - 每个元素独立红框，无间隙，不加深 */
+.play-options.single-group {
+  gap: 0;
+  padding-left: 4rpx;
+}
+
+.play-options.single-group .opt-item {
+  border: 2rpx solid #f5222d;
+  border-radius: 0;
+  margin-right: -2rpx;
+}
+
+.play-options.single-group .opt-item:last-child {
+  margin-right: 0;
+}
+
+.play-options.single-group .opt-item.active {
+  border-color: #c41d1d;
+}
+
+/* 比分每个元素独立红框，无间隙，不加深 */
+.crs-options.single-group {
+  gap: 0;
+}
+.crs-options.single-group .crs-grid {
+  gap: 0;
+  overflow: hidden;
+}
+.crs-options.single-group .crs-item {
+  border: 2rpx solid #f5222d;
+  border-radius: 0;
+  margin-right: -2rpx;
+  margin-top: -2rpx;
+}
+/* 每个 crs-grid 首行（前5项）取消上负边距 */
+.crs-options.single-group .crs-item:nth-child(-n+5) {
+  margin-top: 0;
+}
+/* grid 间重叠 2rpx，避免交界处边框加深 */
+.crs-options.single-group .crs-grid + .crs-grid {
+  margin-top: -2rpx;
+}
+.crs-options.single-group .crs-item.active {
+  border-color: #c41d1d;
+}
+
+.opt-item:active {
   transform: scale(0.98);
 }
 
-.score-item.active, .goal-item.active, .hafu-item.active {
+.opt-item.active {
   background: linear-gradient(135deg, #c41d1d 0%, #d32f2f 100%);
   border-color: #c41d1d;
 }
 
-.s-label, .g-label, .h-label {
+.opt-text {
   font-size: 22rpx;
   color: #333;
   font-weight: 600;
 }
 
-.score-item.active .s-label,
-.goal-item.active .g-label,
-.hafu-item.active .h-label {
+.opt-item.active .opt-text {
   color: #fff;
 }
 
-.s-odds, .g-odds, .h-odds {
+.opt-odds {
+  font-size: 18rpx;
+  color: #999;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.opt-item.active .opt-odds {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 比分特殊布局 */
+.crs-row {
+  /* 移除 flex:1，让内容自然撑开，由 popup-body 滚动承载 */
+}
+
+.crs-options {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 2rpx;
+}
+
+.crs-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4rpx;
+}
+
+.crs-item {
+  width: calc((100% - 16rpx) / 5);
+  padding: 6rpx 2rpx;
+  background: #f5f7fa;
+  border-radius: 6rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rpx;
+  border: 2rpx solid #e8e8e8;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.crs-item:active {
+  transform: scale(0.98);
+}
+
+.crs-item.active {
+  background: linear-gradient(135deg, #c41d1d 0%, #d32f2f 100%);
+  border-color: #c41d1d;
+}
+
+.crs-name {
   font-size: 20rpx;
+  color: #333;
+  font-weight: 600;
+}
+
+.crs-item.active .crs-name {
+  color: #fff;
+}
+
+.crs-odds {
+  font-size: 16rpx;
   color: #999;
   font-weight: 500;
 }
 
-.score-item.active .s-odds,
-.goal-item.active .g-odds,
-.hafu-item.active .h-odds {
+.crs-item.active .crs-odds {
   color: rgba(255, 255, 255, 0.9);
 }
 
-.popup-footer {
-  padding: 16rpx 20rpx;
-  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
-  border-top: 1rpx solid #f0f0f0;
+/* 半全场 */
+.hafu-options {
+  gap: 8rpx;
+}
+.hafu-options .opt-item {
+  width: calc((100% - 16rpx) / 3);
+  flex: none;
+}
+/* 半全场单关红框，不加深 */
+.hafu-options.single-group {
+  gap: 0;
+}
+.hafu-options.single-group .opt-item {
+  border: 2rpx solid #f5222d;
+  border-radius: 0;
+  margin-right: -2rpx;
+  margin-bottom: -2rpx;
+}
+.hafu-options.single-group .opt-item:last-child {
+  margin-right: 0;
+}
+/* 半全场最后一行（3列布局，第7-9项）取消下负边距 */
+.hafu-options.single-group .opt-item:nth-child(n+7) {
+  margin-bottom: 0;
+}
+.hafu-options.single-group .opt-item.active {
+  border-color: #c41d1d;
 }
 
-.popup-btn {
-  padding: 20rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+/* 单关角标（弹窗 label 上） */
+.play-label {
+  position: relative;
+  overflow: visible;
+}
+
+.label-single-tag {
+  position: absolute;
+  top: -4rpx;
+  right: -6rpx;
+  font-size: 18rpx;
+  color: #fff;
+  background: #f5222d;
+  padding: 1rpx 6rpx 1rpx 4rpx;
+  border-radius: 0 4rpx 0 6rpx;
+  line-height: 1.2;
+  z-index: 2;
+  writing-mode: horizontal-tb;
+  font-weight: 500;
+}
+
+/* 总进球 4 列（含 padding-left 4rpx + 3 gap × 4rpx = 16rpx 开销） */
+.ttg-options .opt-item {
+  width: calc((100% - 16rpx) / 4);
+  flex: none;
+}
+/* 总进球单关红框，不加深 */
+.ttg-options.single-group {
+  gap: 0;
+}
+.ttg-options.single-group .opt-item {
+  border: 2rpx solid #f5222d;
+  border-radius: 0;
+  margin-right: -2rpx;
+  margin-bottom: -2rpx;
+}
+.ttg-options.single-group .opt-item:last-child {
+  margin-right: 0;
+}
+/* 总进球最后一行（4列布局，第5-8项）取消下负边距 */
+.ttg-options.single-group .opt-item:nth-child(n+5) {
+  margin-bottom: 0;
+}
+.ttg-options.single-group .opt-item.active {
+  border-color: #c41d1d;
+}
+
+/* 弹窗底部 */
+.popup-footer {
+  display: flex;
+  gap: 16rpx;
+  padding: 12rpx 20rpx;
+  padding-bottom: calc(12rpx + env(safe-area-inset-bottom));
+  border-top: 1rpx solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.popup-btn-cancel,
+.popup-btn-confirm {
+  flex: 1;
+  padding: 16rpx;
   border-radius: 10rpx;
   text-align: center;
-  color: #fff;
   font-size: 28rpx;
   font-weight: 600;
 }
 
-.popup-btn:active { opacity: 0.9; }
+.popup-btn-cancel {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.popup-btn-confirm {
+  background: linear-gradient(135deg, #f5222d 0%, #ff6a88 100%);
+  color: #fff;
+}
+
+.popup-btn-cancel:active,
+.popup-btn-confirm:active {
+  opacity: 0.9;
+}
 
 /* 记录列表样式 */
 .records-content {

@@ -31,7 +31,7 @@ Page({
       'BIND_PHONE': '绑定手机',
       'GROUP_BUY_LEADER':"拼团团长奖励",
       'GROUP_BUY_MEMBER':"拼团团员奖励",
-
+      'FIRST_RENAME': '首次改名奖励',
     }
   },
 
