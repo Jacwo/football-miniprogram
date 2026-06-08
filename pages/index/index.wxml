@@ -47,7 +47,7 @@
 
   <!-- 比赛列表 -->
   <view class="match-list" wx:else>
-    <view class="weekday-group" wx:for="{{groupedMatches}}" wx:key="league" wx:for-index="groupIndex">
+    <view class="weekday-group" wx:for="{{groupedMatches}}" wx:key="_key" wx:for-index="groupIndex">
       <view class="weekday-header" data-index="{{groupIndex}}" bindtap="onToggleGroup">
         <view class="weekday-left">
           <view class="weekday-info">

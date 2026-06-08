@@ -453,56 +453,90 @@ Page({
   // 按周几分组比赛
   groupMatchesByWeekday(matches) {
     const groups = {};
-    const dateMap = {}; // 记录每个周几对应的日期
+    const dateMap = {}; // 记录每个组的日期
+    const groupMeta = {}; // 记录组是否属于本周
+
+    // 计算本周一和下周一的日期
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0(周日) ~ 6(周六)
+    const thisMonday = new Date(now);
+    thisMonday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    const nextMonday = new Date(thisMonday);
+    nextMonday.setDate(thisMonday.getDate() + 7);
 
     matches.forEach((match) => {
       // 从 matchNumStr 提取周几，如 "周二004" -> "周二"
       const weekday = match.matchNumStr
         ? match.matchNumStr.replace(/\d+/g, "")
         : "其他";
-      if (!groups[weekday]) {
-        groups[weekday] = [];
-      }
-      groups[weekday].push(match);
-      // 记录该周的第一场比赛的日期（格式：MM-DD）
-      if (!dateMap[weekday] && match.matchDate) {
-        // 从 "2026-03-26" 提取 "03-26"
+
+      // 判断是否属于本周
+      let isCurrentWeek = true;
+      let dateStr = "";
+      if (match.matchDate) {
         const dateParts = match.matchDate.split("-");
         if (dateParts.length >= 3) {
-          dateMap[weekday] = `${dateParts[1]}-${dateParts[2]}`;
+          dateStr = `${dateParts[1]}-${dateParts[2]}`;
         }
+        const matchDate = new Date(match.matchDate.replace(/-/g, "/"));
+        matchDate.setHours(0, 0, 0, 0);
+        // 不是本周的比赛（>= 下周一）
+        isCurrentWeek = matchDate < nextMonday;
+      }
+
+      // 非本周的比赛按周几+日期分组，本周的按周几分组
+      const groupKey = isCurrentWeek ? weekday : `${weekday}·${dateStr}`;
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(match);
+      groupMeta[groupKey] = { weekday, isCurrentWeek };
+
+      if (!dateMap[groupKey] && dateStr) {
+        dateMap[groupKey] = dateStr;
       }
     });
-    // 按周几顺序排序，以当天为起点
+
+    // 周几顺序（从当天开始排列）
     const fullWeekOrder = [
-      "周一",
-      "周二",
-      "周三",
-      "周四",
-      "周五",
-      "周六",
-      "周日",
+      "周一", "周二", "周三", "周四", "周五", "周六", "周日",
     ];
-    const today = new Date();
-    const todayWeekday = today.getDay(); // 0(周日) ~ 6(周一)
-
-    // 转换为中文周几（1-7: 周一-周日，0也是周一）
-    const weekdayIndex = todayWeekday === 0 ? 6 : todayWeekday - 1; // 0-6: 周一-周日
-
-    // 从当天开始的周顺序
+    const weekdayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     const weekOrder = [
       ...fullWeekOrder.slice(weekdayIndex),
       ...fullWeekOrder.slice(0, weekdayIndex),
       "其他",
     ];
 
-    return Object.keys(groups)
-      .sort((a, b) => weekOrder.indexOf(a) - weekOrder.indexOf(b))
-      .map((weekday) => ({
-        league: weekday,
-        date: dateMap[weekday] || "",
-        matches: groups[weekday].sort((a, b) => a.matchNum - b.matchNum),
-      }));
+    // 拆分为本周组和非本周组
+    const currentWeekKeys = Object.keys(groups).filter(
+      (k) => groupMeta[k].isCurrentWeek
+    );
+    const nonCurrentWeekKeys = Object.keys(groups).filter(
+      (k) => !groupMeta[k].isCurrentWeek
+    );
+
+    // 本周按周几顺序排
+    currentWeekKeys.sort(
+      (a, b) => weekOrder.indexOf(groupMeta[a].weekday) - weekOrder.indexOf(groupMeta[b].weekday)
+    );
+
+    // 非本周按日期排
+    nonCurrentWeekKeys.sort((a, b) => {
+      const da = groups[a][0]?.matchDate || "";
+      const db = groups[b][0]?.matchDate || "";
+      return da.localeCompare(db);
+    });
+
+    const sortedKeys = [...currentWeekKeys, ...nonCurrentWeekKeys];
+
+    return sortedKeys.map((key) => ({
+      _key: key,
+      league: groupMeta[key].weekday,
+      date: dateMap[key] || "",
+      matches: groups[key].sort((a, b) => a.matchNum - b.matchNum),
+    }));
   },
 
   // 检查VIP状态并刷新前端缓存
