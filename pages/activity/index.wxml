@@ -117,7 +117,7 @@
             <text class="reward-text">完成可得 <text class="reward-value">{{item.groupSize}}</text> 积分</text>
           </view>
           <view class="footer-right">
-            <text class="status-badge {{item.status === 0 ? 'ongoing' : 'finished'}}">
+            <text class="status-badge {{item.statusClass}}">
               {{item.statusDesc}}
             </text>
           </view>

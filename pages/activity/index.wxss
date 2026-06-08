@@ -1,7 +1,7 @@
-/* pages/activity/index.wxss - 活动中心 */
+/* pages/activity/index.wxss - 拼团列表 - 暖色主题 */
 .activity-page {
   height: 100vh;
-  background: linear-gradient(180deg, #f8f9fb 0%, #f5f7fa 100%);
+  background: linear-gradient(180deg, #FFF5EB 0%, #FFF0E0 100%);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -18,8 +18,8 @@
 .loading-spinner {
   width: 60rpx;
   height: 60rpx;
-  border: 4rpx solid #f0f0f0;
-  border-top-color: #667eea;
+  border: 4rpx solid #F5E6D8;
+  border-top-color: #FF8C42;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -29,13 +29,13 @@
 .loading-text, .error-text {
   margin-top: 20rpx;
   font-size: 26rpx;
-  color: #666;
+  color: #999;
 }
 
 .retry-btn {
   margin-top: 24rpx;
   padding: 16rpx 48rpx;
-  background: #667eea;
+  background: linear-gradient(135deg, #FF8C42, #FF6B35);
   color: #fff;
   border-radius: 32rpx;
   font-size: 26rpx;
@@ -50,10 +50,10 @@
 
 /* 页面头部 */
 .page-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
   padding: 32rpx 24rpx;
   color: #fff;
-  box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.2);
+  box-shadow: 0 4rpx 16rpx rgba(255, 107, 53, 0.25);
 }
 
 .header-content {
@@ -79,7 +79,7 @@
 
 .page-desc {
   font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   font-weight: 400;
 }
 
@@ -87,7 +87,7 @@
   flex-shrink: 0;
   width: 120rpx;
   padding: 12rpx 16rpx;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.22);
   border: none;
   border-radius: 24rpx;
   display: flex;
@@ -115,7 +115,7 @@
 .tabs {
   display: flex;
   background: #fff;
-  border-bottom: 1rpx solid #f0f0f0;
+  border-bottom: 1rpx solid #F5F0EB;
 }
 
 .tab-item {
@@ -127,17 +127,17 @@
 }
 
 .tab-item.active {
-  border-bottom-color: #667eea;
+  border-bottom-color: #FF6B35;
 }
 
 .tab-label {
   font-size: 28rpx;
-  color: #666;
+  color: #999;
   font-weight: 600;
 }
 
 .tab-item.active .tab-label {
-  color: #667eea;
+  color: #FF6B35;
 }
 
 /* 空状态 */
@@ -153,19 +153,19 @@
 .empty-icon {
   font-size: 120rpx;
   margin-bottom: 24rpx;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 .empty-text {
   font-size: 32rpx;
-  color: #666;
+  color: #999;
   font-weight: 600;
   margin-bottom: 12rpx;
 }
 
 .empty-tip {
   font-size: 26rpx;
-  color: #999;
+  color: #BBB;
   text-align: center;
 }
 
@@ -183,15 +183,30 @@
   border-radius: 24rpx;
   padding: 24rpx;
   margin-bottom: 20rpx;
-  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.12);
+  box-shadow: 0 4rpx 20rpx rgba(255, 140, 66, 0.08);
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   overflow: hidden;
 }
 
+.group-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6rpx;
+  background: linear-gradient(90deg, #FF8C42, #FF6B35, #FF8C42);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
 
 .group-card:active {
   transform: translateY(-4rpx) scale(1.01);
-  box-shadow: 0 16rpx 40rpx rgba(102, 126, 234, 0.2);
+  box-shadow: 0 12rpx 36rpx rgba(255, 107, 53, 0.15);
+}
+
+.group-card:active::before {
+  opacity: 1;
 }
 
 /* 状态标签 */
@@ -200,19 +215,19 @@
   top: 24rpx;
   right: 24rpx;
   padding: 8rpx 16rpx;
-  background: #f0f0f0;
+  background: #F5F0EB;
   border-radius: 16rpx;
   font-size: 18rpx;
 }
 
 .group-status.leader {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.1) 100%);
-  border: 1rpx solid rgba(102, 126, 234, 0.3);
+  background: rgba(255, 140, 66, 0.1);
+  border: 1rpx solid rgba(255, 107, 53, 0.25);
 }
 
 .group-status.joined {
-  background: linear-gradient(135deg, rgba(82, 196, 26, 0.15) 0%, rgba(133, 206, 97, 0.1) 100%);
-  border: 1rpx solid rgba(82, 196, 26, 0.3);
+  background: rgba(82, 196, 26, 0.1);
+  border: 1rpx solid rgba(82, 196, 26, 0.25);
 }
 
 .status-text {
@@ -222,7 +237,7 @@
 }
 
 .group-status.leader .status-text {
-  color: #667eea;
+  color: #FF6B35;
 }
 
 .group-status.joined .status-text {
@@ -237,7 +252,7 @@
   margin-bottom: 16rpx;
   gap: 12rpx;
   padding-bottom: 16rpx;
-  border-bottom: 1rpx solid #f5f5f5;
+  border-bottom: 1rpx solid #F5F0EB;
 }
 
 .leader-info {
@@ -250,7 +265,7 @@
 .leader-avatar-wrapper {
   width: 48rpx;
   height: 48rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
   border-radius: 12rpx;
   display: flex;
   align-items: center;
@@ -286,9 +301,9 @@
 
 .title-text {
   font-size: 22rpx;
-  color: #667eea;
+  color: #FF6B35;
   font-weight: 600;
-  background: rgba(102, 126, 234, 0.1);
+  background: rgba(255, 140, 66, 0.1);
   padding: 6rpx 12rpx;
   border-radius: 12rpx;
 }
@@ -297,13 +312,13 @@
 .progress-section {
   margin-bottom: 16rpx;
   padding: 12rpx;
-  background: #f9f9f9;
+  background: #FDF8F3;
   border-radius: 12rpx;
 }
 
 .progress-bar {
   height: 10rpx;
-  background: #e8e8e8;
+  background: #F0E6DC;
   border-radius: 5rpx;
   overflow: hidden;
   margin-bottom: 8rpx;
@@ -311,9 +326,9 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #52c41a 0%, #85ce61 100%);
+  background: linear-gradient(90deg, #FF8C42, #FF6B35);
   transition: width 0.3s ease;
-  box-shadow: 0 2rpx 8rpx rgba(82, 196, 26, 0.3);
+  box-shadow: 0 2rpx 8rpx rgba(255, 107, 53, 0.3);
 }
 
 .progress-text {
@@ -329,14 +344,14 @@
   gap: 16rpx;
   margin-bottom: 16rpx;
   padding: 16rpx;
-  background: linear-gradient(135deg, #f9f9fb 0%, #f5f7fa 100%);
+  background: linear-gradient(135deg, #FFFBF7 0%, #FFF5EB 100%);
   border-radius: 16rpx;
-  border: 1rpx solid #f0f0f0;
+  border: 1rpx solid #F5F0EB;
 }
 
 .members-label {
   font-size: 20rpx;
-  color: #666;
+  color: #999;
   font-weight: 600;
   flex-shrink: 0;
   letter-spacing: 0.5rpx;
@@ -353,7 +368,7 @@
 .member-avatar {
   width: 40rpx;
   height: 40rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -362,14 +377,14 @@
   font-size: 16rpx;
   font-weight: 700;
   flex-shrink: 0;
-  box-shadow: 0 2rpx 8rpx rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2rpx 8rpx rgba(255, 107, 53, 0.3);
 }
 
 .member-empty {
   width: 40rpx;
   height: 40rpx;
-  background: linear-gradient(135deg, #f0f0f0 0%, #e8e8e8 100%);
-  border: 2rpx dashed #d9d9d9;
+  background: #F5F0EB;
+  border: 2rpx dashed #DDD5CC;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -379,7 +394,7 @@
 
 .plus-icon {
   font-size: 16rpx;
-  color: #ccc;
+  color: #CCC;
   font-weight: 700;
 }
 
@@ -390,9 +405,9 @@
   align-items: center;
   margin-top: 16rpx;
   padding: 16rpx;
-  background: linear-gradient(135deg, rgba(255, 107, 107, 0.08) 0%, rgba(255, 152, 0, 0.04) 100%);
+  background: linear-gradient(135deg, rgba(255, 140, 66, 0.06) 0%, rgba(255, 107, 53, 0.03) 100%);
   border-radius: 16rpx;
-  border: 1rpx solid rgba(255, 107, 107, 0.1);
+  border: 1rpx solid rgba(255, 107, 53, 0.08);
 }
 
 .footer-left {
@@ -407,7 +422,7 @@
 }
 
 .reward-value {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ff8c8c 100%);
+  background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -425,19 +440,24 @@
   font-size: 16rpx;
   padding: 4rpx 12rpx;
   border-radius: 12rpx;
-  background: #f0f0f0;
-  color: #999;
+  background: #F5F0EB;
+  color: #BBB;
   font-weight: 600;
 }
 
 .status-badge.ongoing {
-  background: rgba(82, 196, 26, 0.15);
+  background: rgba(82, 196, 26, 0.12);
   color: #52c41a;
 }
 
-.status-badge.finished {
-  background: rgba(200, 200, 200, 0.2);
-  color: #999;
+.status-badge.success {
+  background: rgba(82, 196, 26, 0.12);
+  color: #52c41a;
+}
+
+.status-badge.expired {
+  background: rgba(245, 34, 45, 0.1);
+  color: #f5222d;
 }
 
 /* 加入按钮覆盖层 */
@@ -457,7 +477,7 @@
 
 .join-btn {
   padding: 16rpx 32rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FF8C42, #FF6B35);
   color: #fff;
   border-radius: 24rpx;
   font-size: 28rpx;
@@ -495,7 +515,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 28rpx 32rpx;
-  border-bottom: 1rpx solid #f5f5f5;
+  border-bottom: 1rpx solid #F5F0EB;
 }
 
 .modal-title {
@@ -511,7 +531,7 @@
   align-items: center;
   justify-content: center;
   font-size: 40rpx;
-  color: #999;
+  color: #BBB;
 }
 
 .modal-body {
@@ -544,7 +564,7 @@
   justify-content: center;
   gap: 6rpx;
   padding: 20rpx 16rpx;
-  background: #f5f5f5;
+  background: #F5F0EB;
   border: 2rpx solid transparent;
   border-radius: 16rpx;
   text-align: center;
@@ -559,7 +579,7 @@
 
 .size-unit {
   font-size: 18rpx;
-  color: #999;
+  color: #BBB;
   font-weight: 500;
 }
 
@@ -571,25 +591,25 @@
 }
 
 .size-btn.active {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%);
-  border-color: #667eea;
+  background: rgba(255, 140, 66, 0.1);
+  border-color: #FF6B35;
 }
 
 .size-btn.active .size-number {
-  color: #667eea;
+  color: #FF6B35;
 }
 
 .size-btn.active .size-unit {
-  color: #667eea;
+  color: #FF6B35;
 }
 
 .size-btn.active .size-reward {
-  color: #ff6b6b;
+  color: #FF6B35;
 }
 
 .modal-info {
   padding: 20rpx;
-  background: #f9f9f9;
+  background: #FDF8F3;
   border-radius: 12rpx;
 }
 
@@ -609,13 +629,13 @@
 
 .info-item {
   font-size: 20rpx;
-  color: #666;
+  color: #888;
   line-height: 1.5;
 }
 
 .modal-footer {
   display: flex;
-  border-top: 1rpx solid #f5f5f5;
+  border-top: 1rpx solid #F5F0EB;
 }
 
 .modal-btn {
@@ -628,18 +648,18 @@
 }
 
 .modal-btn.cancel {
-  color: #666;
-  border-right: 1rpx solid #f5f5f5;
+  color: #999;
+  border-right: 1rpx solid #F5F0EB;
 }
 
 .modal-btn.confirm {
-  color: #667eea;
+  color: #FF6B35;
 }
 
 .modal-btn.confirm.loading {
-  color: #999;
+  color: #BBB;
 }
 
 .modal-btn:active {
-  background: #f9f9f9;
+  background: #FDF8F3;
 }

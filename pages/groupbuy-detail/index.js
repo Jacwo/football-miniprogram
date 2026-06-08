@@ -14,7 +14,13 @@ Page({
     isJoined: false,
     canJoin: false,
     remainingTime: '',
-    isCompleted: false
+    countdownParts: ['00', '00', '00'],
+    isCompleted: false,
+    isExpired: false,
+    slotList: [],
+    progressPercent: 0,
+    hotGroups: [],
+    hotActiveIndex: 0
   },
 
   onLoad(options) {
@@ -57,18 +63,41 @@ Page({
       // 检查拼团是否已完成
       const isCompleted = group.currentSize >= group.groupSize
 
+      // 检测团是否已过期
+      let isExpired = false
+      if (group.expireTime) {
+        let expireTime = typeof group.expireTime === 'number'
+          ? group.expireTime
+          : new Date(group.expireTime).getTime()
+        if (expireTime < 10000000000) {
+          expireTime = expireTime * 1000
+        }
+        isExpired = Date.now() >= expireTime
+      }
+      // 服务端状态也可能标记已过期
+      if (group.status !== undefined && group.status !== 0) {
+        isExpired = true
+      }
+
       this.setData({
         group,
         isLeader,
         isJoined,
         canJoin,
         isCompleted,
-        remainingTime: '',
-        loading: false
+        isExpired,
+        remainingTime: isExpired ? '已过期' : '',
+        countdownParts: ['00', '00', '00'],
+        loading: false,
+        slotList: Array.from({ length: group.groupSize }, (_, i) => i),
+        progressPercent: Math.round((group.currentSize / group.groupSize) * 100)
       })
 
       // 启动倒计时
       this.startCountdown()
+
+      // 加载热门拼团
+      this.loadHotGroups()
     } catch (err) {
       console.error('加载拼团详情失败:', err)
       this.setData({
@@ -159,7 +188,7 @@ Page({
 
         if (remaining <= 0) {
           clearInterval(this._countdownTimer)
-          this.setData({ remainingTime: '已过期' })
+          this.setData({ remainingTime: '已过期', countdownParts: ['00', '00', '00'] })
           return
         }
 
@@ -167,8 +196,10 @@ Page({
         const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
         const seconds = Math.floor((remaining % (1000 * 60)) / 1000)
 
+        const pad = n => String(n).padStart(2, '0')
         this.setData({
-          remainingTime: `${hours}时${minutes}分${seconds}秒`
+          remainingTime: `${hours}时${minutes}分${seconds}秒`,
+          countdownParts: [pad(hours), pad(minutes), pad(seconds)]
         })
       } catch (err) {
         console.error('倒计时计算失败:', err, group.expireTime)
@@ -259,6 +290,35 @@ Page({
     return {
       title: `快来加入${group.leaderName}的${group.groupSize}人拼团，完成可获得${group.groupSize}积分！`,
       path: `/pages/groupbuy-detail/index?id=${group.id}`
+    }
+  },
+
+  // 加载热门拼团
+  async loadHotGroups() {
+    try {
+      const result = await groupbuyApi.getHotGroups()
+      if (result && result.data && Array.isArray(result.data)) {
+        this.setData({
+          hotGroups: result.data,
+          hotActiveIndex: 0
+        })
+      }
+    } catch (err) {
+      // 静默失败，不影响主流程
+      console.log('加载热门拼团失败:', err)
+    }
+  },
+
+  // 切换热门拼团标签
+  onSwitchHot(e) {
+    const index = e.currentTarget.dataset.index
+    this.setData({ hotActiveIndex: index })
+  },
+
+  onShow() {
+    // 分享入口进入后登录，自动重新加载
+    if (this.data.error && this.data.groupId) {
+      this.loadGroupDetail(this.data.groupId)
     }
   },
 

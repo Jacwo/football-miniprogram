@@ -80,5 +80,41 @@
 
     <!-- 分隔线 -->
     <view wx:elif="{{item.type === 'hr'}}" class="md-hr"></view>
+
+    <!-- 表格 -->
+    <view wx:elif="{{item.type === 'table'}}" class="md-table-wrap">
+      <scroll-view class="md-table-scroll" scroll-x="true" enhanced="true" show-scrollbar="false">
+        <view class="md-table">
+          <!-- 表头 -->
+          <view class="md-thead">
+            <view class="md-tr">
+              <view class="md-th" wx:for="{{item.header}}" wx:for-item="cell" wx:key="index">
+                <block wx:for="{{cell.children}}" wx:for-item="child" wx:key="index">
+                  <text wx:if="{{child.type === 'text'}}" selectable="{{selectable}}">{{child.text}}</text>
+                  <text wx:elif="{{child.type === 'strong'}}" class="md-strong" selectable="{{selectable}}">{{child.text}}</text>
+                  <text wx:elif="{{child.type === 'em'}}" class="md-em" selectable="{{selectable}}">{{child.text}}</text>
+                  <text wx:elif="{{child.type === 'code-inline'}}" class="md-code-inline" selectable="{{selectable}}">{{child.text}}</text>
+                  <text wx:elif="{{child.type === 'link'}}" class="md-link" data-url="{{child.url}}" bindtap="onLinkTap">{{child.text}}</text>
+                </block>
+              </view>
+            </view>
+          </view>
+          <!-- 表体 -->
+          <view class="md-tbody">
+            <view class="md-tr" wx:for="{{item.rows}}" wx:for-item="row" wx:key="index">
+              <view class="md-td" wx:for="{{row}}" wx:for-item="cell" wx:key="index">
+                <block wx:for="{{cell.children}}" wx:for-item="child" wx:key="index">
+                  <text wx:if="{{child.type === 'text'}}" selectable="{{selectable}}">{{child.text}}</text>
+                  <text wx:elif="{{child.type === 'strong'}}" class="md-strong" selectable="{{selectable}}">{{child.text}}</text>
+                  <text wx:elif="{{child.type === 'em'}}" class="md-em" selectable="{{selectable}}">{{child.text}}</text>
+                  <text wx:elif="{{child.type === 'code-inline'}}" class="md-code-inline" selectable="{{selectable}}">{{child.text}}</text>
+                  <text wx:elif="{{child.type === 'link'}}" class="md-link" data-url="{{child.url}}" bindtap="onLinkTap">{{child.text}}</text>
+                </block>
+              </view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
   </block>
 </view>

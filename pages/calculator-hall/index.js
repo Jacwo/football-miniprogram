@@ -25,6 +25,9 @@ Page({
     // 功能开关
     showDragon: false, // 是否显示斩龙按钮
     statusBarHeight: 0, // 状态栏高度
+    // 勋章介绍弹窗
+    showMedalPopup: false,
+    currentMedal: null,
 
     // 数据发现相关
     leagues: [], // 联赛列表
@@ -265,6 +268,7 @@ Page({
               ...topMedal,
               icon: this.getMedalIcon(topMedal.level),
               colorClass: this.getMedalColorClass(topMedal.level),
+              levelBadge: this.getMedalLevelName(topMedal.level),
             }
           : null;
       } catch (e) {
@@ -302,6 +306,34 @@ Page({
       7: "medal-rainbow",
     };
     return colorMap[level] || "medal-default";
+  },
+
+  // 获取勋章等级中文名
+  getMedalLevelName(level) {
+    const nameMap = {
+      1: "一级",
+      2: "二级",
+      3: "三级",
+      4: "四级",
+      5: "五级",
+      6: "六级",
+      7: "七级",
+    };
+    return nameMap[level] || "";
+  },
+
+  // 获取勋章角标颜色样式
+  getMedalBadgeClass(level) {
+    const classMap = {
+      1: "badge-level-1",
+      2: "badge-level-2",
+      3: "badge-level-3",
+      4: "badge-level-4",
+      5: "badge-level-5",
+      6: "badge-level-6",
+      7: "badge-level-7",
+    };
+    return classMap[level] || "badge-default";
   },
 
   // 计算胜率
@@ -799,4 +831,29 @@ Page({
       otherLeaguesExpanded: !this.data.otherLeaguesExpanded,
     });
   },
+
+  // 点击勋章图标显示介绍
+  onMedalTap(e) {
+    const medal = e.currentTarget.dataset.medal;
+    if (!medal) return;
+    this.setData({
+      showMedalPopup: true,
+      currentMedal: {
+        ...medal,
+        badgeText: 'Lv.' + medal.level,
+        badgeClass: this.getMedalBadgeClass(medal.level),
+      },
+    });
+  },
+
+  // 关闭勋章弹窗
+  onCloseMedalPopup() {
+    this.setData({
+      showMedalPopup: false,
+      currentMedal: null,
+    });
+  },
+
+  preventTap() {},
+
 });

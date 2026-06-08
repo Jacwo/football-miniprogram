@@ -87,6 +87,30 @@ module.exports = {
       </view>
       <view class="benefit-item">
         <view class="benefit-icon-wrapper">
+          <text class="benefit-icon">🤖</text>
+        </view>
+        <view class="benefit-info">
+          <view class="benefit-name-row">
+            <text class="benefit-name">AI智能问答</text>
+            <text class="benefit-free-tag">限时免费</text>
+          </view>
+          <text class="benefit-desc">AI足球专家在线解答</text>
+        </view>
+      </view>
+      <view class="benefit-item">
+        <view class="benefit-icon-wrapper">
+          <text class="benefit-icon">🧠</text>
+        </view>
+        <view class="benefit-info">
+          <view class="benefit-name-row">
+            <text class="benefit-name">自定义智能体</text>
+            <text class="benefit-free-tag">限时免费</text>
+          </view>
+          <text class="benefit-desc">创建专属AI分析助手</text>
+        </view>
+      </view>
+      <view class="benefit-item">
+        <view class="benefit-icon-wrapper">
           <text class="benefit-icon">🎁</text>
         </view>
         <view class="benefit-info">

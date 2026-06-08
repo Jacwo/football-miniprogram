@@ -20,11 +20,23 @@ function preprocessMarkdown(md) {
 
   let text = md
 
-  // 1) 连续三个 - 当作分隔线：前后补换行
-  text = text.replace(/([^\n])---/g, '$1\n\n---\n\n')
+  // 1) 连续三个 - 当作分隔线：逐行处理，跳过表格行（避免破坏 |---|---|）
+  const lines = text.split('\n')
+  text = lines.map(line => {
+    const trimmed = line.trim()
+    // 跳过表格行（以 | 开头）—— 不修改
+    if (trimmed.startsWith('|')) return line
+    // 已经是纯分隔线（---开头或整个就是---）→ 保持不变
+    if (/^-{3,}\s*$/.test(trimmed)) return '\n---\n'
+    // 行尾紧跟 --- 不是分隔线的情况也跳过
+    return line
+  }).join('\n')
+  // 再处理非表格的连续 --- 情况：某段文本后紧跟---
+  // 排除 | (表分隔符) 和 : (表对齐符号) 前缀，避免破坏表格行
+  text = text.replace(/([^\n|:])---/g, '$1\n\n---')
   text = text.replace(/^---/gm, '\n---\n')
 
-  // 2) ### 后紧跟数字（###1. / ###2. 等）→ 补空间并确保在新行起头
+  // 2) ### 后紧跟数字（###1. / ###2. 等）→ 补空格并确保在新行起头
   text = text.replace(/([^\n])###(\d+[.．、])/g, '$1\n\n### $2')
   text = text.replace(/^###(\d+[.．、])/gm, '### $1')
 
@@ -103,10 +115,19 @@ function convertBlockTokens(tokens) {
         break
 
       case 'table':
-        // 表格降级为纯文本段落
+        // marked v2.1.3: inline tokens 在 token.tokens.header[] 和 token.tokens.cells[][] 中
+        // token.header / token.cells 是纯字符串数组，不含 tokens
         nodes.push({
-          type: 'paragraph',
-          children: [{ type: 'text', text: token.raw }]
+          type: 'table',
+          header: (token.tokens && token.tokens.header
+            ? token.tokens.header.map(t => ({ children: convertInlineTokens(t) }))
+            : (token.header || []).map(t => ({ children: [{ type: 'text', text: t || '' }] }))
+          ),
+          rows: (token.tokens && token.tokens.cells
+            ? token.tokens.cells.map(row => row.map(t => ({ children: convertInlineTokens(t) })))
+            : (token.cells || []).map(row => (row || []).map(t => ({ children: [{ type: 'text', text: t || '' }] })))
+          ),
+          align: token.align || []
         })
         break
 
@@ -274,7 +295,7 @@ function flattenListItemTokens(tokens) {
   return children.length ? children : [{ type: 'text', text: '' }]
 }
 
-// ========== 以下为 rich-text 转换（保持不变） ==========
+// ========== 以下为 rich-text 转换 ==========
 
 /**
  * 将节点数组转换为 rich-text 可用的节点格式
@@ -348,6 +369,36 @@ function toRichTextNodes(nodes) {
           attrs: {
             class: 'md-hr'
           }
+        }
+
+      case 'table':
+        return {
+          name: 'table',
+          attrs: {
+            class: 'md-table'
+          },
+          children: [
+            {
+              name: 'thead',
+              children: [{
+                name: 'tr',
+                children: node.header.map(cell => ({
+                  name: 'th',
+                  children: inlineToRichText(cell.children)
+                }))
+              }]
+            },
+            {
+              name: 'tbody',
+              children: node.rows.map(row => ({
+                name: 'tr',
+                children: row.map(cell => ({
+                  name: 'td',
+                  children: inlineToRichText(cell.children)
+                }))
+              }))
+            }
+          ]
         }
 
       default:

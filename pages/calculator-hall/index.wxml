@@ -66,7 +66,7 @@
             <view class="rank-user">
               <view class="rank-name-row">
                 <text class="rank-name">{{item.userName}}</text>
-                <view class="rank-medal-icon {{item.topMedal.colorClass}}" wx:if="{{item.topMedal}}">
+                <view class="rank-medal-icon {{item.topMedal.colorClass}}" wx:if="{{item.topMedal}}" catchtap="onMedalTap" data-medal="{{item.topMedal}}">
                   <text>{{item.topMedal.icon}}</text>
                 </view>
               </view>
@@ -95,7 +95,7 @@
             <view class="rank-user">
               <view class="rank-name-row">
                 <text class="rank-name">{{item.userName}}</text>
-                <view class="rank-medal-icon {{item.topMedal.colorClass}}" wx:if="{{item.topMedal}}">
+                <view class="rank-medal-icon {{item.topMedal.colorClass}}" wx:if="{{item.topMedal}}" catchtap="onMedalTap" data-medal="{{item.topMedal}}">
                   <text>{{item.topMedal.icon}}</text>
                 </view>
               </view>
@@ -132,7 +132,7 @@
                 <view class="user-name-medals">
                   <text class="user-name">{{item.userStats.userName}}</text>
                   <!-- 最高等级勋章 -->
-                  <view class="user-medal-item {{item.userStats.topMedal.colorClass}}" wx:if="{{item.userStats.topMedal}}">
+                  <view class="user-medal-item {{item.userStats.topMedal.colorClass}}" wx:if="{{item.userStats.topMedal}}" catchtap="onMedalTap" data-medal="{{item.userStats.topMedal}}">
                     <text class="medal-icon">{{item.userStats.topMedal.icon}}</text>
                   </view>
                 </view>
@@ -307,5 +307,18 @@
       <!-- 底部安全区域 -->
       <view class="safe-bottom"></view>
     </scroll-view>
+  </view>
+
+  <!-- 勋章介绍弹窗 -->
+  <view class="medal-info-mask" wx:if="{{showMedalPopup}}" catchtap="onCloseMedalPopup">
+    <view class="medal-info-popup" catchtap="preventTap">
+      <view class="medal-info-icon">{{currentMedal.icon}}</view>
+      <view class="medal-info-title-row">
+        <text class="medal-info-badge {{currentMedal.badgeClass}}">{{currentMedal.badgeText}}</text>
+        <text class="medal-info-name">{{currentMedal.medalName || '勋章'}}</text>
+      </view>
+      <text class="medal-info-desc">{{currentMedal.medalMeaning || ''}}</text>
+      <view class="medal-info-close" catchtap="onCloseMedalPopup">知道了</view>
+    </view>
   </view>
 </view>

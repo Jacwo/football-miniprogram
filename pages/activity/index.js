@@ -28,6 +28,11 @@ Page({
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 4 })
     }
+    // 分享入口进入后登录，自动重新加载
+    const userInfo = userStore.getUserInfo()
+    if (userInfo && userInfo.id && (!this.data.groups || this.data.groups.length === 0 || this.data.error)) {
+      this.loadGroups()
+    }
   },
 
   // 加载拼团列表
@@ -86,12 +91,48 @@ Page({
     }
 
     // 添加其他信息
-    displayGroups = displayGroups.map(g => ({
-      ...g,
-      isLeader: g.leaderId === (userInfo && userInfo.id),
-      progressPercent: Math.round((g.currentSize / g.groupSize) * 100),
-      remainMembers: g.groupSize - g.currentSize
-    }))
+    displayGroups = displayGroups.map(g => {
+      // 检测是否已过期
+      let isExpired = false
+      if (g.expireTime) {
+        let expireTime = typeof g.expireTime === 'number'
+          ? g.expireTime
+          : new Date(g.expireTime).getTime()
+        if (expireTime < 10000000000) {
+          expireTime = expireTime * 1000
+        }
+        isExpired = Date.now() >= expireTime
+      }
+      if (g.status !== undefined && g.status !== 0) {
+        isExpired = true
+      }
+
+      // 计算状态文案
+      const isCompleted = g.currentSize >= g.groupSize
+      let statusDesc = g.statusDesc || ''
+      let statusClass = 'ongoing'
+      if (isCompleted) {
+        statusDesc = '拼团成功'
+        statusClass = 'success'
+      } else if (isExpired) {
+        statusDesc = '已过期'
+        statusClass = 'expired'
+      } else {
+        statusDesc = statusDesc || '进行中'
+        statusClass = 'ongoing'
+      }
+
+      return {
+        ...g,
+        isLeader: g.leaderId === (userInfo && userInfo.id),
+        progressPercent: Math.round((g.currentSize / g.groupSize) * 100),
+        remainMembers: g.groupSize - g.currentSize,
+        isExpired,
+        isCompleted,
+        statusDesc,
+        statusClass
+      }
+    })
 
     this.setData({
       displayGroups

@@ -12,6 +12,10 @@
       <view class="info">
         <view class="name-row">
           <text class="name">{{userInfo.userName || '用户'}}</text>
+          <!-- 首次改名奖励 -->
+          <view class="rename-badge" wx:if="{{userInfo.hasRenamed === false}}">
+            <text>✏️ 改名送3积分</text>
+          </view>
           <!-- VIP图标 -->
           <view class="vip-badge" wx:if="{{userInfo.isVip}}" catchtap="onVipBadgeTap">
             <view class="vip-diamond"></view>

@@ -159,7 +159,8 @@
   width: 48rpx;
   height: 48rpx;
   border-radius: 50%;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.2);
+  background: transparent;
+  box-shadow: none;
 }
 
 .top-medal-icon {
@@ -944,6 +945,7 @@
   align-items: center;
   justify-content: center;
   font-size: 22rpx;
+  background: transparent;
 }
 
 .medal-entry-arrow {
@@ -967,7 +969,7 @@
 .medal-popup-container {
   width: 100%;
   height: 75vh;
-  background: linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%);
+  background: linear-gradient(180deg, #FFF5EB 0%, #ffffff 100%);
   border-radius: 40rpx 40rpx 0 0;
   display: flex;
   flex-direction: column;
@@ -978,7 +980,7 @@
 .medal-popup-header {
   position: relative;
   padding: 32rpx 32rpx 24rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
 }
 
 .medal-popup-close {
@@ -1061,13 +1063,13 @@
 .medal-grid-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 20rpx;
+  justify-content: space-between;
 }
 
 /* 勋章网格项 */
 .medal-grid-item {
   position: relative;
-  width: calc(50% - 10rpx);
+  width: calc(50% - 12rpx);
   padding: 28rpx 20rpx;
   background: #fff;
   border-radius: 20rpx;
@@ -1077,6 +1079,7 @@
   align-items: center;
   transition: all 0.3s;
   box-sizing: border-box;
+  margin-bottom: 24rpx;
 }
 
 .medal-grid-item:active {
@@ -1097,34 +1100,29 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 16rpx;
-  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.15);
+  background: transparent;
+  box-shadow: none;
 }
 
 .medal-icon-text {
-  font-size: 52rpx;
+  font-size: 64rpx;
   z-index: 1;
 }
 
 /* 闪光效果 */
 .medal-shine {
-  position: absolute;
-  top: 8rpx;
-  left: 8rpx;
-  width: 24rpx;
-  height: 24rpx;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 50%;
+  display: none;
 }
 
 /* 锁定状态 */
 .medal-grid-item.locked .medal-icon-box {
-  background: #e0e0e0 !important;
+  background: transparent !important;
   box-shadow: none;
 }
 
 .medal-grid-item.locked .medal-icon-text {
   filter: grayscale(100%);
-  opacity: 0.4;
+  opacity: 0.3;
 }
 
 /* 状态标签 */
@@ -1283,7 +1281,7 @@
 
 /* 百元 - 绿色系 */
 .medal-green {
-  background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+  background: transparent;
 }
 .medal-item.medal-green {
   background: linear-gradient(135deg, rgba(86, 171, 47, 0.15) 0%, rgba(168, 224, 99, 0.15) 100%);
@@ -1298,7 +1296,7 @@
 
 /* 千元 - 蓝色系 */
 .medal-blue {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: transparent;
 }
 .medal-item.medal-blue {
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
@@ -1308,12 +1306,12 @@
   color: #667eea;
 }
 .worn-medal-item.medal-blue {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: transparent;
 }
 
 /* 1万 - 紫色系 */
 .medal-purple {
-  background: linear-gradient(135deg, #9d50bb 0%, #6e48aa 100%);
+  background: transparent;
 }
 .medal-item.medal-purple {
   background: linear-gradient(135deg, rgba(157, 80, 187, 0.15) 0%, rgba(110, 72, 170, 0.15) 100%);
@@ -1328,7 +1326,7 @@
 
 /* 2万 - 粉色系 */
 .medal-pink {
-  background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%);
+  background: transparent;
 }
 .medal-item.medal-pink {
   background: linear-gradient(135deg, rgba(248, 87, 166, 0.15) 0%, rgba(255, 88, 88, 0.15) 100%);
@@ -1343,7 +1341,7 @@
 
 /* 3万 - 橙色系 */
 .medal-orange {
-  background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+  background: transparent;
 }
 .medal-item.medal-orange {
   background: linear-gradient(135deg, rgba(247, 151, 30, 0.15) 0%, rgba(255, 210, 0, 0.15) 100%);
@@ -1358,8 +1356,8 @@
 
 /* 5万 - 金色系 */
 .medal-gold {
-  background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
-  box-shadow: 0 4rpx 16rpx rgba(242, 153, 74, 0.3);
+  background: transparent;
+  box-shadow: none;
 }
 .medal-item.medal-gold {
   background: linear-gradient(135deg, rgba(242, 153, 74, 0.2) 0%, rgba(242, 201, 76, 0.2) 100%);
@@ -1375,8 +1373,8 @@
 
 /* 10万 - 彩虹/红金 */
 .medal-rainbow {
-  background: linear-gradient(135deg, #eb3349 0%, #f45c43 50%, #ffd700 100%);
-  box-shadow: 0 6rpx 20rpx rgba(235, 51, 73, 0.35);
+  background: transparent;
+  box-shadow: none;
 }
 .medal-item.medal-rainbow {
   background: linear-gradient(135deg, rgba(235, 51, 73, 0.15) 0%, rgba(244, 92, 67, 0.15) 50%, rgba(255, 215, 0, 0.15) 100%);
@@ -1392,7 +1390,7 @@
 
 /* 默认勋章样式 */
 .medal-default {
-  background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+  background: transparent;
 }
 .medal-item.medal-default {
   background: rgba(189, 195, 199, 0.15);
@@ -1402,33 +1400,33 @@
   background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
 }
 
-/* 勋章图标颜色 - 弹窗内 */
+/* 勋章图标颜色 - 弹窗内（无背景） */
 .medal-icon-box.medal-green {
-  background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+  background: transparent;
 }
 .medal-icon-box.medal-blue {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: transparent;
 }
 .medal-icon-box.medal-purple {
-  background: linear-gradient(135deg, #9d50bb 0%, #6e48aa 100%);
+  background: transparent;
 }
 .medal-icon-box.medal-pink {
-  background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%);
+  background: transparent;
 }
 .medal-icon-box.medal-orange {
-  background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+  background: transparent;
 }
 .medal-icon-box.medal-gold {
-  background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
+  background: transparent;
 }
 .medal-icon-box.medal-rainbow {
-  background: linear-gradient(135deg, #eb3349 0%, #f45c43 50%, #ffd700 100%);
+  background: transparent;
 }
 .medal-icon-box.medal-default {
-  background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+  background: transparent;
 }
 .medal-icon-box.medal-locked {
-  background: #e0e0e0;
+  background: transparent;
 }
 
 /* 拼团活动 */
@@ -1565,6 +1563,20 @@
 .popup-tip .highlight {
   color: #fa8c16;
   font-weight: 600;
+}
+
+.rename-badge {
+  display: flex;
+  align-items: center;
+  height: 36rpx;
+  line-height: 36rpx;
+  padding: 0 12rpx;
+  background: linear-gradient(135deg, #FFF5EB 0%, #FFF0E0 100%);
+  border: 2rpx solid #FFD4A8;
+  border-radius: 18rpx;
+  font-size: 20rpx;
+  color: #CC5500;
+  white-space: nowrap;
 }
 
 .input-group {

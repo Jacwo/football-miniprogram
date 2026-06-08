@@ -186,3 +186,80 @@
   border: none;
   border-top: 2rpx solid #e8e8e8;
 }
+
+/* 表格 */
+.md-table-wrap {
+  margin: 20rpx 0;
+  border-radius: 8rpx;
+  overflow: hidden;
+  border: 1rpx solid #e0e0e0;
+}
+
+.md-table-scroll {
+  width: 100%;
+}
+
+.md-table {
+  display: table;
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+}
+
+.md-thead {
+  display: table-header-group;
+  background-color: #f5f7fa;
+}
+
+.md-tbody {
+  display: table-row-group;
+}
+
+.md-tr {
+  display: table-row;
+}
+
+.md-tr:last-child .md-td {
+  border-bottom: none;
+}
+
+.md-th {
+  display: table-cell;
+  padding: 16rpx 20rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #333;
+  border-right: 1rpx solid #e0e0e0;
+  border-bottom: 2rpx solid #d0d0d0;
+  white-space: nowrap;
+}
+
+.md-th:last-child {
+  border-right: none;
+}
+
+.md-td {
+  display: table-cell;
+  padding: 14rpx 20rpx;
+  font-size: 26rpx;
+  color: #555;
+  border-right: 1rpx solid #e8e8e8;
+  border-bottom: 1rpx solid #f0f0f0;
+  line-height: 1.6;
+}
+
+.md-td:last-child {
+  border-right: none;
+}
+
+/* 表格内的行内样式 */
+.md-td .md-strong,
+.md-th .md-strong {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.md-td .md-code-inline,
+.md-th .md-code-inline {
+  font-size: 24rpx;
+}
