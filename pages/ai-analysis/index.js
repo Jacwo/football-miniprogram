@@ -1,7 +1,7 @@
 // pages/ai-analysis/index.js - AI 分析结果页面
 const { post } = require('../../api/index')
+const streamApi = require('../../api/stream')
 const userStore = require('../../store/user')
-const userApi = require('../../api/user')
 const analysisApi = require('../../api/analysis')
 
 Page({
@@ -10,13 +10,20 @@ Page({
     matchInfo: null,
     loading: true,
     error: null,
-    analysisResult: '',
+    analysisResult: '', // 完整 Markdown 文本（流式时传给 typing-text，完成后传给 markdown-viewer）
     pointsPerAnalysis: 1, // 每次分析消耗积分
     isAdmin: false, // 是否是管理员
     isVip: false, // 是否是VIP
     generateTime: '', // 生成时间
     streaming: false // 是否正在流式获取
   },
+
+  // 流式请求控制器
+  _streamController: null,
+  // 缓冲区：累积流式文本，避免高频 setData
+  _streamBuffer: '',
+  // 节流定时器
+  _appendTimer: null,
 
   onLoad(options) {
     const { matchId, matchInfo } = options
@@ -65,6 +72,16 @@ Page({
     this.loadAnalysis(matchId)
   },
 
+  onUnload() {
+    // 停止流式请求
+    this.abortStream()
+    // 清理定时器
+    if (this._appendTimer) {
+      clearTimeout(this._appendTimer)
+      this._appendTimer = null
+    }
+  },
+
   // 检查管理员状态和VIP状态
   checkAdminStatus() {
     const userInfo = userStore.getUserInfo()
@@ -77,7 +94,7 @@ Page({
   },
 
   async loadAnalysis(matchId) {
-  
+
     this.setData({ loading: true, error: null })
    
     try {
@@ -211,154 +228,123 @@ Page({
       error: null
     })
 
+    // 清空缓冲区
+    this._streamBuffer = ''
+    if (this._appendTimer) {
+      clearTimeout(this._appendTimer)
+      this._appendTimer = null
+    }
+
     // 调用流式接口
-    this.requestStreamAnalysis(matchId)
+    this.startStreamAnalysis(matchId)
   },
 
-  // 请求流式分析
-  requestStreamAnalysis(matchId) {
-    const that = this
-    let fullText = ''
-    const baseUrl = getApp().globalData.baseUrl || ''
+  // 开始流式分析请求（参考 ai-chat 的实现模式）
+  startStreamAnalysis(matchId) {
     const userInfo = userStore.getUserInfo()
     const userId = userInfo ? (userInfo.userId || userInfo.id || '') : ''
 
-    const requestTask = wx.request({
-      url: `${baseUrl}/api/match/stream/analysis/${matchId}/${userId}`,
-      method: 'POST',
-      enableChunked: true,
-      header: {
-        'content-type': 'application/json',
-        'Authorization': wx.getStorageSync('token') || ''
+    this._streamController = streamApi.streamAnalysis({
+      matchId,
+      userId,
+      onMessage: (text) => {
+        this.appendStreamText(text)
       },
-      success: (res) => {
-        console.log('流式请求完成', res)
-        // 请求完成时确保结束streaming状态
-        if (that.data.streaming) {
-          that.onStreamComplete(fullText)
-        }
+      onComplete: () => {
+        this.finishStream()
       },
-      fail: (err) => {
-        console.error('流式请求失败:', err)
-        that.setData({
-          streaming: false,
-          error: '获取分析失败，请重试'
-        })
-        wx.showToast({
-          title: '获取失败',
-          icon: 'error'
-        })
-      },
-      complete: () => {
-        // 确保streaming状态被重置
-        if (that.data.streaming) {
-          that.onStreamComplete(fullText)
-        }
-      }
-    })
-
-    // 监听分块数据
-    requestTask.onChunkReceived((res) => {
-      try {
-        // 将 ArrayBuffer 转为字符串
-        const text = that.arrayBufferToString(res.data)
-
-        // 检查是否是结束标记
-        if (text.includes('[DONE]')) {
-          that.onStreamComplete(fullText)
-          return
-        }
-
-        // 解析 SSE 格式，直接拼接内容
-        const lines = text.split('\n')
-        lines.forEach(line => {
-          if (!line) return
-          if (line.startsWith('event:') || line.startsWith('id:')) return
-          if (line.trim() === '[DONE]') return
-
-          let content = line
-          if (line.startsWith('data:')) {
-            content = line.substring(5)
-          }
-
-          // 直接拼接，不处理换行
-          fullText += content
-        })
-
-        // 格式化文本后再显示
-        const formattedText = that.formatStreamText(fullText)
-        that.setData({
-          analysisResult: formattedText
-        })
-      } catch (e) {
-        console.error('解析分块数据失败:', e)
+      onError: (err) => {
+        this.handleStreamError(err)
       }
     })
   },
 
-  // 格式化流式文本，智能添加换行
-  formatStreamText(text) {
-    if (!text) return ''
-
-    let result = text
-
-    // 在标题前添加换行 (#### ### ## #)
-    result = result.split('####').join('\n####')
-    result = result.split('###').join('\n###')
-    // 避免重复处理，只处理独立的 ##
-    result = result.replace(/([^#])(##)([^#])/g, '$1\n$2$3')
-
-    // 在列表项前添加换行
-    result = result.split('- **').join('\n- **')
-
-    // 在分隔线前后添加换行
-    result = result.split('---').join('\n---\n')
-
-    // 清理开头的换行
-    result = result.replace(/^\n+/, '')
-    // 清理多余的连续换行
-    result = result.replace(/\n{3,}/g, '\n\n')
-
-    return result
+  // 追加流式文本（缓冲区 + 节流，由 typing-text 组件负责逐字打字机效果）
+  appendStreamText(text) {
+    this._streamBuffer += text
+    if (this._appendTimer) return
+    this._appendTimer = setTimeout(() => {
+      this._flushStreamBuffer()
+    }, 80)
   },
 
-  // ArrayBuffer 转字符串
-  arrayBufferToString(buffer) {
-    const uint8Array = new Uint8Array(buffer)
-    let str = ''
-    for (let i = 0; i < uint8Array.length; i++) {
-      str += String.fromCharCode(uint8Array[i])
-    }
-    try {
-      return decodeURIComponent(escape(str))
-    } catch (e) {
-      return str
-    }
+  // 刷出缓冲区：将累积的原始文本拼接到 analysisResult（typing-text 组件自动处理打字动画）
+  _flushStreamBuffer() {
+    this._appendTimer = null
+    if (!this._streamBuffer) return
+
+    const delta = this._streamBuffer
+    this._streamBuffer = ''
+
+    const newContent = (this.data.analysisResult || '') + delta
+    this.setData({ analysisResult: newContent })
   },
 
   // 流式传输完成
-  onStreamComplete(fullText) {
+  finishStream() {
+    // 先刷出缓冲区中的残留内容
+    if (this._appendTimer) {
+      clearTimeout(this._appendTimer)
+      this._appendTimer = null
+    }
+    this._flushStreamBuffer()
+
     // 防止重复调用
     if (!this.data.streaming) return
 
     const now = new Date()
     const generateTime = this.formatTimestamp(now.getTime())
 
-    // 使用格式化后的文本
-    const formattedText = this.formatStreamText(fullText)
+    this._streamController = null
 
+    // 切换到 Markdown 渲染模式：设 streaming=false，让 wxml 走 markdown-viewer 分支
     this.setData({
       streaming: false,
-      analysisResult: formattedText,
       generateTime: generateTime
     })
 
-    if (fullText) {
+    if (this.data.analysisResult) {
       wx.showToast({
         title: '分析完成',
         icon: 'success'
       })
     }
+  },
+
+  // 处理流式错误
+  handleStreamError(err) {
+    // 先刷出缓冲区残留内容
+    if (this._appendTimer) {
+      clearTimeout(this._appendTimer)
+      this._appendTimer = null
+    }
+    this._flushStreamBuffer()
+
+    this._streamController = null
+
+    console.error('流式请求失败:', err)
+    this.setData({
+      streaming: false,
+      error: err.message || '获取分析失败，请重试'
+    })
+    wx.showToast({
+      title: err.message || '获取失败',
+      icon: 'error'
+    })
+  },
+
+  // 停止生成（供外部调用，如页面卸载时）
+  abortStream() {
+    if (this._streamController) {
+      this._streamController.abort()
+      this._streamController = null
+    }
+    // 刷出残留缓冲区
+    if (this._appendTimer) {
+      clearTimeout(this._appendTimer)
+      this._appendTimer = null
+    }
+    this._flushStreamBuffer()
   },
 
   onShareAppMessage() {

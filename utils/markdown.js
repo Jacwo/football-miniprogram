@@ -20,35 +20,127 @@ function preprocessMarkdown(md) {
 
   let text = md
 
-  // 1) 连续三个 - 当作分隔线：逐行处理，跳过表格行（避免破坏 |---|---|）
+  // ====== 0) 全局清理 ======
+  text = text.replace(/\r\n/g, '\n')
+  text = text.replace(/\r/g, '')
+  text = text.replace(/[\u200B-\u200F\u2028\u2029\uFEFF]/g, '')
+
+  // ====== 1) 分离标题/段落行尾的表格内容 ======
+  // 策略 A: 标题行 + 表格 → "###标题|col1||:--||data|" 在起始管道前切开
+  text = text.replace(/^(#{1,6}\s*)(.+?)\|([^|]+\|[^\n]*\|\|:[-:]+\|.*)$/gm, '$1$2\n|$3')
+  // 策略 B: 段落文本后紧跟的表格（含分隔符特征 ||:---）
+  text = text.replace(/([^\n|])\|(\s*\S.*?\|\|:[-:]+\|[^\n]*)/g, '$1\n|$2')
+  // 策略 C: 表格数据行末尾的非表格内容粘连
+  //     "|cell|...|text###" 或 "|cell|...|text---" → 在 | 后切断
+  text = text.replace(/(\|[^\n|]+)\|(#{1,6}[\s\S]*)$/gm, '$1\n$2')
+  text = text.replace(/(\|[^\n|]+)\|(\s*---\s*)$/gm, '$1\n$2')
+  // 更通用的：表格行末尾 | 后面跟着明显非表格内容（标题/中文开头的大段文本）
+  text = text.replace(/(\|[^\n|]{0,80})\|([^|\n][^|\n]{10,}\s*(?:###|---|\*\*))$/gm, '$1\n$2')
+
+  // ====== 2) 用 || 双管道拆分挤在一起的表格行 ======
+  text = _splitSquishedTables(text)
+
+  // ====== 3) 分隔线处理 ======
   const lines = text.split('\n')
   text = lines.map(line => {
     const trimmed = line.trim()
-    // 跳过表格行（以 | 开头）—— 不修改
     if (trimmed.startsWith('|')) return line
-    // 已经是纯分隔线（---开头或整个就是---）→ 保持不变
-    if (/^-{3,}\s*$/.test(trimmed)) return '\n---\n'
-    // 行尾紧跟 --- 不是分隔线的情况也跳过
+    if (/^-{3,}\s*$/.test(trimmed)) return '---'
     return line
   }).join('\n')
-  // 再处理非表格的连续 --- 情况：某段文本后紧跟---
-  // 排除 | (表分隔符) 和 : (表对齐符号) 前缀，避免破坏表格行
   text = text.replace(/([^\n|:])---/g, '$1\n\n---')
   text = text.replace(/^---/gm, '\n---\n')
 
-  // 2) ### 后紧跟数字（###1. / ###2. 等）→ 补空格并确保在新行起头
-  text = text.replace(/([^\n])###(\d+[.．、])/g, '$1\n\n### $2')
-  text = text.replace(/^###(\d+[.．、])/gm, '### $1')
+  // ====== 4) 标题格式修复 ======
+  text = text.replace(/([^\n])###(\d+[.\-\d]*[.．、])/g, '$1\n\n### $2')
+  text = text.replace(/^###(\d+[.\-\d]*[.．、])/gm, '### $1')
 
-  // 3) * 或 - 开头的列表项紧跟标题或段落尾部 → 补换行
-  text = text.replace(/([^\n])(\*|-) \*\*/g, '$1\n$2 **')
-
-  // 4) 清理多余空行（超过2个连续空行合并为2个）
+  // ====== 5) 子标题 / 列表项拆分（核心：每个子标题独立成段） ======
+  // AI 输出格式（两种）：
+  //   A) "-**市场预期**:text.-**异常波动**:text"  （无空格，-紧跟**）
+  //   B) "* **市场预期**：text.* **异常波动**：text" （有空格，*空格**）← 实际最常见！
+  // 目标: 每个子标题变成独立段落/列表项，marked 才能正确解析
+  let prevText = ''
+  let maxRounds = 6
+  while (prevText !== text && maxRounds-- > 0) {
+    prevText = text
+    // A) -**标题**: 或 -**标题**：（无空格的 -** 模式）
+    text = text.replace(/([^\n])-(\*\*[^*]+\*\*)(?=[:：【《(（])/g, '$1\n\n$2')
+    text = text.replace(/^(\s*)-(\*\*[^*]+\*\*)(?=[:：【《(（])/gm, '$1$2')
+    // B) * **标题**：或 * **标题**: （有空格的 * ** 模式 — 实际AI输出主流格式）
+    //    行中间: "文本* **标题**：" → 在 * 前拆行
+    text = text.replace(/([^\n\*])\*(\s+\*\*[^*]+\*\*)(?=[:：【《(（])/g, '$1\n\n*$2')
+    //    行首已独立的: "* **标题**" → 去掉前导 * 让 marked 当作普通段落（含 strong）
+    text = text.replace(/^(\s*)\*(\s+\*\*[^*]+\*\*)(?=[:：【《(（])/gm, '$1$2')
+  }
   text = text.replace(/\n{3,}/g, '\n\n')
+
+  // ====== 6) 收尾 ======
+  text = text.replace(/^\n+/, '')
+  text = text.replace(/\n+$/, '')
 
   return text
 }
+function _splitSquishedTables(text) {
+  if (!text || !text.includes('|')) return text
 
+  // 快速判断：已有多行表格结构则跳过
+  const lineCount = text.split('\n').length
+  const pipeLines = (text.match(/^\s*\|/gm) || []).length
+  if (lineCount >= 6 && pipeLines >= 3) return text
+
+  // ===== 核心策略：用 || (双管道) 作为行分隔符 =====
+  // 挤在一起的表格格式: |a|b||:---:|:---:||x|y||z|w||
+  // || 是天然的行边界标记
+
+  // 逐行处理所有以 | 开头的长行
+  text = text.replace(/^(\|.*)$/gm, function(line) {
+    if (line.includes('\n')) return line  // 已经是多行的跳过
+    
+    // 检查是否包含 || (行分隔符特征)
+    if (!line.match(/\|\|/)) return line
+    
+    // 用 || 分割成"段"，每段是一行表格内容
+    const segments = line.split('||')
+    
+    // 过滤空段并给每段补上首尾 |
+    const rows = segments
+      .map(s => s.trim())
+      .filter(s => s.length > 0)
+      .map(s => {
+        if (!s.startsWith('|')) s = '|' + s
+        if (!s.endsWith('|')) s = s + '|'
+        return s
+      })
+    
+    // 如果只有一行，不需要拆分
+    if (rows.length <= 1) return line
+    
+    return rows.join('\n')
+  })
+
+  // 二次清理：处理单行内没有 || 但 pipe 数量异常多的情况（备用方案）
+  text = text.replace(/^(\|.*)$/gm, function(line) {
+    if (line.includes('\n')) return line
+    const pipes = (line.match(/\|/g) || []).length
+    if (pipes < 10) return line  // pipe 数不够多，不是挤在一起的表格
+    
+    // 尝试找分隔行来确定列数
+    const cells = line.split('|').filter((c,i) => i>0 && i<line.split('|').length-1)
+    // 假设合理表格不超过 8 列，如果数据格远超则尝试按约 6-7 列拆
+    if (cells.length <= 8) return line
+    
+    // 按 6 列拆（常见表格宽度）
+    const cols = 6
+    const rows = []
+    for (let i = 0; i < cells.length; i += cols) {
+      rows.push('|' + cells.slice(i, i + cols).join('|') + '|')
+    }
+    return rows.join('\n')
+  })
+
+  return text
+}
 /**
  * 解析 Markdown 文本为自定义节点数组
  * @param {string} markdown Markdown 文本
@@ -160,6 +252,7 @@ function convertBlockTokens(tokens) {
 
 /**
  * 将 marked 的行内 tokens 转换为自定义格式
+ * 包含 fallback：扫描残留的 **...** 并转为 strong 节点（兼容小程序环境）
  */
 function convertInlineTokens(tokens) {
   if (!tokens || !tokens.length) {
@@ -209,7 +302,70 @@ function convertInlineTokens(tokens) {
     }
   }
 
-  return children
+  // ====== Fallback：扫描所有 text 节点中残留的未解析 **...** ======
+  // 某些环境下（如小程序）marked 可能不解析 strong，导致 **文字** 作为纯文本输出
+  // 这里做二次提取，确保加粗始终生效
+  return _extractStrongFromText(children)
+}
+
+/**
+ * 扫描子节点中的 text 内容，将残留的 **...** 提取为 strong 节点
+ * 支持嵌套：一个 text 中可能包含多段 **...**
+ */
+function _extractStrongFromText(children) {
+  if (!children || !children.length) return children
+
+  const result = []
+  // 匹配 **非空内容** （排除空匹配和代码块内的）
+  const strongRegex = /\*\*([^*]+?)\*\*/g
+
+  for (let i = 0; i < children.length; i++) {
+    const child = children[i]
+
+    // 只处理纯文本节点；已识别的 strong/em/link 等跳过
+    if (child.type !== 'text' || !child.text) {
+      result.push(child)
+      continue
+    }
+
+    const text = child.text
+    // 快速检查：不含 ** 则直接保留
+    if (!text.includes('**')) {
+      result.push(child)
+      continue
+    }
+
+    // 用正则拆分 text → 交错输出 [普通文本, strong, 普通文本, strong, ...]
+    let lastIndex = 0
+    let match
+    let hasStrong = false
+    // 重置正则的 lastIndex（防止循环中状态泄漏）
+    strongRegex.lastIndex = 0
+
+    while ((match = strongRegex.exec(text)) !== null) {
+      hasStrong = true
+      // 前面的普通文本
+      if (match.index > lastIndex) {
+        result.push({ type: 'text', text: text.substring(lastIndex, match.index) })
+      }
+      // 加粗部分
+      result.push({ type: 'strong', text: match[1] })
+      lastIndex = match.index + match[0].length
+    }
+
+    if (hasStrong) {
+      // 尾部剩余的普通文本
+      if (lastIndex < text.length) {
+        result.push({ type: 'text', text: text.substring(lastIndex) })
+      }
+      // 原始 child 已被拆分替换，不再 push
+    } else {
+      // 无匹配（理论上不会到这里），保留原样
+      result.push(child)
+    }
+  }
+
+  return result
 }
 
 /**

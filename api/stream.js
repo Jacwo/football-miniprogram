@@ -398,9 +398,155 @@ function smartStreamChat(options) {
   }
 }
 
+/**
+ * 流式分析比赛 - 使用 enableChunked 分块传输
+ * 用于 ai-analysis 页面的最新 AI 分析获取
+ *
+ * @param {Object} options 配置项
+ * @param {string} options.matchId 比赛ID
+ * @param {string} options.userId 用户ID
+ * @param {Function} options.onMessage 收到消息回调
+ * @param {Function} options.onComplete 完成回调
+ * @param {Function} options.onError 错误回调
+ * @returns {Object} 包含 abort 方法的控制器
+ */
+function streamAnalysis(options) {
+  const { matchId, userId, onMessage, onComplete, onError } = options
+
+  const token = app.globalData.token || wx.getStorageSync('token')
+  let requestTask = null
+  let isCompleted = false
+
+  // 积累原始 ArrayBuffer 分片
+  const rawChunks = []
+  // 已处理的行数，用于增量推送（实现打字机效果）
+  let processedLineCount = 0
+
+  requestTask = wx.request({
+    url: `${app.globalData.baseUrl}/api/match/stream/analysis/${matchId}/${userId}`,
+    method: 'POST',
+    header: {
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : '',
+      'Accept': 'text/event-stream'
+    },
+    enableChunked: true,
+    responseType: 'text',
+    success: (res) => {
+      if (isCompleted) return
+      isCompleted = true
+
+      if (res.statusCode === 200) {
+        flushReservedLine()
+        onComplete && onComplete()
+      } else if (res.statusCode === 401) {
+        app.clearLoginState && app.clearLoginState()
+        onError && onError(new Error('登录已过期'))
+      } else {
+        onError && onError(new Error(`请求失败: ${res.statusCode}`))
+      }
+    },
+    fail: (err) => {
+      if (isCompleted) return
+      isCompleted = true
+      onError && onError(err)
+    }
+  })
+
+  // 分块到达时的处理逻辑（与 streamChat 一致）
+  requestTask.onChunkReceived((res) => {
+    if (isCompleted) return
+    if (res.data && Object.prototype.toString.call(res.data) === '[object ArrayBuffer]') {
+      rawChunks.push(new Uint8Array(res.data))
+      flushNewLines()
+    }
+  })
+
+  /**
+   * 将当前累积字节一次性解码，提取还未处理的新行并推送
+   */
+  function flushNewLines() {
+    const fullText = concatAndDecode(rawChunks)
+    const allLines = fullText.split('\n')
+
+    // 只处理新增的行，保留最后一行
+    const newLines = allLines.slice(processedLineCount)
+    if (newLines.length <= 1) return
+
+    const linesToProcess = newLines.slice(0, -1)
+    processedLineCount += linesToProcess.length
+
+    for (const line of linesToProcess) {
+      processLine(line)
+    }
+  }
+
+  /**
+   * 刷出被保留的最后一行（在 success 中调用）
+   */
+  function flushReservedLine() {
+    const fullText = concatAndDecode(rawChunks)
+    const allLines = fullText.split('\n')
+    if (processedLineCount < allLines.length) {
+      const line = allLines[processedLineCount]
+      processedLineCount++
+      processLine(line)
+    }
+  }
+
+  /**
+   * 处理单行 SSE 数据（与 streamChat 保持一致）
+   * 支持 OpenAI/DeepSeek 兼容格式和纯文本透传
+   */
+  function processLine(line) {
+    if (!line) return
+
+    // 匹配 "data: " (6字符) 或 "data:" (5字符)
+    let dataStr = ''
+    if (line.startsWith('data: ')) {
+      dataStr = line.slice(6)
+    } else if (line.startsWith('data:')) {
+      dataStr = line.slice(5)
+    } else {
+      return
+    }
+
+    // 跳过空数据或结束标记
+    if (!dataStr || dataStr === '[DONE]') return
+
+    // JSON 格式: OpenAI / DeepSeek 兼容
+    if (dataStr.startsWith('{')) {
+      try {
+        const data = JSON.parse(dataStr)
+        const delta = (data.choices && data.choices[0] && data.choices[0].delta) || {}
+        const content = delta.reasoning_content != null ? String(delta.reasoning_content) :
+                        delta.content != null ? String(delta.content) : ''
+        if (content) {
+          onMessage && onMessage(content)
+        }
+      } catch (e) {
+        // JSON 解析失败（截断 chunk），忽略
+      }
+    } else {
+      // 纯文本透传（向后兼容）
+      onMessage && onMessage(dataStr)
+    }
+  }
+
+  // 返回控制器
+  return {
+    abort: () => {
+      if (requestTask) {
+        requestTask.abort()
+      }
+    }
+  }
+}
+
 module.exports = {
   streamChat,
   streamChatPolling,
   smartStreamChat,
+  streamAnalysis,
   isChunkedSupported
 }

@@ -74,11 +74,17 @@
         <text class="waiting-text">等待AI响应...</text>
       </view>
 
-      <!-- 使用 markdown-viewer 组件渲染 -->
-      <markdown-viewer wx:if="{{analysisResult}}" content="{{analysisResult}}" />
+      <!-- 流式传输中：使用 typing-text 组件实现逐字打字机效果 -->
+      <typing-text wx:if="{{streaming && analysisResult}}"
+        text="{{analysisResult}}"
+        typing="{{true}}"
+        speed="{{30}}"
+        showCursor="{{true}}"
+        bind:complete="onTypingComplete"
+      />
 
-      <!-- 流式传输时的光标效果 -->
-      <view class="typing-cursor" wx:if="{{streaming && analysisResult}}"></view>
+      <!-- 非流式：使用 markdown-viewer 组件渲染完整 Markdown -->
+      <markdown-viewer wx:if="{{!streaming && analysisResult}}" content="{{analysisResult}}" />
     </view>
 
     <view class="safe-bottom"></view>

@@ -1,6 +1,1 @@
-{
-  "navigationBarTitleText": "AI 分析",
-  "usingComponents": {
-    "markdown-viewer": "/components/markdown-viewer/index"
-  }
-}
+{"navigationBarTitleText": "AI 分析", "usingComponents": {"markdown-viewer": "/components/markdown-viewer/index", "typing-text": "/components/typing-text/index"}}
