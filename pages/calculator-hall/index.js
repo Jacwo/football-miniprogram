@@ -579,13 +579,14 @@ Page({
 
   // 点击排行榜用户，跳转推单详情页
   onRankUserTap(e) {
-    const { userid, username, useravatar } = e.currentTarget.dataset;
+    const { userid, username, useravatar, topmedal } = e.currentTarget.dataset;
     if (!userid) return;
 
     const userName = encodeURIComponent(username || '');
     const userAvatar = encodeURIComponent(useravatar || '');
+    const topMedal = topmedal ? encodeURIComponent(JSON.stringify(topmedal)) : '';
     wx.navigateTo({
-      url: `/pages/user-schemes/index?userId=${userid}&userName=${userName}&userAvatar=${userAvatar}`,
+      url: `/pages/user-schemes/index?userId=${userid}&userName=${userName}&userAvatar=${userAvatar}&topMedal=${topMedal}`,
     });
   },
 

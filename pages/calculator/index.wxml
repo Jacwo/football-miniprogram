@@ -212,11 +212,14 @@
   </view>
 
   <!-- 更多玩法弹窗 -->
-  <view class="popup-mask" wx:if="{{showMorePlays}}" bindtap="onCloseMorePlays">
-    <view class="popup-content" catchtap="onPreventTap">
+  <view class="popup-mask" wx:if="{{showMorePlays}}" bindtap="onCloseMorePlays" catchtouchmove="onPreventTap">
+    <view class="popup-content" catchtap="onPreventTap" catchtouchmove="onPreventTap">
       <!-- 弹窗头部 -->
       <view class="popup-header">
-        <text class="popup-title" wx:if="{{currentMatch}}">{{currentMatch.homeTeamAbbName}} VS {{currentMatch.awayTeamAbbName}}</text>
+        <view class="popup-title-wrap">
+          <text class="popup-title" wx:if="{{currentMatch}}">{{currentMatch.homeTeamAbbName}} VS {{currentMatch.awayTeamAbbName}}</text>
+          <text class="popup-time" wx:if="{{currentMatch}}">{{currentMatch.matchTime}}</text>
+        </view>
         <view class="popup-close" bindtap="onCloseMorePlays">×</view>
       </view>
 

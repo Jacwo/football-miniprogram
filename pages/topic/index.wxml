@@ -99,6 +99,7 @@
           <view class="topic-cover">
             <image class="topic-cover-img" src="{{item.imageUrl || item.carouselImageUrl}}" mode="aspectFill" />
             <view class="topic-cover-tag hot" wx:if="{{item.isActive}}">进行中</view>
+            <view class="topic-cover-tag finished" wx:elif="{{item.isFinished}}">已结束</view>
             <view class="topic-cover-tag" wx:else>即将开赛</view>
           </view>
           <view class="topic-body">

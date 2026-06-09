@@ -7,6 +7,7 @@ Page({
     userId: '',
     userName: '',
     userAvatar: '',
+    topMedal: null,
     loading: true,
     error: null,
     schemes: [],
@@ -26,11 +27,12 @@ Page({
   },
 
   onLoad(options) {
-    const { userId, userName, userAvatar } = options
+    const { userId, userName, userAvatar, topMedal } = options
     this.setData({
       userId: userId || '',
       userName: userName ? decodeURIComponent(userName) : '未知用户',
       userAvatar: userAvatar ? decodeURIComponent(userAvatar) : '',
+      topMedal: topMedal ? JSON.parse(decodeURIComponent(topMedal)) : null,
     })
     wx.setNavigationBarTitle({
       title: this.data.userName + '的推单',

@@ -305,24 +305,29 @@ Page({
       // 转换热门比赛数据为 match-card 组件需要的格式
       const transformedHotMatches = this.transformMatchList(hotMatches);
 
-      // 处理 hotLeagues：根据实际日期判断是否已经开始 + 格式化日期
+      // 处理 hotLeagues：根据开始时间和结束时间判断比赛状态 + 格式化日期
       const processedHotLeagues = hotLeagues.map(item => {
         const startDate = item.startDate ? new Date(item.startDate) : null;
         const endDate = item.endDate ? new Date(item.endDate) : null;
-        let isActive = false;
         
-        if (startDate && startDate <= now) {
-          // 已开始，如果没有结束日期或结束日期在未来，则视为进行中
-          isActive = !endDate || endDate >= now;
+        // 三种状态：未开始(upcoming) / 进行中(active) / 已结束(finished)
+        let matchStatus = 'upcoming'; // 默认即将开赛
+        if (startDate && now >= startDate) {
+          if (endDate && now > endDate) {
+            matchStatus = 'finished'; // 已结束
+          } else {
+            matchStatus = 'active';   // 进行中
+          }
         }
         // 如果 status 字段明确为 live/ongoing，也视为进行中
-        if (!isActive && item.status && (item.status === 'live' || item.status === 'ongoing')) {
-          isActive = true;
+        if (matchStatus !== 'active' && item.status && (item.status === 'live' || item.status === 'ongoing')) {
+          matchStatus = 'active';
         }
         
         return {
           ...item,
-          isActive,
+          isActive: matchStatus === 'active',
+          isFinished: matchStatus === 'finished',
           showStartDate: this.formatShowDate(item.startDate),
           showEndDate: this.formatShowDate(item.endDate),
           leagueNameShort: this.truncateStr(item.leagueName, 8),

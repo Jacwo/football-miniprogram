@@ -428,6 +428,10 @@
   background: #ff4d4f;
 }
 
+.topic-cover-tag.finished {
+  background: #999;
+}
+
 .topic-body {
   padding: 16rpx;
   display: flex;

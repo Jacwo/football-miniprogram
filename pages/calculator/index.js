@@ -375,7 +375,7 @@ Page({
       )
       if (selections[matchid].length === 0) delete selections[matchid]
     } else {
-      // 新场次检查8场上限
+      // 新场次检查8场上限（已有8场时拦截新场次）
       if (!selections[matchid] && Object.keys(selections).length >= 8) {
         wx.showToast({ title: '最多选择8场比赛', icon: 'none', duration: 1500 })
         return
@@ -455,28 +455,59 @@ Page({
   },
 
   // 更新可用的过关方式
-  updateAvailablePassTypes() {
-    const { selections, allPassTypes, selectedPassTypes } = this.data
+  /**
+   * 根据 selections 中包含的玩法类型，返回最大串关数
+   * crs(比分)/hafu(半全场) → 最大4关
+   * ttg(总球数) → 最大6关
+   * had/hhad(胜平负/让球) → 最大8关
+   * 混合时取最小值
+   */
+  _getMaxPassByPlayTypes(selections) {
+    // 每种类型的最大串关数限制
+    const TYPE_MAX_PASS = { crs: 4, hafu: 4, ttg: 6 }
+    let maxPass = 8 // 默认
+
+    const matchIds = Object.keys(selections)
+    for (const mid of matchIds) {
+      const items = selections[mid] || []
+      for (const item of items) {
+        const limit = TYPE_MAX_PASS[item.type]
+        if (limit !== undefined && limit < maxPass) {
+          maxPass = limit
+        }
+      }
+      // 已到最低限制4，无需继续检查
+      if (maxPass <= 4) break
+    }
+
+    return maxPass
+  },
+
+  /**
+   * 纯计算：根据 selections 返回过关方式结果（不依赖 this.data，避免 setData 异步竞态）
+   */
+  _calcAvailablePassTypes(selections) {
+    const { allPassTypes, selectedPassTypes } = this.data
     const matchIds = Object.keys(selections)
     const matchCount = matchIds.length
 
     if (matchCount === 0) {
-      this.setData({ availablePassTypes: [], selectedPassTypes: [] })
-      return
+      return { availablePassTypes: [], selectedPassTypes: [], selectedPassTypesMap: {} }
     }
 
     const singleAvailable = this.checkSingleAvailable()
+    const maxPass = this._getMaxPassByPlayTypes(selections)
     const availablePassTypes = []
 
     allPassTypes.forEach(pt => {
       if (pt.value === 'single') {
-        // 单关：需要检查是否有支持单关的选项
         if (singleAvailable) {
           availablePassTypes.push(pt)
         }
       } else {
-        // 串关：场次数需要满足最小要求
-        if (matchCount >= pt.min) {
+        // 需要同时满足：场次数 >= min 且 串关数 <= 该类型最大限制
+        const passNum = pt.min // 如 2_1 的 min=2 表示2串1
+        if (matchCount >= passNum && passNum <= maxPass) {
           availablePassTypes.push(pt)
         }
       }
@@ -487,42 +518,62 @@ Page({
       availablePassTypes.some(apt => apt.value === pt)
     )
 
-    // 更新选中状态的 map
     const selectedPassTypesMap = {}
     validSelectedPassTypes.forEach(pt => {
       selectedPassTypesMap[pt] = true
     })
 
-    this.setData({ availablePassTypes, selectedPassTypes: validSelectedPassTypes, selectedPassTypesMap })
+    return { availablePassTypes, selectedPassTypes: validSelectedPassTypes, selectedPassTypesMap }
+  },
+
+  updateAvailablePassTypes() {
+    const result = this._calcAvailablePassTypes(this.data.selections)
+    this.setData(result)
   },
 
   toggleSelection(matchId, type, value, odds) {
     const { selections, selectedMap } = this.data
-    if (!selections[matchId]) selections[matchId] = []
-
+    // 注意：不要提前创建 selections[matchId]，避免影响后续场次数判断
     const key = `${matchId}_${type}_${value}`
-    const index = selections[matchId].findIndex(item => item.type === type && item.value === value)
+
+    // 如果该场次已有选项，先查找是否为取消操作
+    let index = -1
+    if (selections[matchId]) {
+      index = selections[matchId].findIndex(item => item.type === type && item.value === value)
+    }
 
     if (index > -1) {
+      // 取消选中
       selections[matchId].splice(index, 1)
       if (selections[matchId].length === 0) delete selections[matchId]
       delete selectedMap[key]
     } else {
-      // 新场次需检查是否超过8场上限
-      if (selections[matchId].length === 0 && Object.keys(selections).length >= 8) {
+      // 新场次需检查是否超过8场上限（已有8场时拦截新场次）
+      if (!selections[matchId] && Object.keys(selections).length >= 8) {
         wx.showToast({ title: '最多选择8场比赛', icon: 'none', duration: 1500 })
         return
       }
+      if (!selections[matchId]) selections[matchId] = []
       selections[matchId].push({ type, value, odds })
       selectedMap[key] = true
     }
 
     const selectedCount = Object.keys(selections).length
 
-    this.setData({ selections, selectedMap, selectedCount })
-    // 更新可用的过关方式
-    this.updateAvailablePassTypes()
-    this.calculateBets()
+    // 先用最新数据计算过关方式和奖金，再一次性 setData 避免异步竞态
+    const passResult = this._calcAvailablePassTypes(selections)
+    const betResult = this._calcBetsRaw(selections, passResult.selectedPassTypes)
+
+    this.setData({
+      selections, selectedMap, selectedCount,
+      availablePassTypes: passResult.availablePassTypes,
+      selectedPassTypes: passResult.selectedPassTypes,
+      selectedPassTypesMap: passResult.selectedPassTypesMap,
+      totalBets: betResult.totalBets,
+      totalAmount: betResult.totalAmount,
+      minBonus: betResult.minBonus,
+      maxBonus: betResult.maxBonus
+    })
   },
 
   onMorePlays(e) {
@@ -608,36 +659,32 @@ Page({
     this.calculateBets()
   },
 
-  calculateBets() {
-    const { selections, selectedPassTypes, multiple } = this.data
+  /**
+   * 纯计算：根据 selections 和 selectedPassTypes 返回注数/奖金结果
+   */
+  _calcBetsRaw(selections, selectedPassTypes) {
+    const multiple = this.data.multiple
     const matchIds = Object.keys(selections)
     const selectedCount = matchIds.length
 
-    if (selectedCount === 0 || selectedPassTypes.length === 0) {
-      this.setData({ totalBets: 0, totalAmount: 0, minBonus: 0, maxBonus: 0 })
-      return
+    if (selectedCount === 0 || !selectedPassTypes || selectedPassTypes.length === 0) {
+      return { totalBets: 0, totalAmount: 0, minBonus: 0, maxBonus: 0 }
     }
 
     let totalBets = 0
-    let allBonusResults = [] // 存储所有可能的奖金组合
+    let allBonusResults = []
 
-    // 打印计算过程
-  //  console.log('=== 注数计算 ===')
-  //  console.log(`场次数: ${matchIds.length}`)
     matchIds.forEach(matchId => {
       const types = selections[matchId].map(s => s.type + ':' + s.value)
-   //   console.log(`  场次${matchId}: ${types.join(', ')}`)
     })
 
     selectedPassTypes.forEach(passType => {
       const bets = this.calculatePassTypeBets(passType, matchIds, selections)
-   //   console.log(`${passType}: ${bets.count}注`)
       totalBets += bets.count
       allBonusResults = allBonusResults.concat(bets.bonusResults)
     })
-   //(`总计: ${totalBets}注, ${totalBets * 2 * multiple}元`)
 
-    // 计算最小奖金：所有单注中最小的
+    // 计算最小奖金
     let minBonus = 0
     if (allBonusResults.length > 0) {
       const validResults = allBonusResults.filter(r => r > 0)
@@ -646,10 +693,7 @@ Page({
       }
     }
 
-    // 计算最大奖金：
-    // 1. 确定最优命中选项：每场比赛取赔率最高的选项作为"命中选项"
-    // 2. 对于每张票（每条玩法路径），计算在这种命中情况下的奖金
-    // 3. 所有票的奖金加起来
+    // 计算最大奖金
     let maxBonus = 0
     const hitSelections = {}
     matchIds.forEach(matchId => {
@@ -659,7 +703,6 @@ Page({
       hitSelections[matchId] = maxOddsOpt
     })
 
-    // 计算所有票在最优命中情况下的奖金
     selectedPassTypes.forEach(passType => {
       const bonus = this.calculateMaxBonusForPassType(passType, matchIds, selections, hitSelections)
       maxBonus += bonus * 2 * multiple
@@ -667,12 +710,17 @@ Page({
 
     const totalAmount = totalBets * multiple * 2
 
-    this.setData({
+    return {
       totalBets,
       totalAmount,
       minBonus: minBonus.toFixed(2),
       maxBonus: maxBonus.toFixed(2)
-    })
+    }
+  },
+
+  calculateBets() {
+    const result = this._calcBetsRaw(this.data.selections, this.data.selectedPassTypes)
+    this.setData(result)
   },
 
   // 检查某个选项是否支持单关（用于单关注数计算）

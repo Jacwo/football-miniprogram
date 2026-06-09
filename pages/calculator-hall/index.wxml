@@ -59,7 +59,7 @@
         </view>
         <!-- 胜率排行榜内容 -->
         <view class="rank-list {{rankExpanded ? '' : 'collapsed'}}" wx:if="{{rankType === 'winRate'}}">
-          <view class="rank-item" wx:for="{{rankList}}" wx:key="userName" bindtap="onRankUserTap" data-userid="{{item.oduserId}}" data-username="{{item.userName}}" data-useravatar="{{item.avatar}}">
+          <view class="rank-item" wx:for="{{rankList}}" wx:key="userName" bindtap="onRankUserTap" data-userid="{{item.oduserId}}" data-username="{{item.userName}}" data-useravatar="{{item.avatar}}" data-topmedal="{{item.topMedal}}">
             <view class="rank-medal">
               <text wx:if="{{index === 0}}">🥇</text>
               <text wx:elif="{{index === 1}}">🥈</text>
@@ -88,7 +88,7 @@
         </view>
         <!-- 中奖金额排行榜内容 -->
         <view class="rank-list {{rankExpanded ? '' : 'collapsed'}}" wx:if="{{rankType === 'bonus'}}">
-          <view class="rank-item" wx:for="{{bonusRankList}}" wx:key="userName" bindtap="onRankUserTap" data-userid="{{item.oduserId}}" data-username="{{item.userName}}" data-useravatar="{{item.avatar}}">
+          <view class="rank-item" wx:for="{{bonusRankList}}" wx:key="userName" bindtap="onRankUserTap" data-userid="{{item.oduserId}}" data-username="{{item.userName}}" data-useravatar="{{item.avatar}}" data-topmedal="{{item.topMedal}}">
             <view class="rank-medal">
               <text wx:if="{{index === 0}}">🥇</text>
               <text wx:elif="{{index === 1}}">🥈</text>

@@ -26,8 +26,13 @@
         </view>
       </view>
       <view class="user-name-area">
-        <text class="user-name">{{userName}}</text>
-        <view class="level-badge">
+        <view class="name-row">
+          <text class="user-name">{{userName}}</text>
+          <view class="rank-medal-icon {{topMedal.colorClass}}" wx:if="{{topMedal}}">
+            <text>{{topMedal.icon}}</text>
+          </view>
+        </view>
+        <view class="level-badge" wx:if="{{!topMedal}}">
           <text class="level-icon">⚡</text>
           <text class="level-text">推单人</text>
         </view>

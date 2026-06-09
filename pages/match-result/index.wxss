@@ -279,7 +279,7 @@
   font-weight: 700;
   font-family: 'Arial', 'DIN', monospace;
   letter-spacing: 4rpx;
-  color: #ccc;
+  color: #ff3b30;
   line-height: 1;
 }
 
