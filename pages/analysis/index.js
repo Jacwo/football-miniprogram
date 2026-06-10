@@ -15,8 +15,8 @@ Page({
     loading: true,
     error: null,
 
-    // 标签页
-    tabs: [
+    // 标签页（全量定义，后续由 checkFeature 动态过滤）
+    allTabs: [
       { key: 'recent', name: '战绩' },
       { key: 'table', name: '排名' },
       { key: 'history', name: '交锋' },
@@ -26,6 +26,7 @@ Page({
       { key: 'odds', name: '指数' },
       { key: 'betfair', name: '必发' }
     ],
+    tabs: [],
     activeTab: 'recent',
     loadedTabs: {},
     // 各标签页数据
@@ -56,7 +57,7 @@ Page({
     if (matchId) {
       this.setData({ matchId })
       this.loadMatchDetail(matchId)
-      this.loadTabData('recent')
+      this.checkFeatures()
       this.loadUserPoints()
       this.checkInformationUnlockStatus(matchId)
     } else {
@@ -114,6 +115,34 @@ Page({
       console.error('检查情报解锁状态失败:', e)
       this.setData({ informationUnlocked: false, isVip: false })
     }
+  },
+
+  // 检查功能开关，动态过滤 tabs（复用 /api/match/check/config 接口，与计算器共用配置）
+  async checkFeatures() {
+    try {
+      const result = await matchApi.checkFeatures()
+      // 接口返回 true/false，计算器和情报tab共用此开关
+      const showInformation = result === true
+      const allTabs = this.data.allTabs
+      const tabs = showInformation ? [...allTabs] : allTabs.filter(t => t.key !== 'information')
+
+      let activeTab = this.data.activeTab
+      if (!tabs.find(t => t.key === activeTab)) {
+        activeTab = tabs[0] ? tabs[0].key : ''
+      }
+
+      this.setData({ tabs })
+
+      if (activeTab !== this.data.activeTab) {
+        this.setData({ activeTab })
+        this.loadTabData(activeTab)
+      }
+    } catch (e) {
+      console.error('检查功能开关失败，默认展示全部 tabs:', e)
+      this.setData({ tabs: [...this.data.allTabs] })
+    }
+
+    this.loadTabData('recent')
   },
 
   // 加载比赛详情

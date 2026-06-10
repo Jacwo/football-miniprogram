@@ -6,6 +6,7 @@ App({
     isLoggedIn: false,
     showHistory: true, // 功能开关缓存，供tabbar同步读取
     showCalculator: false, // 是否显示足球计算器（龙虾AI共用此开关）
+    showInformation: false, // 是否显示情报tab（与计算器共用 /api/match/check/config 接口）
     baseUrl: 'https://ai-football.cn/foot' // 需要替换为实际的 API 域名
   },
 
