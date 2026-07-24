@@ -1,0 +1,207 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "比赛列表"
+      }
+    },
+    {
+      "path": "pages/topic/topic",
+      "style": {
+        "navigationBarTitleText": "专题"
+      }
+    },
+    {
+      "path": "pages/calculator-hall/index",
+      "style": {
+        "navigationBarTitleText": "大厅",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/match-result/index",
+      "style": {
+        "navigationBarTitleText": "赛果"
+      }
+    },
+    {
+      "path": "pages/profile/profile",
+      "style": {
+        "navigationBarTitleText": "我的"
+      }
+    },
+    {
+      "path": "pages/calculator/index",
+      "style": {
+        "navigationBarTitleText": "足球计算器"
+      }
+    },
+    {
+      "path": "pages/calculator-detail/index",
+      "style": {
+        "navigationBarTitleText": "记录详情"
+      }
+    },
+    {
+      "path": "pages/dragon-analysis/index",
+      "style": {
+        "navigationBarTitleText": "单关斩龙计划"
+      }
+    },
+    {
+      "path": "pages/point-detail/index",
+      "style": {
+        "navigationBarTitleText": "积分明细"
+      }
+    },
+    {
+      "path": "pages/user-schemes/index",
+      "style": {
+        "navigationBarTitleText": "推单详情"
+      }
+    },
+    {
+      "path": "pages/activity/index",
+      "style": {
+        "navigationBarTitleText": "活动"
+      }
+    },
+    {
+      "path": "pages/groupbuy-detail/index",
+      "style": {
+        "navigationBarTitleText": "拼团详情"
+      }
+    },
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    },
+    {
+      "path": "pages/ai-chat/index",
+      "style": {
+        "navigationBarTitleText": "AI 助手"
+      }
+    },
+    {
+      "path": "pages/history/index",
+      "style": {
+        "navigationBarTitleText": "历史记录"
+      }
+    },
+    {
+      "path": "pages/history-detail/index",
+      "style": {
+        "navigationBarTitleText": "分析详情"
+      }
+    },
+    {
+      "path": "pages/analysis/index",
+      "style": {
+        "navigationBarTitleText": "比赛分析"
+      }
+    },
+    {
+      "path": "pages/ai-analysis/index",
+      "style": {
+        "navigationBarTitleText": "AI 分析"
+      }
+    },
+    {
+      "path": "pages/tool/index",
+      "style": {
+        "navigationBarTitleText": "工具"
+      }
+    },
+    {
+      "path": "pages/agreement/index",
+      "style": {
+        "navigationBarTitleText": "用户协议"
+      }
+    },
+    {
+      "path": "pages/credits/index",
+      "style": {
+        "navigationBarTitleText": "积分充值"
+      }
+    },
+    {
+      "path": "pages/vip/index",
+      "style": {
+        "navigationBarTitleText": "会员中心"
+      }
+    },
+    {
+      "path": "pages/topic-detail/index",
+      "style": {
+        "navigationBarTitleText": "专题详情"
+      }
+    },
+    {
+      "path": "pages/team-info/index",
+      "style": {
+        "navigationBarTitleText": "球队信息"
+      }
+    },
+    {
+      "path": "pages/plugin-market/index",
+      "style": {
+        "navigationBarTitleText": "因素插件市场"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "AI足球智能体",
+    "navigationBarBackgroundColor": "#ffffff",
+    "backgroundColor": "#f5f5f5",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#999999",
+    "selectedColor": "#1890ff",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "比赛",
+        "iconPath": "static/tabbar/match.png",
+        "selectedIconPath": "static/tabbar/match-active.png"
+      },
+      {
+        "pagePath": "pages/topic/topic",
+        "text": "专题",
+        "iconPath": "static/tabbar/topic.png",
+        "selectedIconPath": "static/tabbar/topic-active.png"
+      },
+      {
+        "pagePath": "pages/calculator-hall/index",
+        "text": "大厅",
+        "iconPath": "static/tabbar/hall.png",
+        "selectedIconPath": "static/tabbar/hall-active.png"
+      },
+      {
+        "pagePath": "pages/match-result/index",
+        "text": "赛果",
+        "iconPath": "static/tabbar/result.png",
+        "selectedIconPath": "static/tabbar/result-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "static/tabbar/mine.png",
+        "selectedIconPath": "static/tabbar/mine-active.png"
+      }
+    ]
+  },
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^u-(.*)": "@/uni_modules/uview-ui/components/u-$1/u-$1.vue"
+    }
+  }
+}

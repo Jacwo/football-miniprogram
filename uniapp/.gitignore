@@ -1,0 +1,8 @@
+node_modules/
+dist/
+dev_dist/
+.DS_Store
+*.log
+.idea/
+.vscode/
+unpackage/
